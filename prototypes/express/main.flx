@@ -1,0 +1,5 @@
+router msg
+  >> +IncId(id, count:0)
+    replace(id, count + 1)
+  >> Send(uuid)
+    -> 
