@@ -3,7 +3,7 @@ var express = require('express')();
 app.getAsSession("/", function() {
     this.count = 0;
 
-    this.process() {
+    this.process = function() {
       return this.count += 1;
     }
   }
