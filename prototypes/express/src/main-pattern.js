@@ -2,24 +2,32 @@ var app = require('express')();
 
 var count = {};
 
-function add(n) {
-  return n + 1;
-}
-
-function router(id) {
-  return count[id] = add(count[id]) || 1;
-}
-
-function send(res, id, n) {
-  return res.send('Count(' + id + ') : ' + n);
-}
-
 app.get('/:id', function(req, res){
-  var id = req.params.id;
-  var n = router(id);
-  send(res, id, n);
+  routage(req.params.id, res);
 });
+
+function routage(routeParam, res) {
+  data = count[routeParam] || 1;
+  traitement(routeParam, data, res);
+}
+
+function traitement(routeParam, inputData, res) {
+  retEtat = inputData + 1;
+  retReponse = 'Count(' + routeParam + ') : ' + retEtat;
+  modificationEtat(routeParam, retEtat, retReponse, res);
+}
+
+function modificationEtat(routeParam, outputEtat, outputData, res){
+  count[routeParam] = outputEtat;
+  envoi(outputData, res);
+}  
+
+function envoi(outputData, res) {
+  res.send(outputData);
+}
+
 
 port = 8080;
 app.listen(port);
 console.log("Listening port: "+port);
+
