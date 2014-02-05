@@ -6,6 +6,8 @@ app.getAsSession("/", function() {
     this.process = function() {
       return this.count += 1;
     }
+
+    return this;
   }
 )
 
