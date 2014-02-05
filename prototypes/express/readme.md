@@ -1,6 +1,49 @@
 # Compteur à état
 
-Nous avons developpé un compteur de visite enregistrant les visite des utilisateurs suivant l'id fourni dans leur requète, selon deux approches différentes : en javascript classique, et selon une approche de fluxions.
+Nous avons developpé un compteur de visites enregistrant les visites des utilisateurs suivant un id fourni dans leur requète. Au plus simple, le code s'écrit ainsi :
+
+    var app = require('express')();
+
+    var count = {};
+
+    app.get('/:id', function(req, res){
+      res.send(''+ (count[req.params.id] =(count[req.params.id] + 1) || 1 ));
+    });
+
+    port = 8080;
+    app.listen(port);
+    console.log("Listening port: "+port);
+    
+Lancez ce code avec node :    
+
+    node main-simple.js
+
+Ouvrir la page [localhostA](http://127.0.0.1/A) et [localhostB](http://127.0.0.1/B).
+
+ 
+
+Ce code simple recouvre plusieurs aspects que nous détaillons ici.
+ 
+1. Il travaille sur des flux en entrée et produit un résultat sur des flux de sortie. app.get / app.send. 
+2. Il possède une mémoire interne qui contient l'état courant de chacun des identifiants. (count {})
+3. Il possède une fonction interne de traitement propre. (+1)
+
+Ce code compact est décomposable dans le modèle de programmation suivant :
+
+- Récupération d'une requête d'entrée
+
+- Routage de la requete vers son unité de traitement
+
+- Traitement de la requête
+
+- Envoi de la réponse vers son unité de sortie
+
+
+
+ 
+
+
+, selon deux approches différentes : en javascript classique, et selon une approche de fluxions.
 
 Pour tester ces deux programmes, lancer :
 
@@ -12,7 +55,7 @@ ou
 
 Puis tester en entrant l'adresse : `localhost:8080/A` puis `localhost:8080/B`
 
-En accédant ces deux adresse plusieurs fois, on observe les compteurs associé à ces deux id s'incrémenter.
+En accédant ces deux adresses plusieurs fois, on observe les compteurs associé à ces deux id s'incrémenter.
 
 ## description de l'implémentation classique
 
