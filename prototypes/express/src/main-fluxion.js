@@ -1,14 +1,11 @@
-var app = require('./fluxions');
+var wflx = require('./web-fluxions');
 
-app.getAsSession("/", function() {
+// wflx.register(name, multiplicity, context, function);
 
-  this.count = 0;
-
-  this.run = function() {
-    return this.count += 1;
-  }
-
-  return this;
+wflx.register("/", ["uid"], {count: 0}, function(){
+  this.count += 1;
+  return m("send", this.count);
+  return undefined;
 });
 
-app.listen(8080);
+wflx.listen(8080);

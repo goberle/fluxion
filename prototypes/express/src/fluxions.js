@@ -1,134 +1,97 @@
-var express = require('express')();
-
-var users = {};
-var MSG = {};
-var flx = {};
-
-module.exports = session = {
-  getAsSession : function(route, fn) {
-    register(route, fn);
-  },
-  listen : function(port) {
-    port = 8080;
-    express.listen(port);
-    console.log(">> listening port: " + port);
-  }
-};
-
-express.get('/:id', function(req, res) {
-  var id = req.params.id;
-  // var uuid = req.client._idleStart;
-
-  users[id] = res;
-
-  post(m(a("/",id)));
-
-
-  // send(req.params.id, res);
-})
-
+var util = require('util');
 
 ////////////////////////////////////////////////////
 // Message passing abstraction                    //
 ////////////////////////////////////////////////////
 
 /*
- * MSG sert d'annuaire pour savoir quel fluxion écoute quel type de message
- * exist permet de savoir si un canal est écouté
- * register permet d'abonner une fonction à un canal
- * replace permet de remplacer toutes les fonction abonnées à un canal 
- * post permet de poster un message
+ * flx_inst sert d'annuaire pour savoir quel fluxion est instancié avec un contexte
+ * flx_repo sert d'annuaire pour savoir quel fluxion est disponible à l'instanciation
+ * l'instanciation se fait à l'aide de la méthode link, dynamiquement à la récéption d'un message.
  */
 
+var flx_inst = {};
+var flx_repo = {};
 
-
-
-
-  /*
-  post : permet de poster un message
-  à la reception d'un message, on appelle toutes les fonctions écoutant ce type de message
-  et pour chaque retour obtenu, on place un evenement renvoyant un message
-  Ce mécanisme permet de ne rien imposer au fonctions (ni reception, ni envoi)*/
 function post(msg) {
 
-  function postMsg(type, body, ctx) {
-      var msg = MSG[type].flx.call(ctx, body);
-
-      console.log(ctx);
-
-      if (!msg.type) {
-        console.log(msg.toString());
-        users[id(type)].send(msg.toString());
-      } else {      
-        msg.type = base(msg.type) + spec(type);
-        console.log(msg);
-        setTimeout(post,0, msg);
-      }
-  }
-
-  function send(id, msg) {
-    users[id].send(msg);
-  }
-
-  function base(flux) {
-    return flux.split("_")[0];
-  }
-
-  function id(flux) {
-    return flux.split("_").slice(1)[0];
-  }
-
-  function spec(flux) {
-    return "_" + flux.split("_").slice(1).join("_");
-  }
-
-  function link(flux) {
-    var name = base(flux);
-    if (!flx[name])
-      throw "!! Unknown fluxion " + name;
-
-    MSG[flux] = {flx: flx[name].run, ctx: flx[name].ctx()}
+  function postMsg(type, body, mlt) {
+      setTimeout(post, 0, m(type, mlt, body));
   }
 
 
   if(msg) {
-    if (!MSG[msg.type]) {
-      link(msg.type)
+    if (!flx_inst[msg.type]) {
+      link(msg.type, msg.multiplicity);
     }
 
-    console.log(">> ", msg.type, " | ", MSG[msg.type]);
+    var mltType = flx_repo[msg.type].mlt[0]; // TODO what happen in case of multi multiplicity
+    var mlt = msg.multiplicity[mltType]; 
+    var ctx = flx_inst[msg.type].ctx[mlt] = flx_inst[msg.type].ctx[mlt] || concat({}, flx_repo[msg.type].ctx);
 
-    postMsg(msg.type, msg.body, MSG[msg.type].ctx);
+    console.log(">> ", msg.type, '[', mlt, "] | ", util.inspect(ctx, { showHidden: false, depth: 0 }));
+    var res = flx_inst[msg.type].flx.call(ctx, msg.body);
+
+    // remove used multiplicity
+    msg.multiplicity[mltType] = undefined;
+    // add new multiplicity
+    if (res)
+      msg.multiplicity = concat(msg.multiplicity, res.multiplicity);
+
+    if (res && res.type) {
+      postMsg(res.type, res.body, msg.multiplicity);
+    }
   }
 };
 
-m = function(t,b) {
+m = function(t,m,b) {
+  if (b === undefined) {
+    b = m;
+    m = undefined;
+  }
   return {
     type: t,
-    body: b
+    body: b,
+    multiplicity: m
   };
 };
 
-a = function() {
-  return Array.prototype.join.call(arguments, "_");
+link = function(nm, mlt) {
+  if (!flx_repo[nm])
+    throw "!! Unknown fluxion " + nm;
+
+  // console.log("mlt : ", mlt);
+  // TODO make multiplicity
+  // TODO make context (add post)
+  flx_inst[nm] = {flx: flx_repo[nm].run, ctx: []}
+}
+
+concat = function(a, b) {
+ for (var key in b) {
+  a[key] = b[key];
+ }
+ return a;
+}
+
+next = function(nm, mlt, ctx) {
+  if (!flx_inst[nm]) {
+    link(nm, mlt);
+  }
+
+  flx_inst[nm].ctx[mlt] = concat(ctx, flx_repo[nm].ctx);
 };
 
-next = function(flux, arg) {
-  if (MSG[flux])
-    MSG[flux].arg = arg;
-};
-
-register = function(name, fn) {
-  if (flx[name])
+register = function(nm, mlt, ctx, fn) {
+  if (flx_repo[nm])
     return false;
 
-  var scope = fn.call({post: post});
-  var run = scope.run;
-
-  flx[name] = {run: run, ctx: function() {
-    var scope = new fn();
-    scope.run = undefined;
-    return scope;
-  }};
+  flx_repo[nm] = {run: fn, ctx: ctx, mlt: mlt};
   return true;
+};
+
+module.exports = {
+  register : register,
+  next : next,
+  m : m,
+  post : post,
 };
