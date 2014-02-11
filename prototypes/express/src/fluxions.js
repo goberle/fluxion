@@ -13,85 +13,98 @@ var util = require('util');
 var flx_inst = {};
 var flx_repo = {};
 
+function adress(nm, det) {
+
+  var addr = nm;
+
+  // console.log(nm, det);
+
+  for (var i = 0; i < flx_repo[nm].det.length; i++) {
+    addr += "_" + det[flx_repo[nm].det[i]];
+  };
+
+  return addr;
+}
+
 function post(msg) {
 
-  function postMsg(type, body, mlt) {
-      setTimeout(post, 0, m(type, mlt, body));
+  function postMsg(name, body, det) {
+      setTimeout(post, 0, message(name, det, body));
   }
 
-
   if(msg) {
-    if (!flx_inst[msg.type]) {
-      link(msg.type, msg.multiplicity);
+    var addr = adress(msg.name, msg.det);
+
+    if (!flx_inst[addr]) {
+      link(msg.name, msg.det);
     }
 
-    var mltType = flx_repo[msg.type].mlt[0]; // TODO what happen in case of multi multiplicity
-    var mlt = msg.multiplicity[mltType]; 
-    var ctx = flx_inst[msg.type].ctx[mlt] = flx_inst[msg.type].ctx[mlt] || concat({}, flx_repo[msg.type].ctx);
+    flx_inst[addr].scp.det = msg.det;
 
-    console.log(">> ", msg.type, '[', mlt, "] | ", util.inspect(ctx, { showHidden: false, depth: 0 }));
-    var res = flx_inst[msg.type].flx.call(ctx, msg.body);
+    console.log(">> ", addr, " | ", util.inspect(flx_inst[addr].scp, { showHidden: false, depth: 0 }));
+    var res = flx_inst[addr].flx.call(flx_inst[addr].scp, msg.body);
 
     // remove used multiplicity
-    msg.multiplicity[mltType] = undefined;
+    // msg.det[mltType] = undefined;
     // add new multiplicity
     if (res)
-      msg.multiplicity = concat(msg.multiplicity, res.multiplicity);
+      msg.det = concat(msg.det, res.det);
 
-    if (res && res.type) {
-      postMsg(res.type, res.body, msg.multiplicity);
+    if (res && res.name) {
+      postMsg(res.name, res.body, msg.det);
     }
   }
 };
 
-m = function(t,m,b) {
-  if (b === undefined) {
-    b = m;
-    m = undefined;
+function message(nm, det, body) {
+  if (body === undefined) {
+    body = det;
+    det = undefined;
   }
   return {
-    type: t,
-    body: b,
-    multiplicity: m
+    name: nm,
+    det: det,
+    body: body
   };
 };
 
-link = function(nm, mlt) {
+function link(nm, det, scp) {
   if (!flx_repo[nm])
     throw "!! Unknown fluxion " + nm;
 
-  // console.log("mlt : ", mlt);
-  // TODO make multiplicity
-  // TODO make context (add post)
-  flx_inst[nm] = {flx: flx_repo[nm].run, ctx: []}
+  if (!scp)
+    scp = concat({}, flx_repo[nm].scp);
+
+  scp = concat(scp, {m: message, post: post});
+  flx_inst[adress(nm, det)] = {flx: flx_repo[nm].run, scp: scp}
 }
 
-concat = function(a, b) {
+function concat(a, b) {
  for (var key in b) {
   a[key] = b[key];
  }
  return a;
 }
 
-next = function(nm, mlt, ctx) {
-  if (!flx_inst[nm]) {
-    link(nm, mlt);
-  }
+// store = function(nm, det, scp) {
+//   if (!flx_inst[nm]) {
+//     link(nm, det);
+//   }
 
-  flx_inst[nm].ctx[mlt] = concat(ctx, flx_repo[nm].ctx);
-};
+//   flx_inst[nm].scp[det] = concat(scp, flx_repo[nm].scp);
+// };
 
-register = function(nm, mlt, ctx, fn) {
+function register(nm, det, scp, fn) {
   if (flx_repo[nm])
     return false;
 
-  flx_repo[nm] = {run: fn, ctx: ctx, mlt: mlt};
+  flx_repo[nm] = {run: fn, scp: scp, det: det};
   return true;
 };
 
 module.exports = {
   register : register,
-  next : next,
-  m : m,
   post : post,
+  link : link,
+  m : message,
 };

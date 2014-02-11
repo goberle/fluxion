@@ -12,7 +12,7 @@ module.exports = {
   }
 };
 
-flx.register("send", ["cid"], undefined, function(msg){
+flx.register("output", ["cid"], {}, function(msg){
   this.res.send(msg.toString());
   return undefined;
 })
@@ -21,9 +21,6 @@ express.get('/:id', function(req, res) {
   var uid = req.params.id;
   var cid = req.client._idleStart;
 
-  flx.next("send", cid, {res: res});
-  flx.post(m("/", {uid: uid, cid: cid}, {}));
-
-
-  // send(req.params.id, res);
+  flx.link("output", {cid: cid}, {res: res});
+  flx.post(flx.m("input", {uid: uid, cid: cid}, {}));
 })
