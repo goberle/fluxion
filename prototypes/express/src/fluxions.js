@@ -12,71 +12,59 @@ var util = require('util');
 
 var flx_inst = {};
 var flx_repo = {};
-
-function adress(nm, det) {
-
-  var addr = nm;
-
-  // console.log(nm, det);
-
-  for (var i = 0; i < flx_repo[nm].det.length; i++) {
-    addr += "_" + det[flx_repo[nm].det[i]];
-  };
-
-  return addr;
-}
+var flx_scps = {};
 
 function post(msg) {
 
-  function postMsg(name, body, det) {
-      setTimeout(post, 0, message(name, det, body));
+  function postMsg(msg) {
+      setTimeout(post, 0, msg);
   }
 
   if(msg) {
-    var addr = adress(msg.name, msg.det);
-
-    if (!flx_inst[addr]) {
-      link(msg.name, msg.det);
+    if (!flx_inst[msg.dest]) {
+      link(msg.dest);
     }
 
-    flx_inst[addr].scp.det = msg.det;
+    console.log(">> ", msg.dest, " | ", util.inspect(flx_inst[msg.dest].scps, false, 1));
 
-    console.log(">> ", addr, " | ", util.inspect(flx_inst[addr].scp, { showHidden: false, depth: 0 }));
-    var res = flx_inst[addr].flx.call(flx_inst[addr].scp, msg.body);
+    flx_inst[msg.dest].scps = mkScope(msg.dest); // update scope TODO mkScope should handle name, not dest
 
-    // remove used multiplicity
-    // msg.det[mltType] = undefined;
-    // add new multiplicity
-    if (res)
-      msg.det = concat(msg.det, res.det);
+    var res = flx_inst[msg.dest].run.call(flx_inst[msg.dest].scps, msg.body);
 
-    if (res && res.name) {
-      postMsg(res.name, res.body, msg.det);
+    if (res && res.dest) {
+      postMsg(res);
     }
   }
 };
 
-function message(nm, det, body) {
-  if (body === undefined) {
-    body = det;
-    det = undefined;
-  }
+function message(dest, body) {
   return {
-    name: nm,
-    det: det,
+    dest: dest,
     body: body
   };
 };
 
-function link(nm, det, scp) {
-  if (!flx_repo[nm])
-    throw "!! Unknown fluxion " + nm;
+function mkScope(name) {
+  var scps = {};
 
-  if (!scp)
-    scp = concat({}, flx_repo[nm].scp);
+  for (var i = 0; i < flx_repo[name].ctx.length; i++) {
+    var ctx = flx_repo[name].ctx[i];
+    scps[ctx] = flx_scps[ctx];
+  };
 
-  scp = concat(scp, {m: message, post: post});
-  flx_inst[adress(nm, det)] = {flx: flx_repo[nm].run, scp: scp}
+  scps.m = message;
+  scps.post = post;
+
+  return scps;
+}
+
+function link(name, dest) {
+  if (!dest)
+    dest = name;
+  if (!flx_repo[name])
+    throw "!! Unknown fluxion " + name;
+
+  flx_inst[dest] = {run: flx_repo[name].flx, ctx: flx_repo[name].ctx, scps: mkScope(name)}
 }
 
 function concat(a, b) {
@@ -86,25 +74,33 @@ function concat(a, b) {
  return a;
 }
 
-// store = function(nm, det, scp) {
-//   if (!flx_inst[nm]) {
-//     link(nm, det);
-//   }
-
-//   flx_inst[nm].scp[det] = concat(scp, flx_repo[nm].scp);
-// };
-
-function register(nm, det, scp, fn) {
-  if (flx_repo[nm])
+function register(name, ctx, scps, fn) {
+  if (flx_repo[name])
     return false;
 
-  flx_repo[nm] = {run: fn, scp: scp, det: det};
+  if (!fn)
+    fn = scps;
+  else
+    store(scps);
+
+  flx_repo[name] = {flx: fn, ctx: ctx};
   return true;
 };
+
+function store(scps) {
+
+  console.log("   >>>> store ", util.inspect(scps, false, 1));
+
+  for (var key in scps) {
+    flx_scps[key] = {};
+    concat(flx_scps[key], scps[key]); // TODO this allow scopes overwriting, shouldn't though.
+  }
+}
 
 module.exports = {
   register : register,
   post : post,
   link : link,
+  store : store,
   m : message,
 };

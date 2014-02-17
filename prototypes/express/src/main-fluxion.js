@@ -1,14 +1,16 @@
 var wflx = require('./web-fluxions');
 
-// wflx.register(name, multiplicity, context, function);
-
-wflx.register("input", ["uid"], {count: 0}, function(){
-  this.count += 1;
-  return this.m("view", {count: this.count, uid: this.det.uid});
+wflx.register("input", ["uid"], {uid: {}}, function(msg){
+  this.uid[msg.uid] = this.uid[msg.uid] + 1 || 1;
+  msg.count = this.uid[msg.uid];
+  return this.m("view", msg);
 });
 
-wflx.register("view", [], {}, function(msg) {
-  return this.m("output", msg.uid + "[" + msg.count + "]");
+wflx.register("view", [], function(msg) {
+  msg.view = msg.uid + "[" + msg.count + "]";
+  msg.uid = undefined;
+  msg.count = undefined;
+  return this.m("output", msg);
 })
 
 wflx.listen(8080);

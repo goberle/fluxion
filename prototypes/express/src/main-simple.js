@@ -3,7 +3,7 @@ var app = require('express')();
 var count = {};
 
 app.get('/:id', function(req, res){
-  res.send(''+(count[req.params.id] = (count[req.params.id] + 1) || 1 ));
+  res.send(req.params.id + '[' + (count[req.params.id] = (count[req.params.id] + 1) || 1 ) + ']');
 });
 
 port = 8080;
