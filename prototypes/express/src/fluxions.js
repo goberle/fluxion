@@ -1,4 +1,5 @@
 var util = require('util');
+var hooks = require('./hooks');
 
 ////////////////////////////////////////////////////
 // Message passing abstraction                    //
@@ -24,14 +25,13 @@ function post(msg) {
     if (!flx_inst[msg.dest]) {
       link(msg.dest);
     }
-
-    console.log(">> ", msg.dest, " | ", util.inspect(flx_inst[msg.dest].scps, false, 1));
-
+    
     flx_inst[msg.dest].scps = mkScope(msg.dest); // update scope TODO mkScope should handle name, not dest
 
     var res = flx_inst[msg.dest].run.call(flx_inst[msg.dest].scps, msg.body);
 
     if (res && res.dest) {
+      hooks.post(msg, flx_inst[msg.dest].scps, res.dest);
       postMsg(res);
     }
   }
@@ -83,13 +83,14 @@ function register(name, ctx, scps, fn) {
   else
     store(scps);
 
+  hooks.register(name, ctx, scps);
   flx_repo[name] = {flx: fn, ctx: ctx};
   return true;
 };
 
 function store(scps) {
 
-  console.log("   >>>> store ", util.inspect(scps, false, 1));
+  hooks.store(scps);
 
   for (var key in scps) {
     flx_scps[key] = {};
