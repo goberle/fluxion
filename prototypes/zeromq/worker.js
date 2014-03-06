@@ -2,40 +2,56 @@ var zmq = require('zmq')
   , input = zmq.socket('sub')
   , output = zmq.socket('push');
 
-output.identity = '' + Math.floor(Math.random()*1000000);
+var fx = {};
 
-input.connect('tcp://127.0.0.1:3001', function(arguments) {
-  console.log("connecting input ", arguments);
-});  
-input.subscribe("R" + output.identity);
-console.log("subscribing " + "R" + output.identity);
+// Connection
 
-output.connect('tcp://127.0.0.1:3000', function(arguments) {
-  console.log("connecting output ", arguments);
-});
+input.connect('tcp://127.0.0.1:3001');
+output.connect('tcp://127.0.0.1:3000');
 
 console.log('Worker connect to port 3000/3001');
 
+// Registration
 
-
-process.stdin.resume();
-process.stdin.setEncoding('utf8');
+output.identity = '' + Math.floor(Math.random()*1000000);
+input.subscribe("R" + output.identity);
 
 output.send(['R', ' ', output.identity]);
+input.on('message', registration);
 
-input.on('message', function(id, blank, msg){
-  console.log( '' + id + blank + msg);
+function registration(id, blank, msg) {
 
-  input.unsbuscribe("R" + output.identity);
-  output.identity = msg;
+  console.log(">> " + id + " :: " + blank + " - " + msg);
+
+  // input.unsbuscribe("R" + output.identity); // TODO fix this to avoid conflict
+  output.identity = "N" + msg;
   input.subscribe(output.identity);
+  output.send([output.identity]);
 
-  input.on('message', function(id, blank, msg) {
-    console.log('' + id + blank + msg);
-  })
+  input.removeListener('message', registration);
+  input.on('message', worker);
 
-  process.stdin.on('data', function (chunk) {
-    output.send(JSON.stringify(chunk));
-  });
+  console.log("WORKER READY " + output.identity);
+}
 
-})
+// Worker
+
+function worker(id, blank, msg) {
+  id = ''+id;
+  msg = msg ? JSON.parse(msg) : undefined;
+  console.log(">> " + id + " :: " + blank + " - " + msg);
+
+  // TODO sub the addr, and ack it
+
+
+  if (id[0] === 'N' ) {
+
+    fx[msg.addr] = msg.fn
+
+    input.subscribe(msg.addr);
+    output.send([output.identity, ' ', JSON.stringify([msg.addr])]);
+    console.log("need to sub ")
+  }
+
+
+}
