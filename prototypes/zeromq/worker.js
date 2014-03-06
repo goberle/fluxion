@@ -1,54 +1,41 @@
 var zmq = require('zmq')
-  , sock = zmq.socket('rep')
-  , fnSrlz = require('../lib/fnSrlz')
-  , vm = require('vm')
-  , util = require('util');
+  , input = zmq.socket('sub')
+  , output = zmq.socket('push');
 
+output.identity = '' + Math.floor(Math.random()*1000000);
 
-// Message passing abstraction
+input.connect('tcp://127.0.0.1:3001', function(arguments) {
+  console.log("connecting input ", arguments);
+});  
+input.subscribe("R" + output.identity);
+console.log("subscribing " + "R" + output.identity);
 
-MSG = {};
-
-function postMsg(msg) {
-  if(msg.type !== "stop") {
-    if (!MSG[msg.type]) {
-      throw "type not known";
-    }
-    setTimeout(postMsg,0,MSG[msg.type](msg.body));
-  }
-}
-
-function m(t,b) {
-  return {
-    type: t,
-    body: b
-  };
-}
-
-var initSandbox = {
-  m: m,
-  postMsg: postMsg
-}
-
-sock.connect('tcp://127.0.0.1:3000');
-console.log('Worker connected to port 3000');
-
-sock.on('message', function(msg){
-  msg = JSON.parse(msg);
-
-  if( msg.type === "init" ) {
-    MSG[msg.body.type] = {
-      id: msg.body.type,
-      fn: msg.body.body,
-      context: vm.createContext(initSandbox),
-      run: function(n) {
-        this.context.input = n;
-        return vm.runInContext('(' + this.fn + ')(input)', this.context, this.id + '_vm');
-      }
-    }
-    sock.send(JSON.stringify(m('stop')));
-  } else {
-    var res = MSG[msg.type].run(msg.body);
-    sock.send(JSON.stringify(res));
-  }
+output.connect('tcp://127.0.0.1:3000', function(arguments) {
+  console.log("connecting output ", arguments);
 });
+
+console.log('Worker connect to port 3000/3001');
+
+
+
+process.stdin.resume();
+process.stdin.setEncoding('utf8');
+
+output.send(['R', ' ', output.identity]);
+
+input.on('message', function(id, blank, msg){
+  console.log( '' + id + blank + msg);
+
+  input.unsbuscribe("R" + output.identity);
+  output.identity = msg;
+  input.subscribe(output.identity);
+
+  input.on('message', function(id, blank, msg) {
+    console.log('' + id + blank + msg);
+  })
+
+  process.stdin.on('data', function (chunk) {
+    output.send(JSON.stringify(chunk));
+  });
+
+})
