@@ -1,0 +1,20 @@
+digraph G {
+  rankdir=LR;
+  pad=1;
+
+  graph [ fontname="HelveticaNeue-Thin", fontcolor=black, fontsize=20 ];
+  node [ fontname="HelveticaNeue-Thin", fontcolor=black, fontsize=20, penwidth=0.5 shape=circle, fixedsize=true, width=1.2, height=1.2 ];
+  edge [ fontname="HelveticaNeue-Thin", fontcolor=black, fontsize=20, penwidth=0.5 splines=line, arrowsize=0.7 ];
+  
+  subgraph cluster {
+    node[shape=plaintext]
+    label = "Legend";
+    key [fixedsize=false, label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0">
+      <tr><td align="right" port="i1">send message</td></tr>
+      </table>>]
+    key2 [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0">
+      <tr><td port="i1">&nbsp;</td></tr>
+      </table>>]
+    key:i1:e -> key2:i1:w
+  }
+} 
