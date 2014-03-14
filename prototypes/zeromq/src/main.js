@@ -22,14 +22,18 @@ output.bind('tcp://127.0.0.1:3001');
 console.log('Router bound to port 3000/3001');
 
 input.on('message', function(id, blank, msg){
-  console.log(">> " + id + " :: " + blank + " - " + msg);
-  id = ''+id;
+
+  id = '' + id;
+  var type = id[0];
+  var addr = id.substring(1); //Array.prototype;
   msg = msg ? JSON.parse(msg) : undefined;
 
-  switch(id[0]) {
+  msg = ( msg && msg != "undefined" ) ? JSON.parse(msg) : undefined;
+
+  switch(type) {
     case 'R': register(id, msg); break;
     case 'N': ackNode(id, msg); break;
-    case 'M': postMsg(msg); break;
+    case 'M': postMsg(addr, msg); break;
   }
 });
 
@@ -46,16 +50,16 @@ function ackNode(id, msg) {
 
   if (msg) {
     for (var i = 0; i < msg.length; i++) { var addr = msg[i];
-      console.log("---- ", addr, fx[addr]);
-
       registerFx(addr, undefined, id);
       nodes[id].addrs.push(addr);
     };
+
+    setTimeout(acknowledged, 0, id, msg);
   }
 }
 
-function postMsg(msg) {
-  console.log("msg received ", msg);
+function postMsg(addr, body) {
+  console.log("msg received ", addr, body);
 }
 
 
@@ -78,7 +82,6 @@ function registerFx(addr, fn, node) {
     fx[addr].node = node || fx[addr].node;
 
     if (fx[addr].transition) {
-      console.log("---- transition");
       fx[addr].postMoveCallback(node, addr);
       fx[addr].transition = false;
     }
@@ -89,23 +92,29 @@ function registerFx(addr, fn, node) {
 
 function moveFx(addr, n, callback) {
 
-  console.log("moving FX ", addr, n);
-
   output.send([n, ' ', JSON.stringify({
     addr: addr,
-    fn: fx[addr].fn
+    fn: fx[addr].fn.toString()
   })]);
   fx[addr].transition = true;
   fx[addr].postMoveCallback = callback;
+}
 
-  console.log("---- ", fx[addr]);
+function post(addr, msg) {
+  output.send(["M"+addr, ' ', JSON.stringify(msg)]);
 }
 
 function registered(id) {
   console.log("registered " + id);
 
-  registerFx("test", function(){console.log("test")});
+  registerFx("tic", function(test){return {addr: "tac"}});
+  registerFx("tac", function(test){return {addr: "tic"}});
 
-  moveFx("test", id, function(id, addr){console.log("function moved ", id, addr)});
+  moveFx("tic", id, function(id, addr){console.log("function moved ", id, addr)});
+}
 
+function acknowledged(id, msg) {
+  console.log(id + " acknowledged " + msg);
+
+  post("tic", "this is a test");
 }

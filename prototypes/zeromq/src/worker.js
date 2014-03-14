@@ -1,4 +1,5 @@
 var zmq = require('zmq')
+  , vm = require('vm')
   , input = zmq.socket('sub')
   , output = zmq.socket('push');
 
@@ -34,24 +35,45 @@ function registration(id, blank, msg) {
   console.log("WORKER READY " + output.identity);
 }
 
+function runFactory(code, name) {
+  var script = vm.createScript('__result = (' + code + ').call(this, __arguments)', name);
+  return {
+    run : function(scopes, arguments) {
+      scopes.__arguments = arguments;
+      scopes.console = console; // for debug only
+      try {
+        script.runInNewContext(scopes);
+      } catch(e) {
+        console.log("Error in " + name + " :: " + e);
+      }
+      return scopes.__result;
+    }
+  }
+}
+
 // Worker
 
 function worker(id, blank, msg) {
-  id = ''+id;
+  id = '' + id;
+  var type = id[0];
+  var addr = id.substring(1); //Array.prototype;
   msg = msg ? JSON.parse(msg) : undefined;
-  console.log(">> " + id + " :: " + blank + " - " + msg);
+  console.log(">> " + id + " :: " + blank + " - ", msg);
 
-  // TODO sub the addr, and ack it
-
-
-  if (id[0] === 'N' ) {
-
-    fx[msg.addr] = msg.fn
-
-    input.subscribe(msg.addr);
+  if (type === 'N' ) {
+    fx[msg.addr] = runFactory(msg.fn, msg.addr);
+    input.subscribe( 'M' + msg.addr);
     output.send([output.identity, ' ', JSON.stringify([msg.addr])]);
-    console.log("need to sub ")
   }
 
+  if (type === 'M') {
 
+    console.log("message received")
+
+    var msg = fx[addr].run({}, "this is a test !");
+
+    if (msg && msg.addr) {
+      output.send([ "M" + msg.addr, ' ', msg.body]);
+    }
+  }
 }
