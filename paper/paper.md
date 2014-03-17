@@ -1,31 +1,28 @@
 # Introduction au modèle d'exécution fluxionnel
 
-Avec la croissance des plateformes d'intermédiation sur le web, 
-le traitement des informations par flux s'est imposé comme seule méthode viable pour traiter efficacement de gros volumes sans accumulations.
-
-Classiquement, tous les traitements sont effectués les uns après les autres sur une requête, avant de passer à une autre requête.
-Au contraire, avec une méthodologie de traitement par flux, le découpage du traitement en unité de traitement plus fine offre la parallélisation permettant les optimisations nécessaires au traitement des volumes de données impliqués.
-
-Cette parallélisation permet d'une part d'allouer les ressources en fonction des différentes demandes des traitements.
-D'autre part de multiplier les messages traité en une fois grâce à la parallélisation de données.
-
-Le traitement par flux permet de balancer une charge d'entrée constante, sur différentes ressources.
-Afin de s'adapter dynamiquement à une charge d'entrée variable, il faudrait être capable de rajouter dynamiquement des ressources, et donc d'instancier dynamiquement une partie de l'application sur ces nouvelles ressources.
-
-Cependant, la croissance des plateformes d'intermediation est dû à la capacité du web de favoriser le développement continu de services permettant une mise en production minimal très rapide.
-
-> Release early, release often.
-
-En quelques heures, il est possible d'avoir un produit fonctionnel en ligne afin d'accueillir une première audience.
-Les langage dynamique actuellement porteur de nouveaux services sont suffisamment souples pour permettre aux développeurs de suivre cette philosophie, et rapidement modifier la conception de l'application ou du service.
+La croissance des plateformes d'intermediation est dû à la capacité du web de favoriser le développement continu de services permettant une mise en production minimal très rapide.
+*Release early, release often.* est souvent entendu parmi les communauté open source comme conseil pour construire une communauté.
+En quelques heures, il est possible de mettre en ligne un produit fonctionnel afin d'accueillir une première audience.
+Les langages dynamiques actuellement porteurs de nouveaux services sont suffisamment souples pour permettre aux développeurs de suivre cette philosophie, et rapidement modifier la conception de l'application ou du service.
 
 Si le service répond correctement aux attentes de l'audience, celle-ci va très probablement grossir au fur et à mesure que le service gagne en popularité.
+Afin de pouvoir faire face à cette audience grandissante et proposer des ressources , il arrive un moment dans le développement du produit où la taille des données à traiter impose l'utilisation d'un modèle de traitement par flux.
+Un des modèles de traitement par flux les plus largement accepté consiste à découper le traitement en plusieurs parties communiquant entre elles par message.
+Des outils permettent d'exprimer ces différentes parties, et simplifie l'acheminement des messages [Storm, MillWheel, Spark, TimeStream ...].
+Cependant, ces outils utilisant des interfaces ou des langages particuliers, il est nécessaire d'une part de modifier le code initial afin de l'adapter à ces outils.
+D'autre part de former les équipes de développement à l'utilisation de ces nouveaux outils, ou d'engager des experts familiers avec ces outils.
+Ces outils sortent du cadre accessible au grand public favorisant l'émergence de nouveaux services.
 
-Afin de pouvoir faire face à cette audience grandissante et proposer des ressources , il arrive un moment dans le développement du produit où il deviens nécessaire de changer l'architecture du projet pour une architecture acceptant mieux les flux d'informations.
+Nous proposons un outils permettant de compiler automatiquement un service web écrit dans un langage dynamique classique, favorable à une rapide évolution de l'architecture, vers un modèle d'exécution basé sur les flux d'informations.
+Un service web exprimé selon ce modèle d'exécution encapsule sa logique dans des fluxions.
+Ces fluxions composent la chaîne de traitement traversé par le flux de requêtes utilisateurs.
+Ces fluxions ont chacune une adresse distincte dans un système de messagerie leurs permettant de communiquer entre elles pour faire suivre le flux d'information de la réception d'une requête à l'envoi de la réponse.
+Les fluxions n'ont pas d'états afin de réduire l'adhérence aux systèmes physique support, c'est pourquoi elles manipulent également des scopes, en plus des messages éphémères du flux d'information : des structures persisté par le système de messagerie.
+Une fluxion est enregistré avec un contexte : une liste des noms de scope, afin de renseigner le système de messagerie des différents scopes nécessaires à son exécution.
+Un système de supervision, reçois du système de messagerie des informations sur l'écoulement des flux dans l'application, ce afin d'organiser les fluxions de manière optimale sur l'architecture physique.
+L'implémentation se fait en Javascript, certaines contraintes techniques découlent de ce choix technique.
 
-Les outils offrant ces fonctionnalités de flux imposent généralement une méthodologie de conception lourde et mal adapté à l'évolution rapide, facteur du succès initial.
-
-Nous proposons un outils permettant de compiler un service web écrit dans un langage dynamique classique, favorable à une rapide évolution de l'architecture, vers un modèle d'exécution basé sur les flux d'informations.
+# Lexique du modèle d'exécution fluxionnel
 
 Nous appelons ce nouveau modèle d'exécution : modèle d'exécution fluxionnel, composé de quatre éléments :
 
@@ -33,20 +30,6 @@ Nous appelons ce nouveau modèle d'exécution : modèle d'exécution fluxionnel,
 + les messages
 + le système de messagerie
 + le système de supervision
-
-Un service web exprimé selon ce modèle d'exécution encapsule sa logique dans des fluxions.
-Ces fluxions composent la chaîne de traitement traversé par le flux de requêtes utilisateurs.
-
-Ces fluxions ont chacune une adresse distincte dans un système de messagerie leurs permettant de communiquer entre elles pour faire suivre le flux d'information de la réception d'une requête à l'envoi de la réponse.
-
-Les fluxions n'ont pas d'états afin de réduire l'adhérence aux systèmes physique support, c'est pourquoi elles manipulent également des scopes, en plus des messages éphémères du flux d'information : des structures persisté par le système de messagerie.
-Une fluxion est enregistré avec un contexte : une liste des noms de scope, afin de renseigner le système de messagerie des différents scopes nécessaires à son exécution.
-
-Un système de supervision, reçois du système de messagerie des informations sur l'écoulement des flux dans l'application, ce afin d'organiser les fluxions de manière optimale sur l'architecture physique.
-
-L'implémentation se fait en Javascript, certaines contraintes techniques découlent de ce choix technique.
-
-# Lexique du modèle d'exécution fluxionnel
 
 ## Adresse
 
@@ -224,13 +207,36 @@ Ins: post(m, A) -> F: searchScope(A) -> F: eval(m+scope, A) -> f: localExec -> f
 
 
 
-# Questions ouverte sur le modèle d'exécution fluxionnel
+# Questions ouvertes sur le modèle d'exécution fluxionnel
 
 
 
 
+# Compilation depuis une approche classique vers ce modèle d'exécution fluxionnel
+
+## Différences entre l'approche classique et le modèle d'exécution fluxionnel
+
+Nous listons ici l'ensemble des points de différence entre les deux modèles nécessitant une transformation lors de la compilation.
+
+Nous considérons qu'un service web se situe dans un sous-ensemble des programmes classiques écrit dans un langage dynamique.
+Ce sous-ensemble implique que le programme soit structuré de manière à enchaîner des traitements séquentiellement les uns après les autres.
+
+### Utilisation de la mémoire
+
+// TODO préciser techniquement
+Dans le modèle classique, la mémoire est centrale.
+Elle est cependant cloisonné en scopes de fonctions, et en contexte d'exécution.
+Une fonction n'as accès qu'à son scope, et au contexte dans lequel elle est exécutée.
+
+Dans le modèle fluxionnel, la mémoire est décentralisé.
 
 
+### Appel de fonction
+
+// TODO détailler
+Dans le modèle classique, les fonctions s'appellent en donnant temporairement le contrôle de l'exécution.
+
+Dans le modèle fluxionnel, les fluxions s'envoie des messages, se donnant defini
 
 
 
