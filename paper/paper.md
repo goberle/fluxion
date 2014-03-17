@@ -1,38 +1,52 @@
 # Introduction au modèle d'exécution fluxionnel
 
-// TODO introduction plus poussée sur le contexte
+Avec la croissance des plateformes d'intermédiation sur le web, 
+le traitement des informations par flux s'est imposé comme seule méthode viable pour traiter efficacement de gros volumes sans accumulations.
 
-Avec la croissance du web comme support de plateformes d'intermédiation, la question du traitement de l'information sous forme de flux se pose pleinement.
-La possibilité de traiter l'information pendant son échange offre une maîtrise des délai qui devient nécessaire.
+Classiquement, tous les traitements sont effectués les uns après les autres sur une requête, avant de passer à une autre requête.
+Au contraire, avec une méthodologie de traitement par flux, le découpage du traitement en unité de traitement plus fine offre la parallélisation permettant les optimisations nécessaires au traitement des volumes de données impliqués.
 
-Contrairement au traitement par lot, le traitement par flux ne peut pas utiliser les opérateurs d'ensembles.
-Il est nécessaire de repenser l'ensemble des opérations réalisable pour les traduire en opérateurs de flux.
+Cette parallélisation permet d'une part d'allouer les ressources en fonction des différentes demandes des traitements.
+D'autre part de multiplier les messages traité en une fois grâce à la parallélisation de données.
 
-// TODO traitement par flux pour être capable d'élasticiser l'application proportionnellement (the scalability part from dynmaic scalability).
+Le traitement par flux permet de balancer une charge d'entrée constante, sur différentes ressources.
+Afin de s'adapter dynamiquement à une charge d'entrée variable, il faudrait être capable de rajouter dynamiquement des ressources, et donc d'instancier dynamiquement une partie de l'application sur ces nouvelles ressources.
 
-// TODO Répartition dynamique des étapes du flux pour s'adapter dynamiquement à la charge (the dynamic part from dynmaic scalability).
+Cependant, la croissance des plateformes d'intermediation est dû à la capacité du web de favoriser le développement continu de services permettant une mise en production minimal très rapide.
 
-Nous proposons un nouveau modèle d'exécution permettant d'exprimer un service web sous forme de suite de traitements traversé par un flux d'information : depuis la réception d'une requête cliente, jusqu'à l'envoie de la réponse à ce même client.
+> Release early, release often.
 
-Cette suite de traitement est composé de parties que l'on appel fluxion.
-Un service web exprimé selon ce modèle d'exécution est composé exclusivement de fluxions.
+En quelques heures, il est possible d'avoir un produit fonctionnel en ligne afin d'accueillir une première audience.
+Les langage dynamique actuellement porteur de nouveaux services sont suffisamment souples pour permettre aux développeurs de suivre cette philosophie, et rapidement modifier la conception de l'application ou du service.
+
+Si le service répond correctement aux attentes de l'audience, celle-ci va très probablement grossir au fur et à mesure que le service gagne en popularité.
+
+Afin de pouvoir faire face à cette audience grandissante et proposer des ressources , il arrive un moment dans le développement du produit où il deviens nécessaire de changer l'architecture du projet pour une architecture acceptant mieux les flux d'informations.
+
+Les outils offrant ces fonctionnalités de flux imposent généralement une méthodologie de conception lourde et mal adapté à l'évolution rapide, facteur du succès initial.
+
+Nous proposons un outils permettant de compiler un service web écrit dans un langage dynamique classique, favorable à une rapide évolution de l'architecture, vers un modèle d'exécution basé sur les flux d'informations.
+
+Nous appelons ce nouveau modèle d'exécution : modèle d'exécution fluxionnel, composé de quatre éléments :
+
++ les fluxions
++ les messages
++ le système de messagerie
++ le système de supervision
+
+Un service web exprimé selon ce modèle d'exécution encapsule sa logique dans des fluxions.
+Ces fluxions composent la chaîne de traitement traversé par le flux de requêtes utilisateurs.
+
 Ces fluxions ont chacune une adresse distincte dans un système de messagerie leurs permettant de communiquer entre elles pour faire suivre le flux d'information de la réception d'une requête à l'envoi de la réponse.
 
-Les fluxions n'ont pas d'état pour réduire l'adhérence aux système physique support, c'est pourquoi, elles manipulent, également, en plus des messages éphémères du flux d'information, des scopes : des structures persisté par le système de messagerie.
-Une fluxion décrit un contexte permettant d'identifier les différents scopes dont elle à besoin.
+Les fluxions n'ont pas d'états afin de réduire l'adhérence aux systèmes physique support, c'est pourquoi elles manipulent également des scopes, en plus des messages éphémères du flux d'information : des structures persisté par le système de messagerie.
+Une fluxion est enregistré avec un contexte : une liste des noms de scope, afin de renseigner le système de messagerie des différents scopes nécessaires à son exécution.
 
 Un système de supervision, reçois du système de messagerie des informations sur l'écoulement des flux dans l'application, ce afin d'organiser les fluxions de manière optimale sur l'architecture physique.
 
 L'implémentation se fait en Javascript, certaines contraintes techniques découlent de ce choix technique.
 
 # Lexique du modèle d'exécution fluxionnel
-
-Le modèle d'exécution fluxionnel est composé de quatre éléments :
-
-+ les fluxions
-+ les messages
-+ le système de messagerie
-+ le système de supervision
 
 ## Adresse
 
@@ -209,6 +223,8 @@ Ins: post(m, A) -> F: searchScope(A) -> F: eval(m+scope, A) -> f: localExec -> f
 // f: fluxion
 
 
+
+# Questions ouverte sur le modèle d'exécution fluxionnel
 
 
 
