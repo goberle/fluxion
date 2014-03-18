@@ -1,19 +1,19 @@
 # Introduction
 
-La croissance des plateformes d'intermediation est dû à la capacité du web de favoriser le développement continu de services permettant une mise en production minimal très rapide.
+La croissance des plateformes d'intermédiation est dû à la capacité du web de favoriser le développement continu de services permettant une mise en production minimal très rapide.
 En quelques heures, il est possible de mettre en ligne un produit fonctionnel afin d'accueillir une première audience.
 *Release early, release often.* est souvent entendu parmi les communauté open source comme conseil pour construire rapidement une communauté d'utilisateurs.
-Les langages dynamiques actuellement porteurs de nouveaux services sont suffisamment souples pour permettre aux développeurs de suivre cette philosophie, et rapidement modifier la conception de l'application ou du service.
+Les langages dynamiques actuellement porteurs de nouveaux services sont suffisamment souples pour permettre aux développeurs de suivre cette philosophie, et rapidement modifier la conception du service.
 
 Si le service répond correctement aux attentes de l'audience, celle-ci va très probablement grossir au fur et à mesure que le service gagne en popularité.
-Afin de pouvoir faire face à cette audience grandissante et proposer des ressources , il arrive un moment dans le développement du produit où la taille des données à traiter impose l'utilisation d'un modèle de traitement par flux.
-Un des modèles de traitement par flux largement accepté consiste à découper le traitement en plusieurs parties communiquant entre elles par message.
-Des outils permettent d'exprimer ces différentes parties, et simplifie l'acheminement des messages [Storm, MillWheel, Spark, TimeStream ...].
+Afin de pouvoir faire face à cette audience grandissante, la quantité de ressources utilisé par le service augmente régulièrement, et il arrive un moment dans le développement du produit où la taille des données à traiter et la quantité de ressources nécessaires impose l'utilisation d'un modèle de traitement par flux.
+Le modèles d'exécution du traitement par flux découpe le traitement en plusieurs parties communiquant entre elles par message.
+Des outils permettent d'exprimer ces différentes parties et leurs interactions, et simplifie l'acheminement des messages [Storm, MillWheel, Spark, TimeStream ...].
 Cependant, ces outils utilisant des interfaces ou des langages particuliers, il est nécessaire d'une part de former les équipes de développement à l'utilisation de ces nouveaux outils, ou d'engager des experts familiers avec ces outils.
 D'autre part de modifier le code initial afin de l'adapter à ces outils, ce qui rend l'architecture globale moins souple et moins propice aux changements rapides.
-Ces outils sortent du cadre accessible grand public favorisant l'émergence spontanée de nouveaux services, et représente une barrière dans l'évolution d'un projet de service web.
+Ces outils sortent du cadre accessible grand public favorisant l'émergence spontanée de nouveaux services, et représentent une barrière dans l'évolution d'un projet de service web.
 
-Nous proposons un outils permettant de compiler automatiquement un service web écrit dans un langage dynamique classique, favorable à une rapide évolution de l'architecture, vers un modèle d'exécution basé sur les flux d'informations.
+Nous proposons un outil permettant de compiler automatiquement un service web écrit dans un langage dynamique classique, favorable à une rapide évolution de l'architecture, vers un modèle d'exécution basé sur les flux d'informations.
 Notre objectif est de réduire au minimum la barrière existante dans le cycle de développement d'un service web dû à ce changement de paradigme dans l'architecture.
 
 # Modèle d'exécution fluxionnel
@@ -233,7 +233,43 @@ Dans le modèle classique, la mémoire est centrale.
 Elle est cependant cloisonné en scopes de fonctions, et en contexte d'exécution.
 Une fonction n'as accès qu'à son scope, et au contexte dans lequel elle est exécutée.
 
-Dans le modèle fluxionnel, la mémoire est décentralisé.
+Dans le modèle fluxionnel, la mémoire est décentralisé et encapsulé dans des scopes.
+
+1. Une fonction n'utilise aucune mémoire, ou n'utilise aucune persistance entre ses invocations.
+    -> pas de scope
+
+```
+function(mon_argument) {
+    return mon_argument + 3;
+}
+```
+
+
+2. Une fonction utilise une closure comme scope et elle est la seule à accéder à cette closure.
+    -> scope représentant la closure
+
+```
+function(mon_scope) {
+    // mon_scope accessible
+    return function(mon_argument) {
+        // mon_argument et mon_scope accessible
+        return mon_scope + mon_argument;
+    }
+}
+```
+
+3. Une fonction utilise une closure comme scope et elle n'est pas la seule à accéder à cette closure, cas de l'objet global.
+    -> scope représentant la closure, partagé entre les fluxions.
+
+```
+function(mon_scope) {
+    // mon_scope accessible
+    return function(mon_argument) {
+        // mon_argument et mon_scope accessible
+        return mon_scope + mon_argument;
+    }
+}
+```
 
 
 ### Appel de fonction
@@ -241,8 +277,7 @@ Dans le modèle fluxionnel, la mémoire est décentralisé.
 // TODO détailler
 Dans le modèle classique, les fonctions s'appellent en donnant temporairement le contrôle de l'exécution.
 
-Dans le modèle fluxionnel, les fluxions s'envoie des messages, se donnant defini
-
+Dans le modèle fluxionnel, le pointeur d'exécution est passé de manière événementiel, porté par le système de messagerie.
 
 
 
