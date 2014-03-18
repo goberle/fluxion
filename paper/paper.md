@@ -11,15 +11,14 @@ Le modèles d'exécution du traitement par flux découpe le traitement en plusie
 Des outils permettent d'exprimer ces différentes parties et leurs interactions, et simplifie l'acheminement des messages [Storm, MillWheel, Spark, TimeStream ...].
 Cependant, ces outils utilisant des interfaces ou des langages particuliers, il est nécessaire de former les équipes de développement à l'utilisation de ces nouveaux outils ou d'engager des experts familiers avec ces outils et de réécrire le service initial en utilisant ces nouveaux outils.
 Cette nouvelle architecture est globalement moins souple et moins propice aux changements rapides. // TODO à vérifier et documenter [biblio]
-Ces changements représentent une prise de risque pour la poursuite du projet.
-En effet, ces outils sortent du cadre grand public suffisamment accessible pour favoriser l'émergence spontanée de nouveaux services.
+Ce changements de paradigmes de développement représente une prise de risque dans la poursuite du projet car ces outils sortent du cadre grand public suffisamment accessible pour favoriser l'émergence spontanée de nouveaux services.
 
 Nous proposons un outil permettant d'éviter de forcer ce changement de paradigme de développement.
-Nous visons des applications web dont les sollicitations proviennent des flux de requêtes utilisateurs et dont le développement initial est ...(?) selon une approche web 'classique' (serveur web / traitement applicatif / data).
-Nous pensons qu'il est possible d'analyser ce genre d'applications dès les premières étapes d'exploitations afin de les re-exprimer plus ou moins concrètement(?) sous la forme de flux d'échange.
+Nous visons des applications web dont les sollicitations proviennent des flux de requêtes utilisateurs et dont le développement initial est réalisé selon une approche web 'classique' (serveur web / traitement applicatif / data).
+Nous pensons qu'il est possible d'analyser ce genre d'applications dès les premières étapes d'exploitations afin de les re-exprimer plus ou moins concrètement sous la forme de flux d'échange.
 
 Nous supposons que les applications serveur serait développés dans un langage dynamique comme javascript, et nous proposons un outil capable d'identifier les flux internes, de définir des unités de traitement de ces flux, et de pouvoir gérer de manière dynamique ces unités.
-L'outil identifie ces unités sans être intrusif dans le code existant mais en proposant une sur-expression du programme initial en utilisant le paradigme de flux que nous allons définir et qui servira(?) au cœur de notre proposition.
+L'outil identifie ces unités sans être intrusif dans le code existant mais en proposant une sur-expression du programme initial en utilisant le paradigme de flux que nous allons définir et qui servira au cœur de notre proposition.
 
 // TODO
 La section 2 présente le principe de fluxion en le positionnant par rapport à l'existant.
