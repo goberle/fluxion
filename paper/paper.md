@@ -1,20 +1,29 @@
 # Introduction
 
-La croissance des plateformes d'intermédiation est dû à la capacité du web de favoriser le développement continu de services permettant une mise en production minimal très rapide.
+La croissance des plateformes d'intermédiation est dû à la capacité du web de favoriser le développement de services avec une mise en production minimal très rapide.
 En quelques heures, il est possible de mettre en ligne un produit fonctionnel afin d'accueillir une première audience.
-*Release early, release often.* est souvent entendu parmi les communauté open source comme conseil pour construire rapidement une communauté d'utilisateurs.
-Les langages dynamiques actuellement porteurs de nouveaux services sont suffisamment souples pour permettre aux développeurs de suivre cette philosophie, et rapidement modifier la conception du service.
+*Release early, release often.* est souvent entendu parmi les communauté open source comme conseil pour capter rapidement une communauté d'utilisateurs.
 
 Si le service répond correctement aux attentes de l'audience, celle-ci va très probablement grossir au fur et à mesure que le service gagne en popularité.
-Afin de pouvoir faire face à cette audience grandissante, la quantité de ressources utilisé par le service augmente régulièrement, et il arrive un moment dans le développement du produit où la taille des données à traiter et la quantité de ressources nécessaires impose l'utilisation d'un modèle de traitement par flux.
+Afin de pouvoir faire face à cette audience grandissante, la quantité de ressources utilisé par le service augmente régulièrement, et il arrive un moment dans le développement du produit où la taille des données à traiter et la quantité de ressources nécessaires imposent l'utilisation d'un modèle de traitement plus efficace.
+Les modèles de traitements plus efficaces passent par une segmentation des échange entre fonction en utilisant différents paradigmes de communication comme les approches three-tiers, les événements, les messages ou les flux. [bilbio]
 Le modèles d'exécution du traitement par flux découpe le traitement en plusieurs parties communiquant entre elles par message.
 Des outils permettent d'exprimer ces différentes parties et leurs interactions, et simplifie l'acheminement des messages [Storm, MillWheel, Spark, TimeStream ...].
-Cependant, ces outils utilisant des interfaces ou des langages particuliers, il est nécessaire d'une part de former les équipes de développement à l'utilisation de ces nouveaux outils, ou d'engager des experts familiers avec ces outils.
-D'autre part de modifier le code initial afin de l'adapter à ces outils, ce qui rend l'architecture globale moins souple et moins propice aux changements rapides.
-Ces outils sortent du cadre accessible grand public favorisant l'émergence spontanée de nouveaux services, et représentent une barrière dans l'évolution d'un projet de service web.
+Cependant, ces outils utilisant des interfaces ou des langages particuliers, il est nécessaire de former les équipes de développement à l'utilisation de ces nouveaux outils ou d'engager des experts familiers avec ces outils et de réécrire le service initial en utilisant ces nouveaux outils.
+Cette nouvelle architecture est globalement moins souple et moins propice aux changements rapides. // TODO à vérifier et documenter [biblio]
+Ces changements représentent une prise de risque pour la poursuite du projet.
+En effet, ces outils sortent du cadre grand public suffisamment accessible pour favoriser l'émergence spontanée de nouveaux services.
 
-Nous proposons un outil permettant de compiler automatiquement un service web écrit dans un langage dynamique classique, favorable à une rapide évolution de l'architecture, vers un modèle d'exécution basé sur les flux d'informations.
-Notre objectif est de réduire au minimum la barrière existante dans le cycle de développement d'un service web dû à ce changement de paradigme dans l'architecture.
+Nous proposons un outil permettant d'éviter de forcer ce changement de paradigme de développement.
+Nous visons des applications web dont les sollicitations proviennent des flux de requêtes utilisateurs et dont le développement initial est ...(?) selon une approche web 'classique' (serveur web / traitement applicatif / data).
+Nous pensons qu'il est possible d'analyser ce genre d'applications dès les premières étapes d'exploitations afin de les re-exprimer plus ou moins concrètement(?) sous la forme de flux d'échange.
+
+Nous supposons que les applications serveur serait développés dans un langage dynamique comme javascript, et nous proposons un outil capable d'identifier les flux internes, de définir des unités de traitement de ces flux, et de pouvoir gérer de manière dynamique ces unités.
+L'outil identifie ces unités sans être intrusif dans le code existant mais en proposant une sur-expression du programme initial en utilisant le paradigme de flux que nous allons définir et qui servira(?) au cœur de notre proposition.
+
+// TODO
+La section 2 présente le principe de fluxion en le positionnant par rapport à l'existant.
+La section 3 ...
 
 # Modèle d'exécution fluxionnel
 
@@ -240,7 +249,7 @@ Dans le modèle fluxionnel, la mémoire est décentralisé et encapsulé dans de
 
 ```
 function(mon_argument) {
-    return mon_argument + 3;
+    return mon_argument + 3; // traitements
 }
 ```
 
@@ -253,7 +262,7 @@ function(mon_scope) {
     // mon_scope accessible
     return function(mon_argument) {
         // mon_argument et mon_scope accessible
-        return mon_scope + mon_argument;
+        return mon_scope + mon_argument; // traitements
     }
 }
 ```
@@ -262,22 +271,41 @@ function(mon_scope) {
     -> scope représentant la closure, partagé entre les fluxions.
 
 ```
-function(mon_scope) {
-    // mon_scope accessible
-    return function(mon_argument) {
-        // mon_argument et mon_scope accessible
-        return mon_scope + mon_argument;
-    }
+var global ...
+
+function fn1(mon_scope) {
+    // global, mon_argument accessibles
+    return mon_scope + global; // traitements
+}
+
+function fn2(mon_scope) {
+    // global, mon_argument accessibles
+    return mon_scope + global; // traitements
 }
 ```
 
 
 ### Appel de fonction
 
-// TODO détailler
-Dans le modèle classique, les fonctions s'appellent en donnant temporairement le contrôle de l'exécution.
+// TODO à détailler et préciser
+Dans le modèle classique d'un service web, les fonctions de traitement sont appelé les unes après les autres en suivant un principe de chaîne de traitement.
+
+```
+function(req) {
+    // traitements sur req
+    return next(req);
+}
+```
 
 Dans le modèle fluxionnel, le pointeur d'exécution est passé de manière événementiel, porté par le système de messagerie.
+
+1. Une fonction appelle une autre fonction à la fin de son exécution
+    -> la fluxion représentant la première fonction envoie un message à la seconde fonction
+
+```
+
+```
+
 
 
 
