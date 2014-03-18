@@ -289,6 +289,11 @@ function fn2(mon_scope) {
 // TODO à détailler et préciser
 Dans le modèle classique d'un service web, les fonctions de traitement sont appelé les unes après les autres en suivant un principe de chaîne de traitement.
 
+Dans le modèle fluxionnel, le pointeur d'exécution est passé de manière événementiel, porté par le système de messagerie.
+
+1. Une fonction appelle une autre fonction à la fin de son exécution
+    -> la fluxion représentant la fonction appelante envoie un message à la fluxion représentant la fonction appelée.
+
 ```
 function(req) {
     // traitements sur req
@@ -296,16 +301,13 @@ function(req) {
 }
 ```
 
-Dans le modèle fluxionnel, le pointeur d'exécution est passé de manière événementiel, porté par le système de messagerie.
+fluxion appelante -> fluxion appelée
 
-1. Une fonction appelle une autre fonction à la fin de son exécution
-    -> la fluxion représentant la première fonction envoie un message à la seconde fonction
+2. Une fonction appelle une autre fonction avant la fin de son exécution.
+    -> la fonction appelante est découpé en deux fluxions.
+    la fluxion représentant la fonction appelée va servir d'intermédiaire entre ces deux fluxions.
 
-```
-
-```
-
-
+fluxion appelante 1 -> fluxion appelée -> fluxion appelante 2
 
 
 
