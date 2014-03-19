@@ -9,7 +9,7 @@ var fx = {};
 // Connection
 
 input.connect('tcp://127.0.0.1:3001');
-post.connect('tcp://127.0.0.1:3001');
+post.bind('tcp://127.0.0.1:3001');
 output.connect('tcp://127.0.0.1:3000');
 
 console.log('Worker connect to port 3000/3001');
@@ -70,14 +70,28 @@ function worker(id, blank, msg) {
   }
 
   if (type === 'M') {
+    recvMsg(addr, msg);
+  }
+}
 
+function recvMsg(addr, body) {
+  var msg = fx[addr].run({}, body);
 
-    var msg = fx[addr].run({}, "this is a test !");
-    console.log("message -> ", msg);
-
-    if (msg && msg.addr) {
+  if (msg && msg.addr) {
+    if (fx[msg.addr])
+      setTimeout(recvMsg, 0, msg.addr, msg.body);
+    else {
       console.log("sending ", "M" + msg.addr, ' ', msg.body)
       post.send(["M" + msg.addr, ' ', msg.body]);
     }
   }
 }
+
+
+
+
+
+
+
+
+

@@ -1,4 +1,5 @@
 var zmq = require('zmq')
+  , vm = require('vm')
   , input = zmq.socket('pull')
   , recv = zmq.socket('sub')
   , output = zmq.socket('pub');
@@ -8,43 +9,43 @@ output.identity = "router";
 var nid = 0;
 var nodes = {};
 var fx = {};
+
 function default_node() {
   return {
     addrs : []
   };
 }
 
-function s(id) { // TODO te be deleted, not used anymore
-  return ('' + id)[0];
+
+function start() {
+  input.bind('tcp://127.0.0.1:3000');
+  output.bind('tcp://127.0.0.1:3001');
+  recv.connect('tcp://127.0.0.1:3001');
+  console.log('Router bound to port 3000/3001');
+
+  input.on('message', function(id, blank, msg){
+
+    // console.log(">> " + id + " :: " + blank + " - ", msg);
+
+    id = '' + id;
+    var type = id[0];
+    var addr = id.substring(1);
+
+    msg = ( msg && msg != "undefined" ) ? JSON.parse(msg) : undefined;
+
+    switch(type) {
+      case 'R': regNode(id, msg); break;
+      case 'N': ackNode(id, msg); break;
+      case 'M': recvMsg(addr, msg); break;
+    }
+  });
+
+  recv.on('message', function(id, blank, msg) {
+    console.log(">>> " + id + blank + msg);
+  })
 }
 
-input.bind('tcp://127.0.0.1:3000');
-output.bind('tcp://127.0.0.1:3001');
-recv.connect('tcp://127.0.0.1:3001');
-console.log('Router bound to port 3000/3001');
-
-input.on('message', function(id, blank, msg){
-
-  console.log(">> " + id + " :: " + blank + " - ", msg);
-
-  id = '' + id;
-  var type = id[0];
-  var addr = id.substring(1); //Array.prototype;
-
-  msg = ( msg && msg != "undefined" ) ? JSON.parse(msg) : undefined;
-
-  switch(type) {
-    case 'R': register(id, msg); break;
-    case 'N': ackNode(id, msg); break;
-    case 'M': postMsg(addr, msg); break;
-  }
-});
-
-recv.on('message', function(id, blank, msg){
-  console.log(">>> ", id + " :: "+ msg);
-})
-
-function register(id, msg) {
+function regNode(id, msg) {
   console.log("registering :: N" + nid);
   output.send([id + msg, ' ', nid++]);
 }
@@ -57,7 +58,7 @@ function ackNode(id, msg) {
 
   if (msg) {
     for (var i = 0; i < msg.length; i++) { var addr = msg[i];
-      registerFx(addr, undefined, id);
+      register(addr, undefined, id);
       nodes[id].addrs.push(addr);
     };
 
@@ -65,25 +66,32 @@ function ackNode(id, msg) {
   }
 }
 
-function postMsg(addr, body) {
+function recvMsg(addr, body) {
   console.log("msg received ", addr, body);
 }
 
 
 
+function runFactory(code, name) {
+  var script = vm.createScript('__result = (' + code + ').call(this, __arguments)', name);
+  return {
+    run : function(scopes, arguments) {
+      scopes.__arguments = arguments;
+      scopes.console = console; // for debug only
+      try {
+        script.runInNewContext(scopes);
+      } catch(e) {
+        console.log("Error in " + name + " :: " + e);
+      }
+      return scopes.__result;
+    }
+  }
+}
 
 
 
 
-// var state = false;
-// setInterval(function(){
-//   console.log((state = !state) ? "tic" : "toc");
-// }, 1000);
-
-// TODO make the messages structures VERY CLEAR
-// not embedded inside tons of logic code
-
-function registerFx(addr, fn, node) {
+function register(addr, fn, node) {
   if (fx[addr]) {
     fx[addr].fn = fn || fx[addr].fn;
     fx[addr].node = node || fx[addr].node;
@@ -93,11 +101,12 @@ function registerFx(addr, fn, node) {
       fx[addr].transition = false;
     }
   } else {
-    fx[addr] = {fn: fn, node: node};
+    fx[addr] = runFactory(fn.toString(), addr);
+    fx[addr].fn = fn; // TODO refactor that
   }
 }
 
-function moveFx(addr, n, callback) {
+function move(addr, n, callback) {
 
   output.send([n, ' ', JSON.stringify({
     addr: addr,
@@ -111,16 +120,22 @@ function post(addr, msg) {
   output.send(["M"+addr, ' ', JSON.stringify(msg)]);
 }
 
+
+
+// TODO make a callback mechanism
+
+
 function registered(id) {
   console.log("registered " + id);
 
-  registerFx("tic", function(test){return {addr: "tic"}});
-  registerFx("tac", function(test){return {addr: "tic"}});
-  recv.subscribe("Mtic");
-  recv.subscribe("Mtac");
+  register("tic", function(test){return {addr: "tac"}});
+  register("tac", function(test){return {addr: "tic"}});
+  
+  // move("tac", id, function(id, addr){console.log("function moved ", id, addr)});
+  // recv.subscribe("Mtic");
 
-  moveFx("tic", id, function(id, addr){console.log("function moved ", id, addr)});
-  moveFx("tac", id, function(id, addr){console.log("function moved ", id, addr)});
+  recv.subscribe("Mtac");
+  move("tic", id, function(id, addr){console.log("function moved ", id, addr)});
 }
 
 function acknowledged(id, msg) {
@@ -130,3 +145,12 @@ function acknowledged(id, msg) {
     post("tic", "this is a test");
   }
 }
+
+
+module.exports = {
+  start: start,
+  register: register,
+  post: post
+}
+
+
