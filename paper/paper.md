@@ -1,24 +1,24 @@
 # Introduction
 
-La croissance des plateformes d'intermédiation est dû à la capacité du web de favoriser le développement de services avec une mise en production minimal très rapide.
+La croissance des plateformes du Web est dû à la capacité d'internet' de favoriser le développement de services avec une mise en production minimale très rapide.
 En quelques heures, il est possible de mettre en ligne un produit fonctionnel afin d'accueillir une première audience.
-*Release early, release often.* est souvent entendu parmi les communauté open source comme conseil pour capter rapidement une communauté d'utilisateurs.
+'*Release early, release often.*' est souvent entendu parmi les communautés open source pour capter rapidement une communauté d'utilisateurs.
 
 Si le service répond correctement aux attentes de l'audience, celle-ci va très probablement grossir au fur et à mesure que le service gagne en popularité.
-Afin de pouvoir faire face à cette audience grandissante, la quantité de ressources utilisé par le service augmente régulièrement, et il arrive un moment dans le développement du produit où la taille des données à traiter et la quantité de ressources nécessaires imposent l'utilisation d'un modèle de traitement plus efficace.
-Les modèles de traitements plus efficaces passent par une segmentation des échange entre fonction en utilisant différents paradigmes de communication comme les approches three-tiers, les événements, les messages ou les flux. [bilbio]
-Le modèles d'exécution du traitement par flux découpe le traitement en plusieurs parties communiquant entre elles par message.
-Des outils permettent d'exprimer ces différentes parties et leurs interactions, et simplifie l'acheminement des messages [Storm, MillWheel, Spark, TimeStream ...].
-Cependant, ces outils utilisant des interfaces ou des langages particuliers, il est nécessaire de former les équipes de développement à l'utilisation de ces nouveaux outils ou d'engager des experts familiers avec ces outils et de réécrire le service initial en utilisant ces nouveaux outils.
+Afin de pouvoir faire face à cette croissance, la quantité de ressources utilisé par le service augmente en conséquence, et il arrive un moment dans le développement du produit où la taille des données à traiter et la quantité de ressources nécessaires, imposent l'utilisation d'un modèle de traitement plus efficace.
+Ces modèles plus efficaces passent par une segmentation des échanges entre fonctions, en utilisant différents paradigmes de communication comme les approches three-tiers, les événements, les messages ou les flux. [bilbio]
+Une fois segmenté, les différentes parties communiquent entre elles par un principe de messagerie le plus souvent asynchrone.
+De très nombreux outils ont été définis qui permettent d'exprimer ces différentes parties, leurs interactions, et de prendre en charge l'acheminement des messages [Storm, MillWheel, Spark, TimeStream ...].
+Cependant, ces outils utilisent des interfaces ou des langages particuliers. Il est nécessaire de former les équipes de développement à l'utilisation de ces nouveaux outils, d'engager des experts familiers avec ces outils et de réécrire le service initial en utilisant ces nouveaux outils.
 Cette nouvelle architecture est globalement moins souple et moins propice aux changements rapides. // TODO à vérifier et documenter [biblio]
 Ce changements de paradigmes de développement représente une prise de risque dans la poursuite du projet car ces outils sortent du cadre grand public suffisamment accessible pour favoriser l'émergence spontanée de nouveaux services.
 
-Nous proposons un outil permettant d'éviter de forcer ce changement de paradigme de développement.
-Nous visons des applications web dont les sollicitations proviennent des flux de requêtes utilisateurs et dont le développement initial est réalisé selon une approche web 'classique' (serveur web / traitement applicatif / data).
-Nous pensons qu'il est possible d'analyser ce genre d'applications dès les premières étapes d'exploitations afin de les re-exprimer plus ou moins concrètement sous la forme de flux d'échange.
+Nous proposons un outil permettant d'éviter de forcer ce changement de paradigme en proposant une vision segmentée de programme "standard".
+Nous visons des applications Web dont les sollicitations proviennent des flux de requêtes utilisateurs et dont le développement initial est réalisé selon une approche web 'classique' (serveur web / traitement applicatif / data).
+Nous pensons qu'il est possible d'analyser cette classe d'applications dès les premières étapes d'exploitations afin de les re-exprimer plus ou moins concrètement sous la forme de flux d'échange.
 
-Nous supposons que les applications serveur serait développés dans un langage dynamique comme javascript, et nous proposons un outil capable d'identifier les flux internes, de définir des unités de traitement de ces flux, et de pouvoir gérer de manière dynamique ces unités.
-L'outil identifie ces unités sans être intrusif dans le code existant mais en proposant une sur-expression du programme initial en utilisant le paradigme de flux que nous allons définir et qui servira au cœur de notre proposition.
+Nous supposons que les applications serveur sont développés dans un langage dynamique comme Javascript, et nous proposons un outil capable d'identifier les flux internes, de définir des unités de traitement de ces flux, et de pouvoir gérer de manière dynamique ces unités.
+L'outil identifie ces unités sans être intrusif dans le code existant mais en proposant une sur-expression du programme initial en utilisant le paradigme de fluxion que nous allons définir et qui servira au cœur de notre proposition.
 
 // TODO
 La section 2 présente le principe de fluxion en le positionnant par rapport à l'existant.
@@ -113,6 +113,17 @@ Afin de pouvoir persister la continuation du traitement entre la réception de m
 + les messages, structures de données éphémères échangé par le système de messagerie et
 + les scopes, structures de données persisté par le système de messagerie.
 
+Les bordures du systèmes sont des fluxions qui font l'interface avec l'extérieur du système.
+Il existe deux types de fluxion en bordures :
+
++ les **entrées**  
+    permettent de recevoir des connections client entrantes suivant le protocole HTTP.
+    C'est donc le premier maillon de la chaîne de traitement.
+    Pour chaque connexion entrante, l'entrée va générer une bordure de sortie permettant de répondre au client.
++ les **sorties**  
+    permettent d'envoyer le résultat de la chaîne de traitement au client.
+    C'est donc le dernier maillon de la chaîne de traitement.
+
 ## Message
 
 Les messages sont des structures de données composant le flux d'information éphémère échangé entre les fluxion.
@@ -160,22 +171,19 @@ Le système de supervision rassemble des métriques sur l'écoulement des flux d
 
 // TODO détailler techniquement
 
-## Bordures
-
-// TODO virer ça, l'incorporer avec le paragraphe sur les fluxions.
-
-Les bordures du systèmes sont des fluxions qui font l'interface avec l'extérieur du système.
-Il existe deux types de bordures :
-
-+ les **entrées**  
-    permettent de recevoir des connections client entrantes suivant le protocole HTTP.
-    C'est donc le premier maillon de la chaîne de traitement.
-    Pour chaque connexion entrante, l'entrée va générer une bordure de sortie permettant de répondre au client.
-+ les **sorties**  
-    permettent d'envoyer le résultat de la chaîne de traitement au client.
-    C'est donc le dernier maillon de la chaîne de traitement.
-
 # Interface entre le système de messagerie et les fluxions.
+
+
+## Enregistrement d'une fluxion
+
+Lors du lancement du service web, avant de pouvoir recevoir des requêtes clientes, le système de messagerie doit prendre connaissance des différentes fluxion de la chaîne de traitement.
+Une fluxion doit être enregistré au préalable dans le système à l'aide de la méthode `register(addr, scps, fn)`.
+
+Le système de messagerie enregistre l'association entre l'adresse et la fluxion enregistré.
+Une fois la fluxion enregistré, il lui est possible de recevoir des messages, et d'en échanger.
+
+Pendant l'enregistrement, il est possible de renseigner un objet contenant les scopes nécessaire à la fluxion.
+
 
 ## `register(addr, scps, fn)`
 
@@ -214,15 +222,7 @@ Un message est un objet ayant la structure suivante :
 
 # Détails des mécanismes du modèle d'exécution.
 
-## Enregistrement d'une fluxion
 
-Lors du lancement du service web, avant de pouvoir recevoir des requêtes clientes, le système de messagerie doit prendre connaissance des différentes fluxion de la chaîne de traitement.
-Une fluxion doit être enregistré au préalable dans le système à l'aide de la méthode `register(addr, scps, fn)`.
-
-Le système de messagerie enregistre l'association entre l'adresse et la fluxion enregistré.
-Une fois la fluxion enregistré, il lui est possible de recevoir des messages, et d'en échanger.
-
-Pendant l'enregistrement, il est possible de renseigner un objet contenant les scopes nécessaire à la fluxion.
 
 ## Réception d'un message
 
