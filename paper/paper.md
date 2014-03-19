@@ -26,6 +26,30 @@ La section 3 ...
 
 # Modèle d'exécution fluxionnel
 
+Le principe de modèle d'exécution fluxionnel est d'identifier des unités d'exécution autonomes fondés sur des flux.
+Une unité est autonome quand elle peut être déplacé dynamiquement d'environnement d'exécution pendant sont activité.
+Déplacer une unité d'exécution nécessite de déplacer avec le code d'éxecution son contexte courant. C'est à dire l'ensemble des variables d'état et de mémoire provenant des executions précédentes de la fonction.
+Pour notre approche nous 'transferont' ce contexte dans un flux propre à l'unité déplacé. Ainsi, déplacer une telle unité consiste à déplacer le code fonctionnel vers une nouvelle destination puis de rediriger les flux d'entrée et de sortie en conséquence. Une telle unité peut alors 'circuler' de noeud en noeud sans y être supprimée(?).
+Seul les flux doivent être redirigés en conséquence.
+
+Nous avons appelé cette unité d'exécution autonome une fluxion. C'est à dire une fonction, au sens de la programmation fonctionnelle ne dépendant pour ses entrées et ne produisant sur ses sorties que des flux.
+
+## Définition du modèle fluxionnel
+
+L'idée principale est de pouvoir déplacer à chaud des unités d'exécution. L'approche classique consiste à déplacer la pile / le tas de variable sans se préoccuper des flux associés. Dans notre cas, on transforme tout en flux.
+
+
+
+
+
+
+
+
+
+---
+OLD
+
+---
 Un service web exprimé selon ce modèle d'exécution encapsule sa logique dans des fluxions.
 Ces fluxions composent la chaîne de traitement traversé par le flux de requêtes utilisateurs.
 
@@ -41,6 +65,8 @@ Nous appelons ce nouveau modèle d'exécution : modèle d'exécution fluxionnel,
 + les messages
 + le système de messagerie
 + le système de supervision
+
+---
 
 # Lexique
 
