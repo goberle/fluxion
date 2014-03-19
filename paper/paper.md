@@ -43,9 +43,25 @@ L'idée principale est de pouvoir déplacer à chaud des unités d'exécution. L
 + Compatibilité avec le modèle d'exécution.
 + Compatibilité avec le modèle d'entrée / sortie global.
 
+# Description du modèle fluxionnel
 
+Un service web exprimé selon ce modèle d'exécution encapsule sa logique dans des fluxions.
+Ces fluxions composent la chaîne de traitement traversé par le flux de requêtes utilisateurs.
 
+Les fluxions ont chacune une adresse distincte dans un système de messagerie leurs permettant de communiquer entre elles pour faire suivre le flux d'information de la réception d'une requête à l'envoi de la réponse.
+Les fluxions n'ont pas d'états afin d'être transportable de nœud en nœud.
 
+## Persistence des états
+> Transformation des états dans des flux
+
+Les fluxions n'ont pas d'état afin de pouvoir être transportable d'un noeud à l'autre en cours d'exécution. Comme de nombreuses applications supposent l'existence d'un tel état, nous l'avons transféré dans les flux d'entrées et de sortie des fluxions. Ainsi l'état suit la mobilité d'une fluxion en redirigeant ses flux d'états en fonction. L'état d'une fluxion est donc modélisé par des flux d'entré supplémentaires que nous appelons scope. Lorsqu'une fluxion a fini de s'exécuter elle envoie dans son flux scope les données qu'elle souhaite persister, et qui seront réagregé à son prochain appel.
+A titre d'exemple, voicie la transformation d'un programme compteur dans l'approche fluxion.
+
+## Adressage et mobilité des fluxions
+
+## Les entrées / sorties
+
+# Une plateforme support au modèle fluxionnel
 
 
 
@@ -55,11 +71,8 @@ L'idée principale est de pouvoir déplacer à chaud des unités d'exécution. L
 OLD
 
 ---
-Un service web exprimé selon ce modèle d'exécution encapsule sa logique dans des fluxions.
-Ces fluxions composent la chaîne de traitement traversé par le flux de requêtes utilisateurs.
 
-Les fluxions ont chacune une adresse distincte dans un système de messagerie leurs permettant de communiquer entre elles pour faire suivre le flux d'information de la réception d'une requête à l'envoi de la réponse.
-Les fluxions n'ont pas d'états afin de réduire l'adhérence aux systèmes physique support, c'est pourquoi elles manipulent également des scopes, en plus des messages éphémères du flux d'information : des structures persisté par le système de messagerie.
+c'est pourquoi elles manipulent également des scopes, en plus des messages éphémères du flux d'information : des structures persisté par le système de messagerie.
 Une fluxion est enregistré avec un contexte : une liste des noms de scope, afin de renseigner le système de messagerie des différents scopes nécessaires à son exécution.
 Un système de supervision, reçois du système de messagerie des informations sur l'écoulement des flux dans l'application, ce afin d'organiser les fluxions de manière optimale sur l'architecture physique.
 L'implémentation se fait en Javascript, certaines contraintes techniques découlent de ce choix technique.
@@ -98,10 +111,11 @@ Pour des raisons techniques, un nom de scope suit les même contrainte que les a
 
 ## Fluxion
 
-Une fluxion est identifié de manière unique dans le système de messagerie par une adresse.
 Une fluxion est une fonction de traitement de flux.
+Elle est identifié de manière unique dans le système de messagerie par une adresse.
+Avant de pouvoir recevoir des messages, une fluxion dois être enregistré avec une adresse et un contexte dans le système de messagerie.
 
-Elle est invoqué par le système de messagerie à la réception d'un message.
+Elle peut ensuite être invoqué par le système de messagerie à la réception d'un message.
 La fluxion a la possibilité de :
 
 + modifier le message, et
@@ -149,7 +163,11 @@ Cette fluxion renvoie à son tour un message, acheminé par le système de messa
 
 Les scopes persistent les données nécessaire à la continuité du processus de traitement d'une fluxion.
 
-Lors de l'invocation d'une fluxion, le système de messagerie 
+Ils sont enregistré implicitement dans le système lors de l'enregistrement d'une fluxion.
+
+Lors de l'invocation d'une fluxion, le système de messagerie joins les scopes nécessaires à la fluxion avec le message provoquant l'invocation.
+
+
 
 // TODO parler des noms, de l'enregsitrement des noms dans le système
 // TODO détailler la façon dont le système de messagerie :
@@ -163,6 +181,9 @@ Lors de l'invocation d'une fluxion, le système de messagerie
 Le système de messagerie tiens à jours l'annuaire d'adresses des fluxions, et s'occupe d'acheminer les message d'une fluxion à l'autre.
 Cette dernière fonction peut être comparé au scheduler d'un système d'exploitation classique.
 
+Le système de messagerie est présent sur chacun des nœuds de l'infrastructure, et écoute en permanence l'arrivée de messages en provenance de clients, ou d'autres nœuds.
+À l'arrivée d'un message, il vérifie que la fluxion associé à l'adresse 
+
 // TODO détailler techniquement
 
 ## Système de supervision
@@ -171,21 +192,26 @@ Le système de supervision rassemble des métriques sur l'écoulement des flux d
 
 // TODO détailler techniquement
 
+
+
+
+
+
+
+
+
 # Interface entre le système de messagerie et les fluxions.
 
 
 ## Enregistrement d'une fluxion
 
-Lors du lancement du service web, avant de pouvoir recevoir des requêtes clientes, le système de messagerie doit prendre connaissance des différentes fluxion de la chaîne de traitement.
-Une fluxion doit être enregistré au préalable dans le système à l'aide de la méthode `register(addr, scps, fn)`.
+Une fluxion doit être enregistré dans le système à l'aide de la méthode `register(addr, scps, fn)`  avant de pouvoir recevoir des messages.
+Lors du lancement du service web, avant de pouvoir recevoir des requêtes clientes, le système de messagerie doit donc prendre connaissance des différentes fluxion de la chaîne de traitement.
 
 Le système de messagerie enregistre l'association entre l'adresse et la fluxion enregistré.
-Une fois la fluxion enregistré, il lui est possible de recevoir des messages, et d'en échanger.
+Pendant l'enregistrement, il est possible de renseigner le contexte d'une fluxion : un objet contenant les scopes nécessaire.
 
-Pendant l'enregistrement, il est possible de renseigner un objet contenant les scopes nécessaire à la fluxion.
-
-
-## `register(addr, scps, fn)`
+### `register(addr, scps, fn)`
 
 L'enregistrement d'une fluxion se fait par la méthode `register`.
 
@@ -193,20 +219,42 @@ L'enregistrement d'une fluxion se fait par la méthode `register`.
 + `scps` est le (ou les) scope nécessaire à la fluxion.
 + `fn` est la fonction à exécuter à la réception d'un message.
 
-## `link(addr)`
 
-Une fois la fluxion enregistré, avant de pouvoir être utilisé, elle doit être lié à une adresse.
-Pendant cette phase de liaison, les scopes vont être initialisé.
-> Cette étape est optionnelle, car prise en charge par le système de messagerie.
+## Démarrage du service
+
+Le service web doit être lié à un port sur le nœud courant afin de pouvoir accepter des connexions provenant de clients.
+
+### `listen(port)`
+
+La fonction `listen` lie le service à un port, et démarre le service.
+Il est préférable d'enregistrer toutes les fluxions fournissant des points d'entrée, les fluxions de bordures d'entrée, avant de lier le service.
 
 
-## `registerScope(scps)`
+### `listen(port)`
+
+## Enregistrement d'un scope
+
+Les scopes sont la mémoire persisté permettant à une fluxion une continuité de traitement entre deux invocations provoqués par la réception de message.
+
+Si un scope doit contenir des valeurs initiales, ils peuvent être renseigné pendant l'enregistrement de la fluxion.
+
+Les scopes d'une fluxion sont lié avant l'invocation par le système de messagerie au message provoquant l'invocation.
+Pendant son invocation, les modifications apportés par la fluxion sur les scopes seront persisté automatiquement.
+
+Pour modifier un scope en dehors de l'invocation des fluxions auquel il est associé, la méthode `registerScope(scps)` permet d'initialiser un scope avec l'objet passé en paramètre.
+
+### `registerScope(scps)`
+
+> Cette méthode ne devrait pas être utilisé.
 
 La méthode `registerScope` permet d'enregistrer un scope.
 
-## `post(msg)`
+## Poster un message
 
-La méthode `post` permet de poster un message.
+Les fluxions communiquent entre elles par le biais de message acheminé par le système de messagerie.
+
+Pour envoyer un message, une fluxion peut retourner un objet de type `msg` ou appeler la fonction `post(msg)`.
+
 Un message est un objet ayant la structure suivante :
 
     {
@@ -217,6 +265,28 @@ Un message est un objet ayant la structure suivante :
         }
     }
 
+En pratique, il est préférable d'envoyer un message en retournant un objet de type `msg` que d'utiliser la fonction `post`.
+
+### `post(msg)`
+
+> Cette méthode ne devrait pas être utilisé.
+
+La méthode `post` permet de poster un message.
+
+## Liaison d'une fluxion
+
+> Cette étape est optionnelle
+
+Entre le moment où une fluxion est enregistré, et où elle peut recevoir des messages, le système de messagerie doit lier l'adresse et la fluxion.
+Cette étape est prise en charge automatiquement par le système de méssagerie.
+
+### `link(addr)`
+
+> Cette méthode ne devrait pas être utilisé.
+
+Une fois la fluxion enregistré, avant de pouvoir être utilisé, elle doit être lié à une adresse.
+Pendant cette phase de liaison, les scopes vont être initialisé.
+> Cette étape est optionnelle, car prise en charge par le système de messagerie.
 
 
 
