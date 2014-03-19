@@ -28,8 +28,9 @@ La section 3 ...
 
 Le principe de modèle d'exécution fluxionnel est d'identifier des unités d'exécution autonomes fondés sur des flux.
 Une unité est autonome quand elle peut être déplacé dynamiquement d'environnement d'exécution pendant sont activité.
-Déplacer une unité d'exécution nécessite de déplacer avec le code d'éxecution son contexte courant. C'est à dire l'ensemble des variables d'état et de mémoire provenant des executions précédentes de la fonction.
-Pour notre approche nous 'transferont' ce contexte dans un flux propre à l'unité déplacé. Ainsi, déplacer une telle unité consiste à déplacer le code fonctionnel vers une nouvelle destination puis de rediriger les flux d'entrée et de sortie en conséquence. Une telle unité peut alors 'circuler' de noeud en noeud sans y être supprimée(?).
+Déplacer une unité d'exécution nécessite de déplacer avec le code d'exécution son contexte courant. C'est à dire l'ensemble des variables d'état et de mémoire provenant des exécutions précédentes de la fonction.
+Dans notre approche, ce contexte est encapsulé sous forme de flux pour être manipulé par l'unité d'exécution.
+(Pour notre approche nous "transférons" ce contexte dans un flux propre à l'unité déplacé.) Ainsi, déplacer une telle unité consiste à déplacer le code fonctionnel vers une nouvelle destination puis de rediriger les flux d'entrées et de sorties en conséquence. Une telle unité peut alors être déplacé de nœud en nœud sans y être supprimée(?).
 Seul les flux doivent être redirigés en conséquence.
 
 Nous avons appelé cette unité d'exécution autonome une fluxion. C'est à dire une fonction, au sens de la programmation fonctionnelle ne dépendant pour ses entrées et ne produisant sur ses sorties que des flux.
@@ -37,6 +38,10 @@ Nous avons appelé cette unité d'exécution autonome une fluxion. C'est à dire
 ## Définition du modèle fluxionnel
 
 L'idée principale est de pouvoir déplacer à chaud des unités d'exécution. L'approche classique consiste à déplacer la pile / le tas de variable sans se préoccuper des flux associés. Dans notre cas, on transforme tout en flux.
+
++ Non adhérence à l'architecture d'exécution.
++ Compatibilité avec le modèle d'exécution.
++ Compatibilité avec le modèle d'entrée / sortie global.
 
 
 
