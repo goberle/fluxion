@@ -72,6 +72,19 @@ Dans notre approche, un message est une entité assez standard contenant deux pa
 Le système de messagerie impose deux fonctions : une fonction d'enregistrement : `register(<nom>, <fn>, <contexte>)` et une fonction de déclenchement de la chaîne de traitement `start(<nom>,<param>)`.
 Comme les données propres au fonctionnement d'une application sont stockées dans le système de messagerie et que les fluxion ne possèdent pas de données propres, l'installation d'une nouvelle version se fait en enregistrant en cours d'exécution les nouvelles fluxions. De plus la relocalisation d'une fluxion se fait de manière transparente par l'application, par le système de messagerie qui connaît la localisation exacte des fluxions. Nous y reviendrons plus tard, mais la relocalisation d'une fluxion consiste à déplacer les fluxions sur un nouveau nœud et de rediriger les messages en conséquences. Comme les types de messages, leur débit et le contexte propre d'une fluxion sont connus, on connaît a priori le coût de migration à chaud d'une fluxion.
 
+# Application web fluxionnelle
+
+Le système fluxionnel ne manipule que des fluxion par l'intermediaire d'un système de messagerie. Afin de pouvoir interagir avec le monde exterieur, il faut définir des interfaces de bordure. Notre approche repose sur une esperance de gain technologique principalement sur les architectures Web. Le premier point d'entré visé est ... les interfaces REST.
+Le schema suivant présente la séparation du système en fonctions indépendantes.
+
+// TODO schema
+
+Le système Web est donc le déclencheur d'une chaîne de traitement de requètes à chaque nouvelle requète d'un utilisateur un appel à la fonction `start('/', <param>)` est réalisé dans le système de messagerie.
+Au démarrage du système Web, deux demi-fluxions sont lancées.
+La demi-fluxion 'in' n'est pas enregistré dans le système de messagerie.
+Elle prend les paramètres de la requète Web, place l'identifiant de la conneciton client dans le contexte de la demi-fluxion de sortie, puis lance le traitement de la requète en invoquant la fonction `start` du système de messagerie.
+
+
 
 ---
 OLD
