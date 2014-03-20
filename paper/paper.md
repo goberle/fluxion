@@ -64,7 +64,13 @@ A titre d'exemple, voicie la transformation d'un programme compteur dans l'appro
 # Une plateforme support au modèle fluxionnel
 
 
+# Cycle de vie d'une application fluxionnelle
 
+Une application fluxionnelle est composée d'un enchaînement de fluxions.
+Chaque fluxion présente le même comportement, elle est invoqué par un système de messagerie, effectue des opérations sur les paramètres connus, modifie son état interne déporté dans le système de messagerie, renvoie un message.
+Dans notre approche, un message est une entité assez standard contenant deux paramètres : le nom de la fluxion à invoquer et le corps du message.
+Le système de messagerie impose deux fonctions : une fonction d'enregistrement : `register(<nom>, <fn>, <contexte>)` et une fonction de déclenchement de la chaîne de traitement `start(<nom>,<param>)`.
+Comme les données propres au fonctionnement d'une application sont stockées dans le système de messagerie et que les fluxion ne possèdent pas de données propres, l'installation d'une nouvelle version se fait en enregistrant en cours d'exécution les nouvelles fluxions. De plus la relocalisation d'une fluxion se fait de manière transparente par l'application, par le système de messagerie qui connaît la localisation exacte des fluxions. Nous y reviendrons plus tard, mais la relocalisation d'une fluxion consiste à déplacer les fluxions sur un nouveau nœud et de rediriger les messages en conséquences. Comme les types de messages, leur débit et le contexte propre d'une fluxion sont connus, on connaît a priori le coût de migration à chaud d'une fluxion.
 
 
 ---
