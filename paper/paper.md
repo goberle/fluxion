@@ -27,17 +27,27 @@ La section 3 ...
 # Modèle d'exécution fluxionnel
 
 Le principe de modèle d'exécution fluxionnel est d'identifier des unités d'exécution autonomes fondés sur des flux.
+// TODO on ne parle plus du tout de l'identification des unités d'exécution après, alors qu'on dit que c'est le principe même du modèle d'exécution fluxionnel.
 Une unité est autonome quand elle peut être déplacé dynamiquement d'environnement d'exécution pendant sont activité.
-Déplacer une unité d'exécution nécessite de déplacer avec le code d'exécution son contexte courant. C'est à dire l'ensemble des variables d'état et de mémoire provenant des exécutions précédentes de la fonction.
+Déplacer une unité d'exécution nécessite de déplacer avec le code d'exécution son contexte courant. C'est à dire l'ensemble des variables d'état et de mémoire provenant des exécutions précédentes de l'unité.
 Dans notre approche, ce contexte est encapsulé sous forme de flux pour être manipulé par l'unité d'exécution.
-(Pour notre approche nous "transférons" ce contexte dans un flux propre à l'unité déplacé.) Ainsi, déplacer une telle unité consiste à déplacer le code fonctionnel vers une nouvelle destination puis de rediriger les flux d'entrées et de sorties en conséquence. Une telle unité peut alors être déplacé de nœud en nœud sans y être supprimée(?).
-Seul les flux doivent être redirigés en conséquence.
+(Pour notre approche nous "transférons" ce contexte dans un flux propre à l'unité déplacé.)
+Ainsi, déplacer une telle unité consiste à déplacer le code fonctionnel vers une nouvelle destination, puis à rediriger les flux d'entrées et de sorties en conséquence. Une telle unité peut alors être déplacé de nœud en nœud sans y être supprimée (attachée?).
+Seul les flux ont besoin d'être redirigés en conséquence.
 
 Nous avons appelé cette unité d'exécution autonome une fluxion. C'est à dire une fonction, au sens de la programmation fonctionnelle ne dépendant pour ses entrées et ne produisant sur ses sorties que des flux.
 
-## Définition du modèle fluxionnel
+## ~~Définition du modèle fluxionnel~~
 
-L'idée principale est de pouvoir déplacer à chaud des unités d'exécution. L'approche classique consiste à déplacer la pile / le tas de variable sans se préoccuper des flux associés. Dans notre cas, on transforme tout en flux.
+Le modèle d'exécution fluxionnel est conçu pour pouvoir déplacer à chaud des unités d'exécution.
+L'approche classique consiste à déplacer les éléments en mémoires, sans se préoccuper des modifications apportés par l'environnement extérieur.
+Dans notre cas, la mémoire et les modifications apportés par l'environnement extérieur sont encapsulé dans des flux.
+
+
+
+(L'idée principale est de pouvoir déplacer à chaud des unités d'exécution. L'approche classique consiste à déplacer la pile / le tas de variable sans se préoccuper des flux associés. 
+// TODO les flux dans l'approche classique sont différents de ceux de l'approche fluxionnel, mais on ne définit pas la différence entre les deux flux.
+Dans notre cas, on transforme tout en flux.)
 
 + Non adhérence à l'architecture d'exécution.
 + Compatibilité avec le modèle d'exécution.
@@ -51,38 +61,60 @@ Ces fluxions composent la chaîne de traitement traversé par le flux de requêt
 Les fluxions ont chacune une adresse distincte dans un système de messagerie leurs permettant de communiquer entre elles pour faire suivre le flux d'information de la réception d'une requête à l'envoi de la réponse.
 Les fluxions n'ont pas d'états afin d'être transportable de nœud en nœud.
 
-## Persistence des états
+## Persistance des états
 > Transformation des états dans des flux
 
-Les fluxions n'ont pas d'état afin de pouvoir être transportable d'un noeud à l'autre en cours d'exécution. Comme de nombreuses applications supposent l'existence d'un tel état, nous l'avons transféré dans les flux d'entrées et de sortie des fluxions. Ainsi l'état suit la mobilité d'une fluxion en redirigeant ses flux d'états en fonction. L'état d'une fluxion est donc modélisé par des flux d'entré supplémentaires que nous appelons scope. Lorsqu'une fluxion a fini de s'exécuter elle envoie dans son flux scope les données qu'elle souhaite persister, et qui seront réagregé à son prochain appel.
-A titre d'exemple, voicie la transformation d'un programme compteur dans l'approche fluxion.
+Les fluxions n'ont pas d'état afin de pouvoir être transporté d'un nœud à l'autre en cours d'exécution. Comme de nombreuses applications reposent sur l'existence d'un tel état, nous l'avons transféré dans les flux d'entrées et de sortie des fluxions. Ainsi l'état suit la mobilité d'une fluxion lors de la redirection de ses flux.
+// TODO est-ce qu'on laisse cette explication sur l'état volontairement plus simpliste, ou est-ce qu'on explique le détail technique de `apply` ?
+L'état d'une fluxion est ainsi modélisé par un flux d'entré supplémentaire appelé scope. Lorsqu'une fluxion a fini de s'exécuter elle envoie dans son flux scope les données qu'elle souhaite persister, et qui seront re-agregé à son prochain appel.
 
 ## Adressage et mobilité des fluxions
 
-## Les entrées / sorties
+Le système de messagerie distribue les messages aux fluxions en se basant sur l'adresse de destination du message.
+Chaque fluxion est associé à une adresse permettant au système de messagerie de l'identifier de manière unique.
 
-# Une plateforme support au modèle fluxionnel
-
+Lorsqu'une fluxion se déplace d'un nœud à l'autre, son adresse se déplace aussi, et ce avec les flux associé à cette adresse.
+Les deux nœuds communiquent ce déplacement entre eux pour le valider, et auprès des autres nœuds pour les en informer.
+De cette manière chacun des nœuds connaît l'emplacement de chacune des fluxions sur les autres nœuds.
+Ainsi le système de messagerie composé de l'ensemble de ces nœuds peut acheminer n'importe quel message sur l'ensemble du système.
 
 # Cycle de vie d'une application fluxionnelle
 
 Une application fluxionnelle est composée d'un enchaînement de fluxions.
-Chaque fluxion présente le même comportement, elle est invoqué par un système de messagerie, effectue des opérations sur les paramètres connus, modifie son état interne déporté dans le système de messagerie, renvoie un message.
-Dans notre approche, un message est une entité assez standard contenant deux paramètres : le nom de la fluxion à invoquer et le corps du message.
-Le système de messagerie impose deux fonctions : une fonction d'enregistrement : `register(<nom>, <fn>, <contexte>)` et une fonction de déclenchement de la chaîne de traitement `start(<nom>,<param>)`.
-Comme les données propres au fonctionnement d'une application sont stockées dans le système de messagerie et que les fluxion ne possèdent pas de données propres, l'installation d'une nouvelle version se fait en enregistrant en cours d'exécution les nouvelles fluxions. De plus la relocalisation d'une fluxion se fait de manière transparente par l'application, par le système de messagerie qui connaît la localisation exacte des fluxions. Nous y reviendrons plus tard, mais la relocalisation d'une fluxion consiste à déplacer les fluxions sur un nouveau nœud et de rediriger les messages en conséquences. Comme les types de messages, leur débit et le contexte propre d'une fluxion sont connus, on connaît a priori le coût de migration à chaud d'une fluxion.
+Chaque fluxion présente le même comportement : 
+
++ elle est invoqué par un système de messagerie à la réception d'un message,
++ effectue des opérations à partir du message reçu,
++ modifie son état interne déporté dans le système de messagerie sous forme de scope,
++  puis renvoie un message.
+
+Dans notre approche, un message est une structure de couples clé / valeur  contenant deux couples : le nom de la fluxion à invoquer `addr` et le corps du message `body`.
+Le système de messagerie impose deux fonctions :
++ une fonction d'enregistrement
+    `register(<nom>, <fn>, <contexte>)` et
++ une fonction de déclenchement de la chaîne de traitement
+    `start(<nom>,<param>)`.
+
+### Mise à jour du code à chaud
+Les données et la logique d'une application étant cloisonné de manière distincte pendant l'exécution, il est possible de mettre à jour une fluxion en la remplaçant dans le système, sans impacter l'exécution de l'application.
+
+(Comme les données propres au fonctionnement d'une application sont stockées dans le système de messagerie et que les fluxions ne possèdent pas de données propres, l'installation d'une nouvelle version se fait en enregistrant en cours d'exécution les nouvelles fluxions.)
+
+
+// TODO on à déjà parlé de la migration des fluxion à ce moment là.
+De plus la relocalisation d'une fluxion se fait de manière transparente par l'application, par le système de messagerie qui connaît la localisation exacte des fluxions. Nous y reviendrons plus tard, mais la relocalisation d'une fluxion consiste à déplacer les fluxions sur un nouveau nœud et de rediriger les messages en conséquences. Comme les types de messages, leur débit et le contexte propre d'une fluxion sont connus, on connaît a priori le coût de migration à chaud d'une fluxion.
 
 # Application web fluxionnelle
 
-Le système fluxionnel ne manipule que des fluxion par l'intermediaire d'un système de messagerie. Afin de pouvoir interagir avec le monde exterieur, il faut définir des interfaces de bordure. Notre approche repose sur une esperance de gain technologique principalement sur les architectures Web. Le premier point d'entré visé est ... les interfaces REST.
+Le système fluxionnel ne manipule que des fluxion par l'intermédiaire d'un système de messagerie. Afin de pouvoir interagir avec le monde extérieur, il faut définir des interfaces de bordure. Notre approche repose sur une espérance de gain technologique principalement sur les architectures Web. Le premier point d'entré visé est ... les interfaces REST.
 Le schema suivant présente la séparation du système en fonctions indépendantes.
 
 // TODO schema
 
-Le système Web est donc le déclencheur d'une chaîne de traitement de requètes à chaque nouvelle requète d'un utilisateur un appel à la fonction `start('/', <param>)` est réalisé dans le système de messagerie.
+Le système Web est donc le déclencheur d'une chaîne de traitement de requêtes à chaque nouvelle requête d'un utilisateur un appel à la fonction `start('/', <param>)` est réalisé dans le système de messagerie.
 Au démarrage du système Web, deux demi-fluxions sont lancées.
 La demi-fluxion 'in' n'est pas enregistré dans le système de messagerie.
-Elle prend les paramètres de la requète Web, place l'identifiant de la conneciton client dans le contexte de la demi-fluxion de sortie, puis lance le traitement de la requète en invoquant la fonction `start` du système de messagerie.
+Elle prend les paramètres de la requête Web, place l'identifiant de la connexion client dans le contexte de la demi-fluxion de sortie, puis lance le traitement de la requête en invoquant la fonction `start` du système de messagerie.
 
 
 
