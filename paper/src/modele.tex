@@ -3,7 +3,7 @@
 	\subsection{Fluxions}
 
 	Le principe de modèle d'exécution fluxionnel est d'identifier des unités d'exécution autonomes fondés sur des flux.
-	// TODO on ne parle plus du tout de l'identification des unités d'exécution après, alors qu'on dit que c'est le principe même du modèle d'exécution fluxionnel.
+	\TODO{on ne parle plus du tout de l'identification des unités d'exécution après, alors qu'on dit que c'est le principe même du modèle d'exécution fluxionnel.}
 	Une unité est autonome quand elle peut être déplacé dynamiquement d'environnement d'exécution pendant sont activité.
 	Déplacer une unité d'exécution nécessite de déplacer avec le code d'exécution son contexte courant. C'est à dire l'ensemble des variables d'état et de mémoire provenant des exécutions précédentes de l'unité.
 	Dans notre approche, ce contexte est encapsulé sous forme de flux pour être manipulé par l'unité d'exécution.
@@ -38,8 +38,6 @@
 
 		(Comme les données propres au fonctionnement d'une application sont stockées dans le système de messagerie et que les fluxions ne possèdent pas de données propres, l'installation d'une nouvelle version se fait en enregistrant en cours d'exécution les nouvelles fluxions.)
 
-
-		// TODO on à déjà parlé de la migration des fluxion à ce moment là.
 		De plus la relocalisation d'une fluxion se fait de manière transparente par l'application, par le système de messagerie qui connaît la localisation exacte des fluxions. Nous y reviendrons plus tard, mais la relocalisation d'une fluxion consiste à déplacer les fluxions sur un nouveau nœud et de rediriger les messages en conséquences. Comme les types de messages, leur débit et le contexte propre d'une fluxion sont connus, on connaît a priori le coût de migration à chaud d'une fluxion.
 
 	\subsection{Architecture Web}
@@ -47,7 +45,7 @@
 		Le système fluxionnel ne manipule que des fluxion par l'intermédiaire d'un système de messagerie. Afin de pouvoir interagir avec le monde extérieur, il faut définir des interfaces de bordure. Notre approche repose sur une espérance de gain technologique principalement sur les architectures Web. Le premier point d'entré visé est ...(?) les interfaces REST.
 		Le schema suivant présente la séparation du système en fonctions indépendantes.
 
-		// TODO schema
+		\TODO{schema}
 
 		Le système Web est donc le déclencheur d'une chaîne de traitement de requêtes à chaque nouvelle requête d'un utilisateur un appel à la fonction \lstinline|start('/', <param>)| est réalisé dans le système de messagerie.
 		Au démarrage du système Web, deux demi-fluxions sont lancées.
