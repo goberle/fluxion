@@ -37,7 +37,60 @@ Seul les flux ont besoin d'être redirigés en conséquence.
 
 Nous avons appelé cette unité d'exécution autonome une fluxion. C'est à dire une fonction, au sens de la programmation fonctionnelle ne dépendant pour ses entrées et ne produisant sur ses sorties que des flux.
 
-## ~~Définition du modèle fluxionnel~~
+## Cycle de vie
+
+Une application fluxionnelle est composée d'un enchaînement de fluxions.
+Chaque fluxion présente le même comportement : 
+
++ elle est invoqué par un système de messagerie à la réception d'un message,
++ effectue des opérations à partir du message reçu,
++ modifie son état interne déporté dans le système de messagerie sous forme de scope,
++  puis renvoie un message.
+
+Dans notre approche, un message est une structure de couples clé / valeur  contenant deux couples : le nom de la fluxion à invoquer `addr` et le corps du message `body`.
+Le système de messagerie impose deux fonctions :
++ une fonction d'enregistrement
+    `register(<nom>, <fn>, <contexte>)` et
++ une fonction de déclenchement de la chaîne de traitement
+    `start(<nom>,<param>)`.
+
+### Mise à jour du code à chaud
+Les données et la logique d'une application étant cloisonné de manière distincte pendant l'exécution, il est possible de mettre à jour une fluxion en la remplaçant dans le système, sans impacter l'exécution de l'application.
+
+(Comme les données propres au fonctionnement d'une application sont stockées dans le système de messagerie et que les fluxions ne possèdent pas de données propres, l'installation d'une nouvelle version se fait en enregistrant en cours d'exécution les nouvelles fluxions.)
+
+
+// TODO on à déjà parlé de la migration des fluxion à ce moment là.
+De plus la relocalisation d'une fluxion se fait de manière transparente par l'application, par le système de messagerie qui connaît la localisation exacte des fluxions. Nous y reviendrons plus tard, mais la relocalisation d'une fluxion consiste à déplacer les fluxions sur un nouveau nœud et de rediriger les messages en conséquences. Comme les types de messages, leur débit et le contexte propre d'une fluxion sont connus, on connaît a priori le coût de migration à chaud d'une fluxion.
+
+## Architecture Web
+
+Le système fluxionnel ne manipule que des fluxion par l'intermédiaire d'un système de messagerie. Afin de pouvoir interagir avec le monde extérieur, il faut définir des interfaces de bordure. Notre approche repose sur une espérance de gain technologique principalement sur les architectures Web. Le premier point d'entré visé est ... les interfaces REST.
+Le schema suivant présente la séparation du système en fonctions indépendantes.
+
+// TODO schema
+
+Le système Web est donc le déclencheur d'une chaîne de traitement de requêtes à chaque nouvelle requête d'un utilisateur un appel à la fonction `start('/', <param>)` est réalisé dans le système de messagerie.
+Au démarrage du système Web, deux demi-fluxions sont lancées.
+La demi-fluxion 'in' n'est pas enregistré dans le système de messagerie.
+Elle prend les paramètres de la requête Web, place l'identifiant de la connexion client dans le contexte de la demi-fluxion de sortie, puis lance le traitement de la requête en invoquant la fonction `start` du système de messagerie.
+
+
+
+
+
+
+
+
+
+
+
+---
+OLD
+
+---
+
+## Définition du modèle fluxionnel
 
 Le modèle d'exécution fluxionnel est conçu pour pouvoir déplacer à chaud des unités d'exécution.
 L'approche classique consiste à déplacer les éléments en mémoires, sans se préoccuper des modifications apportés par l'environnement extérieur.
@@ -77,49 +130,6 @@ Lorsqu'une fluxion se déplace d'un nœud à l'autre, son adresse se déplace au
 Les deux nœuds communiquent ce déplacement entre eux pour le valider, et auprès des autres nœuds pour les en informer.
 De cette manière chacun des nœuds connaît l'emplacement de chacune des fluxions sur les autres nœuds.
 Ainsi le système de messagerie composé de l'ensemble de ces nœuds peut acheminer n'importe quel message sur l'ensemble du système.
-
-# Cycle de vie d'une application fluxionnelle
-
-Une application fluxionnelle est composée d'un enchaînement de fluxions.
-Chaque fluxion présente le même comportement : 
-
-+ elle est invoqué par un système de messagerie à la réception d'un message,
-+ effectue des opérations à partir du message reçu,
-+ modifie son état interne déporté dans le système de messagerie sous forme de scope,
-+  puis renvoie un message.
-
-Dans notre approche, un message est une structure de couples clé / valeur  contenant deux couples : le nom de la fluxion à invoquer `addr` et le corps du message `body`.
-Le système de messagerie impose deux fonctions :
-+ une fonction d'enregistrement
-    `register(<nom>, <fn>, <contexte>)` et
-+ une fonction de déclenchement de la chaîne de traitement
-    `start(<nom>,<param>)`.
-
-### Mise à jour du code à chaud
-Les données et la logique d'une application étant cloisonné de manière distincte pendant l'exécution, il est possible de mettre à jour une fluxion en la remplaçant dans le système, sans impacter l'exécution de l'application.
-
-(Comme les données propres au fonctionnement d'une application sont stockées dans le système de messagerie et que les fluxions ne possèdent pas de données propres, l'installation d'une nouvelle version se fait en enregistrant en cours d'exécution les nouvelles fluxions.)
-
-
-// TODO on à déjà parlé de la migration des fluxion à ce moment là.
-De plus la relocalisation d'une fluxion se fait de manière transparente par l'application, par le système de messagerie qui connaît la localisation exacte des fluxions. Nous y reviendrons plus tard, mais la relocalisation d'une fluxion consiste à déplacer les fluxions sur un nouveau nœud et de rediriger les messages en conséquences. Comme les types de messages, leur débit et le contexte propre d'une fluxion sont connus, on connaît a priori le coût de migration à chaud d'une fluxion.
-
-# Application web fluxionnelle
-
-Le système fluxionnel ne manipule que des fluxion par l'intermédiaire d'un système de messagerie. Afin de pouvoir interagir avec le monde extérieur, il faut définir des interfaces de bordure. Notre approche repose sur une espérance de gain technologique principalement sur les architectures Web. Le premier point d'entré visé est ... les interfaces REST.
-Le schema suivant présente la séparation du système en fonctions indépendantes.
-
-// TODO schema
-
-Le système Web est donc le déclencheur d'une chaîne de traitement de requêtes à chaque nouvelle requête d'un utilisateur un appel à la fonction `start('/', <param>)` est réalisé dans le système de messagerie.
-Au démarrage du système Web, deux demi-fluxions sont lancées.
-La demi-fluxion 'in' n'est pas enregistré dans le système de messagerie.
-Elle prend les paramètres de la requête Web, place l'identifiant de la connexion client dans le contexte de la demi-fluxion de sortie, puis lance le traitement de la requête en invoquant la fonction `start` du système de messagerie.
-
-
-
----
-OLD
 
 ---
 

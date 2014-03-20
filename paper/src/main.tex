@@ -1,0 +1,45 @@
+\documentclass[final,10pt]{article}
+\usepackage[top=20mm, bottom=20mm, left=25mm, right=25mm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[english, french]{babel}
+\usepackage[babel=true]{csquotes}
+
+\usepackage{longtable}
+\usepackage{mathtools}
+
+\usepackage[citestyle=authoryear]{biblatex}
+\addbibresource{OS.bib}
+\addbibresource{Flow-Based Programming.bib}
+\addbibresource{Functional Programming-Functional Reactive Programming.bib}
+\addbibresource{Stream.bib}
+\addbibresource{Dataflow.bib}
+\addbibresource{Web & Social Networks.bib}
+
+\parskip=10pt
+
+% \input{_todos}
+% \input{alias}
+\input{code}
+
+\author{Etienne Brodu}
+\date{\today}
+\title{Définition d'un ensemble d'opérateurs\\
+\small{Création d'un langage de programmation en flux}}
+
+
+\begin{document}
+\maketitle
+\newpage
+
+\tableofcontents{}
+\newpage
+
+\input{abstract}
+\input{introduction}
+\input{modele}
+% \input{transformation}
+% \input{evaluation}
+
+\end{document}
