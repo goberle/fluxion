@@ -1,5 +1,7 @@
 \section{Modèle d'exécution fluxionnel}
 
+	\subsection{Fluxions}
+
 	Le principe de modèle d'exécution fluxionnel est d'identifier des unités d'exécution autonomes fondés sur des flux.
 	// TODO on ne parle plus du tout de l'identification des unités d'exécution après, alors qu'on dit que c'est le principe même du modèle d'exécution fluxionnel.
 	Une unité est autonome quand elle peut être déplacé dynamiquement d'environnement d'exécution pendant sont activité.
@@ -51,3 +53,4 @@
 		Au démarrage du système Web, deux demi-fluxions sont lancées.
 		La demi-fluxion 'in' n'est pas enregistré dans le système de messagerie.
 		Elle prend les paramètres de la requête Web, place l'identifiant de la connexion client dans le contexte de la demi-fluxion de sortie, puis lance le traitement de la requête en invoquant la fonction `start` du système de messagerie.
+
