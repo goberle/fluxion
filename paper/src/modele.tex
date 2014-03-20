@@ -2,16 +2,33 @@
 
 	\subsection{Fluxions}
 
-	Le principe de modèle d'exécution fluxionnel est d'identifier des unités d'exécution autonomes fondés sur des flux.
-	\TODO{on ne parle plus du tout de l'identification des unités d'exécution après, alors qu'on dit que c'est le principe même du modèle d'exécution fluxionnel.}
-	Une unité est autonome quand elle peut être déplacé dynamiquement d'environnement d'exécution pendant sont activité.
-	Déplacer une unité d'exécution nécessite de déplacer avec le code d'exécution son contexte courant. C'est à dire l'ensemble des variables d'état et de mémoire provenant des exécutions précédentes de l'unité.
-	Dans notre approche, ce contexte est encapsulé sous forme de flux pour être manipulé par l'unité d'exécution.
-	(Pour notre approche nous "transférons" ce contexte dans un flux propre à l'unité déplacé.)
-	Ainsi, déplacer une telle unité consiste à déplacer le code fonctionnel vers une nouvelle destination, puis à rediriger les flux d'entrées et de sorties en conséquence. Une telle unité peut alors être déplacé de nœud en nœud sans y être supprimée (attachée?).
-	Seul les flux ont besoin d'être redirigés en conséquence.
+		Le principe de modèle d'exécution fluxionnel est d'identifier des unités d'exécution autonomes fondés sur des flux.
+		Une unité est autonome quand elle peut être déplacé dynamiquement d'environnement d'exécution pendant sont activité.
+		Déplacer une unité d'exécution nécessite de déplacer avec le code d'exécution son contexte courant. C'est à dire l'ensemble des variables d'état et de mémoire provenant des précédentes exécutions de l'unité.
+		Dans notre approche, ce contexte est encapsulé sous forme de flux pour être manipulé par l'unité d'exécution.
+		(Pour notre approche nous "transférons" ce contexte dans un flux propre à l'unité déplacé.)
+		Ainsi, déplacer une telle unité consiste à déplacer le code fonctionnel vers une nouvelle destination, puis à rediriger les flux d'entrées et de sorties en conséquence. Une telle unité peut alors être déplacé de nœud en nœud sans y être supprimée (attachée?).
+		Seul les flux ont besoin d'être redirigés en conséquence.
 
-	Nous avons appelé cette unité d'exécution autonome une fluxion. C'est à dire une fonction, au sens de la programmation fonctionnelle ne dépendant pour ses entrées et ne produisant sur ses sorties que des flux.
+		Nous avons appelé cette unité d'exécution autonome une fluxion. C'est à dire une fonction, au sens de la programmation fonctionnelle ne dépendant pour ses entrées et ne produisant sur ses sorties que des flux.
+
+		\subsubsection{Persistance des états}
+
+			Les fluxions n'ont pas d'état afin de pouvoir être transporté d'un nœud à l'autre en cours d'exécution. Comme de nombreuses applications reposent sur l'existence d'un tel état, nous l'avons transféré dans les flux d'entrées et de sortie des fluxions. Ainsi l'état suit la mobilité d'une fluxion lors de la redirection de ses flux.
+			// TODO est-ce qu'on laisse cette explication sur l'état volontairement plus simpliste, ou est-ce qu'on explique le détail technique de `apply` ?
+			L'état d'une fluxion est ainsi modélisé par un flux d'entré supplémentaire appelé scope. Lorsqu'une fluxion a fini de s'exécuter elle envoie dans son flux scope les données qu'elle souhaite persister, et qui seront re-agregé à son prochain appel.
+
+		\subsubsection{Adressage et mobilité des fluxions}
+
+			Le système de messagerie distribue les messages aux fluxions en se basant sur l'adresse de destination du message.
+			Chaque fluxion est associé à une adresse permettant au système de messagerie de l'identifier de manière unique.
+
+			Lorsqu'une fluxion se déplace d'un nœud à l'autre, son adresse se déplace aussi, et ce avec les flux associé à cette adresse.
+			Les deux nœuds communiquent ce déplacement entre eux pour le valider, et auprès des autres nœuds pour les en informer.
+			De cette manière chacun des nœuds connaît l'emplacement de chacune des fluxions sur les autres nœuds.
+			Ainsi le système de messagerie composé de l'ensemble de ces nœuds peut acheminer n'importe quel message sur l'ensemble du système.
+
+		\subsubsection{entrées \/ sorties}
 
 	\subsection{Cycle de vie}
 

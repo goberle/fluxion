@@ -1,45 +1,113 @@
-\documentclass[final,10pt]{article}
-\usepackage[top=20mm, bottom=20mm, left=25mm, right=25mm]{geometry}
+\documentclass{acm_proc_article-sp}
+
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-
 \usepackage[english, french]{babel}
 \usepackage[babel=true]{csquotes}
 
-\usepackage{longtable}
-\usepackage{mathtools}
-
-\usepackage[citestyle=authoryear]{biblatex}
-\addbibresource{OS.bib}
-\addbibresource{Flow-Based Programming.bib}
-\addbibresource{Functional Programming-Functional Reactive Programming.bib}
-\addbibresource{Stream.bib}
-\addbibresource{Dataflow.bib}
-\addbibresource{Web & Social Networks.bib}
-
-\parskip=10pt
+% \usepackage[citestyle=authoryear]{biblatex}
+% \addbibresource{OS.bib}
+% \addbibresource{Flow-Based Programming.bib}
+% \addbibresource{Functional Programming-Functional Reactive Programming.bib}
+% \addbibresource{Stream.bib}
+% \addbibresource{Dataflow.bib}
+% \addbibresource{Web & Social Networks.bib}
 
 \input{_todos}
 % \input{alias}
 \input{code}
 
-\author{Etienne Brodu}
-\date{\today}
-\title{Définition d'un modèle d'execution fluxionnel\\
-\small{Création d'un langage de programmation en flux}}
-
-
+% Document starts
 \begin{document}
-\maketitle
-\newpage
 
-\tableofcontents{}
-\newpage
+% Title portion
+\title{
+	Définition d'un modèle d'execution fluxionnel
+	\titlenote{
+		(Does NOT produce the permission block, copyright information nor page numbering). For use with ACM\_PROC\_ARTICLE-SP.CLS. Supported by ACM.
+	}
+}
+\subtitle{
+	[Extended Abstract]
+	\titlenote{
+		A full version of this paper is available as
+		\textit{Author's Guide to Preparing ACM SIG Proceedings Using
+		\LaTeX$2_\epsilon$\ and BibTeX} at
+		\texttt{www.acm.org/eaddress.htm}
+	}
+}
+
+
+\numberofauthors{4}
+\author{
+% 1st. author
+\alignauthor
+Etienne Brodu\titlenote{title notes}\\
+       \affaddr{addr line 1}\\
+       \affaddr{addr line 2}\\
+       \affaddr{addr line 3}\\
+       \email{etienne.brodu@insa-lyon.fr}
+% 2nd. author
+\alignauthor
+Stéphane Frénot\titlenote{title notes}\\
+       \affaddr{addr line 1}\\
+       \affaddr{addr line 2}\\
+       \affaddr{addr line 3}\\
+       \email{stephane.frenot@insa-lyon.fr}
+% 3rd. author
+\alignauthor
+Fabien Cellier\titlenote{title notes}\\
+       \affaddr{addr line 1}\\
+       \affaddr{addr line 2}\\
+       \affaddr{addr line 3}\\
+       \email{fabien.cellier@worldline.com}
+\and  % use '\and' if you need 'another row' of author names
+% 4th. author
+\alignauthor
+Frédéric Oblé\\
+       \affaddr{addr line 1}\\
+       \affaddr{addr line 2}\\
+       \affaddr{addr line 3}\\
+       \email{frederic.oble@worldline.com}
+}
+
+\maketitle
 
 \input{abstract}
+
+
+% A category with the (minimum) three required fields
+\category{H.4}{Information Systems Applications}{Miscellaneous}
+%A category including the fourth, optional field follows...
+\category{D.2.8}{Software Engineering}{Metrics}[complexity measures, performance measures]
+
+\terms{Theory}
+
+\keywords{ACM proceedings, \LaTeX, text tagging} % NOT required for Proceedings
+
+
 \input{introduction}
 \input{modele}
 % \input{transformation}
 % \input{evaluation}
+
+% Acknowledgments
+% \input{acknowledgments}
+
+% Bibliography
+\bibliographystyle{abbrv}
+% \bibliography{OS.bib}
+% \bibliography{Flow-Based Programming.bib}
+% \bibliography{Functional Programming-Functional Reactive Programming.bib}
+% \bibliography{Stream.bib}
+% \bibliography{Dataflow.bib}
+% \bibliography{Web & Social Networks.bib}
+                             % Sample .bib file with references that match those in
+                             % the 'Specifications Document (V1.5)' as well containing
+                             % 'legacy' bibs and bibs with 'alternate codings'.
+                             % Gerry Murray - March 2012
+
+\appendix
+% \input{appendix}
 
 \end{document}
