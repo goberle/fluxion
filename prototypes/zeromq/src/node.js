@@ -5,7 +5,7 @@ var zmq = require('zmq');
 var args = process.argv.slice(2);
 
 var nodes = {};
-var nid = 2;
+var nid = 1;
 
 if (args[0] === 'router')
 	router();
@@ -25,33 +25,54 @@ function router() {
 	cloud = zmq.socket('sub');
 	output = zmq.socket('pub');
 	ctl = zmq.socket('rep');
+
+	console.log("output bound to 3000");
 	output.bind('tcp://127.0.0.1:3000');
+
+	console.log("ctl    bound to 3001");
 	ctl.bind('tcp://127.0.0.1:3001');
 
+	console.log("cloud subscribing to " + __BROADCAST);
 	cloud.subscribe(__BROADCAST);
 
 	nodes[0] = "_";
+
+	cloud.on('message', function(id, blank, msg) {
+
+		blank = blank || '';
+		msg = msg || '';
+
+		console.log(">>> " + id + blank + msg);
+	})
 
 	ctl.on('message', function(id, blank, msg) {
 
 		blank = blank || '';
 		msg = msg || '';
 
-		console.log(">>> " + id + blank + msg);
+		// console.log(">>> " + id + blank + msg);
 
 		if (id == "new") { // TODO pattern de construction / reception de message
 			// TODO cette étape n'est nécessaire que parce que les nodes ne connaissent pas leur endpoint initialement
 			// Avec des adresses ip distinctes, les endpoints sont connus automatiquement.
 			console.log(">>1 " + id + blank + msg);
+
+			nid++;
+
 			ctl.send([nid, ' ', JSON.stringify(nodes)]);
 
 			nodes[nid] = "_";
-
-			nid++;
 		} else {
 			console.log(">>2 " + id + blank + msg);
+			console.log("cloud connecting to 300" + nid);
 			cloud.connect('tcp://127.0.0.1:300' + nid);
+			console.log("cloud subscribing to " + __BROADCAST);
+			cloud.subscribe(__BROADCAST);
+
+			console.log("<<B " + nid);
 			output.send(bc(nid));
+
+			console.log("<< ok")
 			ctl.send("ok");
 
 			setTimeout(function(){
@@ -67,12 +88,17 @@ function node() {
 	ctl = zmq.socket('req');
 	output = zmq.socket('pub');
 
-	cloud.connect('tcp://127.0.0.1:3000');
+	// console.log("cloud connecting to 3000");
+	// cloud.connect('tcp://127.0.0.1:3000');
+
+	console.log("ctl   connecting to 3001");
 	ctl.connect('tcp://127.0.0.1:3001');
 	
-	console.log("Node conecting ...");
+	console.log("Node connecting ...");
 
+	console.log("cloud subscribing to " + __BROADCAST);
 	cloud.subscribe(__BROADCAST);
+
 	cloud.on('message', function(id, blank, msg) {
 
 		blank = blank || '';
@@ -81,7 +107,7 @@ function node() {
 		console.log(">>> " + id + blank + msg)
 
 		if (msg < 1000) {// TODO pattern de construction / reception de message
-			console.log("Connecting to 300" + msg);
+			console.log("cloud connecting to 300" + msg);
 			cloud.connect('tcp://127.0.0.1:300' + msg);
 		}
 	})
@@ -93,17 +119,19 @@ function node() {
 		blank = blank || '';
 		msg = msg || '';
 
-		console.log(">>> " + id + blank + msg);
+		// console.log(">>> " + id + blank + msg);
 
 		if (id < 1000) { // TODO pattern de construction / reception de message
 
 			console.log(">>1 " + id + blank + msg);
+
+			console.log("output bound to 300" + id);
 			output.bind('tcp://127.0.0.1:300' + id);
 
 			var obj = JSON.parse(msg);
 
 			for (var i in obj) if (obj.hasOwnProperty(i)) {
-				console.log("Connecting to 300" + i);
+				console.log("cloud connecting to 300" + i);
 				cloud.connect('tcp://127.0.0.1:300' + i);
 			}
 
@@ -114,9 +142,9 @@ function node() {
 			console.log(">>2 " + id + blank + msg);
 
 			setTimeout(function(){
-				console.log('<< hola');
+				console.log('<<B hola');
 				output.send(bc("hola"));
-			}, 1000);
+			}, 2000);
 		}
 
 	})
