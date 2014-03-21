@@ -1,12 +1,15 @@
 \section{Introduction}
 
-La croissance des plateformes du Web est dû à la capacité d'internet' de favoriser le développement de services avec une mise en production minimale très rapide.
+La croissance des plateformes du Web est dû partiellement à la capacité
+d'Internet à favoriser le développement de services avec une mise en production minimale très rapide.
 En quelques heures, il est possible de mettre en ligne un produit fonctionnel afin d'accueillir une première audience.
 ``Release early, release often'' est souvent entendu parmi les communautés open source pour capter rapidement une communauté d'utilisateurs.
 
 Si le service répond correctement aux attentes de l'audience, celle-ci va très probablement grossir au fur et à mesure que le service gagne en popularité.
 Afin de pouvoir faire face à cette croissance, la quantité de ressources utilisé par le service augmente en conséquence, et il arrive un moment dans le développement du produit où la taille des données à traiter et la quantité de ressources nécessaires, imposent l'utilisation d'un modèle de traitement plus efficace.
-Ces modèles plus efficaces passent par une segmentation des échanges entre fonctions, en utilisant différents paradigmes de communication comme les approches three-tiers, les événements, les messages ou les flux. [bilbio]
+Ces modèles plus efficaces passent par une segmentation des échanges entre
+fonctions, en utilisant différents paradigmes de communication comme les
+approches \textit{three-tiers}, les événements, les messages ou les flux. [bilbio]
 Une fois segmenté, les différentes parties communiquent entre elles par un principe de messagerie le plus souvent asynchrone.
 De très nombreux outils ont été définis qui permettent d'exprimer ces différentes parties, leurs interactions, et de prendre en charge l'acheminement des messages [Storm, MillWheel, Spark, TimeStream ...].
 Cependant, ces outils utilisent des interfaces ou des langages particuliers. Il est nécessaire de former les équipes de développement à l'utilisation de ces nouveaux outils, d'engager des experts familiers avec ces outils et de réécrire le service initial en utilisant ces nouveaux outils.
