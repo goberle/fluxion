@@ -1,6 +1,6 @@
 \section{Introduction}
 
-La croissance des plateformes du Web est dû à la capacité d'internet' de favoriser le développement de services avec une mise en production minimale très rapide.
+La croissance des plateformes du Web est dû à la capacité d'internet de favoriser le développement de services avec une mise en production minimale très rapide.
 En quelques heures, il est possible de mettre en ligne un produit fonctionnel afin d'accueillir une première audience.
 ``Release early, release often'' est souvent entendu parmi les communautés open source pour capter rapidement une communauté d'utilisateurs.
 
@@ -11,13 +11,13 @@ Une fois segmenté, les différentes parties communiquent entre elles par un pri
 De très nombreux outils ont été définis qui permettent d'exprimer ces différentes parties, leurs interactions, et de prendre en charge l'acheminement des messages [Storm, MillWheel, Spark, TimeStream ...].
 Cependant, ces outils utilisent des interfaces ou des langages particuliers. Il est nécessaire de former les équipes de développement à l'utilisation de ces nouveaux outils, d'engager des experts familiers avec ces outils et de réécrire le service initial en utilisant ces nouveaux outils.
 Cette nouvelle architecture est globalement moins souple et moins propice aux changements rapides. // TODO à vérifier et documenter [biblio]
-Ce changements de paradigmes de développement représente une prise de risque dans la poursuite du projet car ces outils sortent du cadre grand public suffisamment accessible pour favoriser l'émergence spontanée de nouveaux services.
+Ce changement de paradigmes de développement représente une prise de risque dans la poursuite du projet car ces outils sortent du cadre grand public suffisamment accessible pour favoriser l'émergence spontanée de nouveaux services.
 
 Nous proposons un outil permettant d'éviter de forcer ce changement de paradigme en proposant une vision segmentée de programme 'standard'.
 Nous visons des applications Web dont les sollicitations proviennent des flux de requêtes utilisateurs et dont le développement initial est réalisé selon une approche web 'classique' (serveur web / traitement applicatif / data).
 Nous pensons qu'il est possible d'analyser cette classe d'applications dès les premières étapes d'exploitations afin de les re-exprimer plus ou moins concrètement sous la forme de flux d'échange.
 
-Nous supposons que les applications serveur sont développés dans un langage dynamique comme Javascript, et nous proposons un outil capable d'identifier les flux internes, de définir des unités de traitement de ces flux, et de pouvoir gérer de manière dynamique ces unités.
+Nous supposons que les applications serveur sont développées dans un langage dynamique comme Javascript, et nous proposons un outil capable d'identifier les flux internes, de définir des unités de traitement de ces flux, et de pouvoir gérer de manière dynamique ces unités.
 L'outil identifie ces unités sans être intrusif dans le code existant mais en proposant une sur-expression du programme initial en utilisant le paradigme de fluxion que nous allons définir et qui servira au cœur de notre proposition.
 
 \TODO{La section 2 présente le principe de fluxion en le positionnant par rapport à l'existant.
