@@ -2,24 +2,99 @@
 
 \subsection{Fluxions}
 
-Comme pour les autres systèmes scalables, le principe de modèle d'exécution
-fluxionnel est d'identifier des unités
-d'exécution autonomes fondées exclusivement sur des flux comme paramètre
-d'entrée et de sortie des unités.  Une unité est autonome quand
-elle peut être déplacée dynamiquement d'environnement d'exécution au cours
-de son activité.  Déplacer une unité nécessite de déplacer
-avec son code d'exécution son contexte d'exécution courant, c'est à dire l'ensemble des
-variables de mémoire dont dépend l'unité. Dans notre approche, le contexte est
-capturé dans flux spécifique réinjecté dans l'unité à chaque d'exécution. 
-Ainsi, déplacer une telle unité consiste à déplacer le code fonctionnel
-vers une nouvelle destination, puis à rediriger les flux d'entrées et de
-sorties en conséquence. L'état, les paramètres d'appel et les paramètres
-de retour étant capturé dans des flux, on a une estimation instantané du coup
-de déplacement de la fonction, proportionnel au débit des flux concernés. 
+Le principe du modèle d'exécution fluxionnel est d'identifier des unités d'exécution autonomes n'ayant pour paramètre d'entrée et de sortie que des flux.
+Une unité est autonome quand elle peut être déplacée dynamiquement d'environnement d'exécution au cours de son activité.
+Déplacer une unité nécessite de déplacer avec son code d'exécution son contexte d'exécution courant, c'est à dire l'ensemble des variables de mémoire dont dépend l'unité. Dans notre approche, le contexte est capturé dans des flux spécifiques réinjectés dans l'unité à chaque exécution.
+Ainsi, déplacer une telle unité consiste à déplacer le code fonctionnel vers une nouvelle destination, puis à rediriger les flux d'entrées et de sorties en conséquence.
+L'état, les paramètres d'appel et les paramètres de retour étant capturé dans des flux, on a une estimation instantané du coup de déplacement de la fonction, proportionnel au débit des flux concernés. 
 
-Nous avons appelé cette unité d'exécution autonome une fluxion. C'est à
-dire une fonction, au sens de la programmation fonctionnelle, dépendant
-exclusivement de flux de données.
+Nous avons appelé cette unité d'exécution autonome une fluxion. C'est à dire une fonction, au sens de la programmation fonctionnelle, dépendant exclusivement de flux de données.
+
+	\subsubsection{Fluxions}
+
+	Une fluxion est une unité autonome de traitement de flux.
+	Ce traitement est exprimé sous la forme d'une fonction.
+
+	Ces flux d'informations sont composés de messages, échangés d'une fluxion à l'autre.
+	L'enchaînement des fluxions relié par des flux forme une chaîne de traitement.
+
+	Lorsque le système de messagerie délivre un message à une fluxion, celle-ci a la possibilité de :
+	\begin{itemize}
+		\item modifier le message, et
+		\item envoyer un (ou plusieurs) message à la (ou les) prochaine fluxion dans la chaîne de traitement.
+	\end{itemize}
+
+	Les bordures du systèmes sont des fluxions qui font l'interface avec l'extérieur du système.
+	Il existe deux types de fluxion en bordures :
+
+	\begin{itemize}
+		\item[les \textbf{entrées}]
+	    permettent de recevoir des connections client entrantes suivant le protocole HTTP.
+	    C'est donc le premier maillon de la chaîne de traitement.
+	    Pour chaque connexion entrante, l'entrée va générer une bordure de sortie permettant de répondre au client.
+		\item[les \textbf{sorties}]
+	    permettent d'envoyer le résultat de la chaîne de traitement au client.
+	    C'est donc le dernier maillon de la chaîne de traitement.
+	\end{itemize}
+
+	\subsubsection{Message}
+
+	Les messages sont des structures de données composant le flux d'information éphémère échangé entre les fluxion.
+	Ils représentent à la fois :
+
+	\begin{itemize}
+		\item le signal d'invocation du traitement d'une partie du flux
+		\item les données du flux à traiter
+	\end{itemize}
+
+	Un message est composé d'une adresse, et d'un corps :
+	\begin{code}
+  {
+      addr: ma_fluxion, // adresse de destination du message
+      body: // corps du message, optionnel
+          {}, [], "", ...
+  }
+  \end{code}
+
+	Les messages sont acheminé entre les fluxions par le système de messagerie.
+	À la réception d'un message, le système de messagerie invoque la fluxion destinataire du message.
+	Cette fluxion renvoie à son tour un message, acheminé par le système de messagerie jusqu'à la prochaine fluxion.
+
+	\subsubsection{Adressage des fluxions}
+
+	Les fluxions communiquent par l'intermédiaire de flux composés de messages.
+	Le système de méssagerie distribue ces messages aux différentes fluxions en se basant sur des adresses.
+	Les fluxions sont enregistré dans le système de messagerie en spécifiant une adresse unique dans le système.
+	Cette adresse permet aux fluxions de recevoir des messages.
+
+	Lorsqu'une fluxion se déplace d'un nœud à l'autre, son adresse se déplace aussi, et ce avec les flux associé à cette adresse.
+	Les deux nœuds communiquent ce déplacement entre eux pour le valider, et auprès des autres nœuds pour les en informer.
+	De cette manière chacun des nœuds connaît l'emplacement de chacune des fluxions sur les autres nœuds.
+	Ainsi le système de messagerie composé de l'ensemble de ces nœuds peut acheminer n'importe quel message sur l'ensemble du système.
+
+	\subsubsection{Persistance des états}
+
+	Les fluxions n'ont pas d'état afin de pouvoir être transporté d'un nœud à l'autre en cours d'exécution. Comme les applications écrit dans un modèle de programmation classique reposent sur l'existence d'un tel état, nous l'avons cloisonné dans un flux spécifique à chaque fluxion. Ainsi l'état suit la mobilité d'une fluxion lors de la redirection de ses flux.
+
+	Lors de l'invocation d'une fluxion, le système de messagerie l'execute en fournissant comme contexte le contenu dde ce flux spécifique.
+
+	Nous avons appelé ce flux capturant l'état d'une fluxion un scope.
+
+	\subsubsection{Système de messagerie}
+
+	Le système de messagerie tiens à jours l'annuaire d'adresses des fluxions, et s'occupe d'acheminer les message d'une fluxion à l'autre.
+	Cette dernière fonction peut être comparé au scheduler d'un système d'exploitation classique.
+
+	Le système de messagerie est présent sur chacun des nœuds de l'infrastructure, et écoute en permanence l'arrivée de messages en provenance de clients, ou d'autres nœuds.
+	À l'arrivée d'un message, il vérifie que la fluxion associé à l'adresse 
+
+	\TODO{détailler techniquement}
+
+	\subsubsection{Système de supervision}
+
+	Le système de supervision rassemble des métriques sur l'écoulement des flux d'informations entre les fluxions, par l'intermédiaire du système de messagerie, et permet, grâce à ces métriques, de répartir les fluxions de manière optimale sur la topologie matériel, et de donner des indices à un opérateur humain sur la qualité de service global du système.
+
+	\TODO{détailler techniquement}
 
 \subsection{Plateforme de fluxions}
 
@@ -29,14 +104,10 @@ Chaque fluxion présente le même comportement :
   \item elle est invoquée par un système de messagerie,
   \item elle effectue des opérations à partir du message reçu,
   \item elle modifie son état interne rendu persistant dans le système de messagerie
-  \item puis elle retourne un ensemble de messages à destination d'autres
-    fluxions.
+  \item puis elle retourne un ensemble de messages à destination d'autres fluxions.
 \end{itemize}
 
-Dans notre approche, un message est une structure clé/valeur
-contenant deux couples : le nom de la fluxion à invoquer \textit{name} et le
-corps du message \textit{body}, contenant l'ensemble clé/valeur des
-attributs nécessaires à l'exécution de la fonction. 
+Dans notre approche, un message est une structure clé/valeur contenant deux couples : le nom de la fluxion à invoquer \textit{name} et le corps du message \textit{body}, contenant l'ensemble clé/valeur des attributs nécessaires à l'exécution de la fonction.
 
 Le système de messagerie repose sur uniquement deux fonctions publiques :
 \begin{itemize}
@@ -46,35 +117,19 @@ Le système de messagerie repose sur uniquement deux fonctions publiques :
     \texttt{start(<nom>,<param>)}
 \end{itemize}
 
-Les données et la logique d'une application sont cloisonnés
-à l'exécution, il est possible de mettre à jour une
-fluxion en la remplaçant dans le système, sans impacter l'exécution de
-l'application. De plus déplacer une fluxion ne nécessite pas de la
-supprimer de son n\oe ud initial, car seul la réception de message
-déclenche une exécution. 
+Les données et la logique d'une application sont cloisonnés à l'exécution, il est possible de mettre à jour une fluxion en la remplaçant dans le système, sans impacter l'exécution de l'application. De plus déplacer une fluxion ne nécessite pas de la supprimer de son nœud initial, car seul la réception de message déclenche une exécution. 
 
-La relocalisation d'une fluxion se fait de manière transparente
-par l'application, par le système de messagerie qui connaît la
-localisation des fluxions. 
+La relocalisation d'une fluxion se fait de manière transparente par l'application, par le système de messagerie qui connaît la localisation des fluxions. 
 
 \subsection{Architecture Web}
 
-Le système fluxionnel ne manipule que des fluxion par l'intermédiaire d'un
-système de messagerie. Afin de pouvoir interagir avec le monde extérieur,
-il faut définir des interfaces de bordure. Notre approche repose sur une
-espérance de gain technologique principalement sur les architectures Web.
-Le premier point d'entré visé est l'intégration des interfaces REST.  Le
-schéma~\ref{xxx:xxx} présente les éléments d'un système Web fluxionnel.
+Le système fluxionnel ne manipule que des fluxion par l'intermédiaire d'un système de messagerie. Afin de pouvoir interagir avec le monde extérieur, il faut définir des interfaces de bordure. Notre approche repose sur une espérance de gain technologique principalement sur les architectures Web. Le premier point d'entré visé est l'intégration des interfaces REST.
+Le schéma~\ref{xxx:xxx} présente les éléments d'un système Web fluxionnel.
 
 \TODO{schema}
 
-Le système Web est donc le déclencheur d'une chaîne de traitement de
-requêtes à chaque nouvelle requête d'un utilisateur un appel à la fonction
-\lstinline|start('/', <param>)| est réalisé dans le système de messagerie.
-Au démarrage du système Web, deux demi-fluxions sont lancées.  La
-demi-fluxion 'in' n'est pas enregistré dans le système de messagerie.
-Elle prend les paramètres de la requête Web, place l'identifiant de la
-connexion client dans le contexte de la demi-fluxion de sortie, puis lance
-le traitement de la requête en invoquant la fonction `start` du système de
-messagerie.
+Le système Web est donc le déclencheur d'une chaîne de traitement de requêtes à chaque nouvelle requête d'un utilisateur un appel à la fonction \lstinline|start('/', <param>)| est réalisé dans le système de messagerie.
+Au démarrage du système Web, deux demi-fluxions sont lancées.
+La demi-fluxion 'in' n'est pas enregistré dans le système de messagerie.
+Elle prend les paramètres de la requête Web, place l'identifiant de la connexion client dans le contexte de la demi-fluxion de sortie, puis lance le traitement de la requête en invoquant la fonction `start` du système de messagerie.
 

@@ -1,0 +1,82 @@
+\section{Transformation d'un modèle à l'autre}
+
+	Nous développons ici les étapes de compilation necessaire pour passer d'un modèle de programmation classique utilisant Javascript, vers le modèle d'execution fluxionnel décrit dans la précédente section.
+
+	Nous listons ici l'ensemble des points de différence entre les deux modèles nécessitant une transformation lors de la compilation.
+
+	Nous considérons qu'un service web se situe dans un sous-ensemble des programmes classiques écrit dans un langage dynamique.
+	Ce sous-ensemble implique que le programme soit structuré de manière à enchaîner des traitements séquentiellement les uns après les autres.
+
+	\subsection{Différences entre les deux modèles}
+
+		\subsubsection{Utilisation de la mémoire}
+
+			Dans le modèle classique, la mémoire est centrale.
+			Elle est cependant cloisonné en scopes de fonctions, et en contexte d'exécution.
+			Une fonction n'as accès qu'à son scope, et au contexte dans lequel elle est exécutée.
+
+			Dans le modèle fluxionnel, la mémoire est décentralisé et encapsulé dans des scopes.
+
+			1. Une fonction n'utilise aucune mémoire, ou n'utilise aucune persistance entre ses invocations.
+			    -> pas de scope
+
+			\begin{code}
+				function(mon_argument) {
+				    return mon_argument + 3; // traitements
+				}
+			\end{code}
+
+
+			2. Une fonction utilise une closure comme scope et elle est la seule à accéder à cette closure.
+			    -> scope représentant la closure
+
+			\begin{code}
+				function(mon_scope) {
+				    // mon_scope accessible
+				    return function(mon_argument) {
+				        // mon_argument et mon_scope accessible
+				        return mon_scope + mon_argument; // traitements
+				    }
+				}
+			\end{code}
+
+			3. Une fonction utilise une closure comme scope et elle n'est pas la seule à accéder à cette closure, cas de l'objet global.
+			    -> scope représentant la closure, partagé entre les fluxions.
+
+			\begin{code}
+				var global ...
+
+				function fn1(mon_scope) {
+				    // global, mon_argument accessibles
+				    return mon_scope + global; // traitements
+				}
+
+				function fn2(mon_scope) {
+				    // global, mon_argument accessibles
+				    return mon_scope + global; // traitements
+				}
+			\end{code}
+
+		\subsubsection{Appel de fonction}
+
+			Dans le modèle classique d'un service web, les fonctions de traitement sont appelé les unes après les autres en suivant un principe de chaîne de traitement.
+
+			Dans le modèle fluxionnel, le pointeur d'exécution est passé de manière événementiel, porté par le système de messagerie.
+
+			1. Une fonction appelle une autre fonction à la fin de son exécution
+			    -> la fluxion représentant la fonction appelante envoie un message à la fluxion représentant la fonction appelée.
+
+			\begin{code}
+				function(req) {
+				    // traitements sur req
+				    return next(req);
+				}
+			\end{code}
+
+			fluxion appelante -> fluxion appelée
+
+			2. Une fonction appelle une autre fonction avant la fin de son exécution.
+			    -> la fonction appelante est découpé en deux fluxions.
+			    la fluxion représentant la fonction appelée va servir d'intermédiaire entre ces deux fluxions.
+
+			fluxion appelante 1 -> fluxion appelée -> fluxion appelante 2
