@@ -48,6 +48,9 @@ function register(name, fn, scp) {
   if (flx_repo[name])
     return false;
 
+  scp = scp || {};ds
+  scp.m = message;
+
   if (typeof fn === "function") {
     hooks.register(name, fn, scp);
     flx_repo[name] = {run: fn, scp: scp}; 

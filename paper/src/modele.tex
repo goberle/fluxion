@@ -8,17 +8,18 @@ C'est à dire une fonction, au sens de la programmation fonctionnelle, dépendan
 Elle est composée d'un nom unique, d'une fonction de traitement, et d'un contexte mémoire au moment de son exécution.
 
 Les entrées et sorties d'une fluxion sont des flux.
-Un flux est un ensemble de message à destination d'une fluxion.
+Un flux est un ensemble de messages à destination d'une fluxion.
 Les messages sont composés du nom de la fluxion destinataire et d'un corps.
 Ils représentent à la fois le signal d'invocation, et les données nécessaires à cette invocation.
 Après avoir traité un message, la fonction de traitement modifie son contexte local, puis se termine en renvoyant un message sur son flux de sortie.
 % La fonction de traitement sait à quelles fluxions les messages de sortie doivent être délivré.
 % Toute la logique d'une application fluxionnel se trouve dans les fluxions, il n'est pas masqué par une interface de messagerie et un système de routage.
 
-Les fluxions forment des chaînes de traitement lié par les flux.
-À la réception d'un message de démarrage, la fluxion destinataire va envoyer un second message à une autre fluxion, qui elle même va renvoyer un troisième message à une fluxion différente, et ainsi de suite.
+Les fluxions forment des chaînes de traitement lié par les flux, trapsnorté par un système de messagerie d'écrit plus bas.
+% À la réception d'un message de démarrage, la fluxion destinataire va envoyer un second message à une autre fluxion, qui elle même va renvoyer un troisième message à une fluxion différente, et ainsi de suite.
+Les fluxions sont organisés dans un graph dirigé. (note: le graphe n'est pas acyclique)
 
-Le contexte d'exécution de la fonction de traitement est l'ensemble des variables de mémoire dont dépend la fluxion pour poursuivre un traitement d'une exécution à l'autre.
+Le contexte d'exécution de la fonction de traitement est l'ensemble des variables de mémoire dont dépend la fluxion pour poursuivre un traitement entre deux exécutions.
 % En dehors du contexte d'exécution, la fonction de traitement ne peut pas persister de mémoire d'une exécution à l'autre.
 
 % \TODO{	
@@ -35,32 +36,45 @@ Le contexte d'exécution de la fonction de traitement est l'ensemble des variabl
 
 \subsection{Système de messagerie}
 
-Le modèle d'exécution fluxionnel repose sur un système de messagerie permettant d'acheminer les flux entre les fluxion selon leurs noms.
-Toute l'exécution est orchestré par ce système de messagerie.
+Le système de messagerie permet d'acheminer les flux entre les fluxions selon leurs noms.
+% Toute l'exécution est orchestré par ce système de messagerie.
 
-Lorsqu'un message ou un groupe de message est soumis à l'envoie, soit par l'appel à \texttt{start}, soit au retour d'une fluxion, le système de messagerie le prend en charge.
+% Lorsqu'un message ou un groupe de message est soumis à l'envoie, soit par l'appel à \texttt{start}, soit au retour d'une fluxion, le système de messagerie le prend en charge.
 
 % TODO à reformuler
 % Pour chaque message, le système vérifie que la fluxion destinataire existe.
 % Il appel la fonction de traitement de la fluxion destinataire, en utilisant son contexte d'exécution, et avec pour paramètre le corps du message.
 % La fonction de traitement retourne un message, à son tour soumis à l'envoie.
 
-Les messages soumis à l'envoi sont poussés sur une file de messages, en attendant d'être traité par le système de messagerie.
+Les messages soumis à l'envoi sont poussés dans une file, en attendant d'être traité par le système de messagerie.
 
 \begin{algorithm}
-\caption{Algorithme d'envoi de message}
+\caption{Algorithme de traitement de la file de messages}
 \begin{algorithmic}
-\FORALL{$DEST$}
-\STATE $FLX \leftarrow lookupFluxion(DEST)$
-\STATE $SCP \leftarrow lookupScope(DEST)$
-\STATE $RES \leftarrow exec(FLX, SCP, MSG)$
-\STATE $enqueue ~ RES$
-\ENDFOR
+\Function{ProcessMsg}{$msg$}
+\For{$dest$ \textbf{in} $msg.dest$}
+\State $flx \gets lookup(dest)$
+\State $res \gets$ \Call{exec}{$flx, msg.body$}
+\State \Call{enqueue}{$res$}
+\EndFor
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Algorithme de parcours de la file}
+\begin{algorithmic}
+\Function{ProcessMsg}{$msg$}
+\While{$msg$ \textbf{presents in} $msgQueue$}
+\State $msg \gets$ \Call{dequeue}{\null}
+\State \Call{ProcessMsg}{$msg$}
+\EndWhile
+\EndFunction
 \end{algorithmic}
 \end{algorithm}
 
 La fonction de traitement ne sera appelé qu'avec un seul paramètre : le message reçu.
-Ce message peut être vide, auquel cas, ce paramètre sera indéfini.
+% Ce message peut être vide, auquel cas, ce paramètre sera indéfini.
 
 La fonction de traitement doit renvoyer un message, ou un tableau de plusieurs messages.
 Un message se compose du nom de la fluxion destinataire, et optionnellement d'un corps.
@@ -73,9 +87,6 @@ Il se construit sous la forme suivante :
       {}, [], "", ...
 }
 \end{code}
-
-
-\subsection{Interface}
 
 Pour exécuter un programme exprimé sous la forme de fluxions, le modèle d'exécution fluxionnel propose deux fonctions d'interface : l'enregistrement et le démarrage.
 
@@ -90,6 +101,7 @@ L'exécution des fluxions enregistré dans le modèle d'exécution se fait en en
 % L'exécution d'une fluxion est déclenchée par le système de messagerie qui traite tous les messages en attente.
 Pour déclencher cette chaîne un premier message est envoyé au système de messagerie en utilisant la fonction \texttt{start(<nom>,<msg>)}.
 
+\subsection{Interface}
 
 Le système fluxionnel ne manipule que des fluxion par l'intermédiaire d'un système de messagerie.
 Afin de pouvoir interagir avec le monde extérieur, il faut définir des interfaces de bordure.
@@ -126,10 +138,63 @@ Elle prend les paramètres de la requête Web, place l'identifiant de la connexi
 
 \subsection{Exemple de fluxion}
 
-\TODO{}
+Afin d'illustrer le modèle d'exécution fluxionnel, nous présentons ici un exemple de son utilisation à travers une application de comptage de visite.
+
+\begin{code}
+var app = require('express')();
+
+var count = {};
+
+app.get('/:id', function(req, res){
+  res.send(req.params.id + '[' + (count[req.params.id] = (count[req.params.id] + 1) || 1 ) + ']');
+});
+
+port = 8080;
+app.listen(port);
+console.log("Listening port: "+port);
+\end{code}
 
 
+\begin{code}
+var flx = require('./lib/flx')
+  , express = require('express')
+  , app = express();
 
+flx.register("output", function(msg){
+  if (msg.res) {
+    this.cid[msg.cid] = msg.res;
+  } else {
+    this.cid[msg.cid].send(msg.view.toString());
+  }
+  return undefined;
+}, {
+  cid: {}
+})
 
+flx.register("input", function(msg){
+  this.uid[msg.uid] = this.uid[msg.uid] + 1 || 1;
+  msg.count = this.uid[msg.uid];
+  return this.m("view", msg);
+},{
+  uid: {}
+});
+
+flx.register("view", function(msg) {
+  msg.view = msg.uid + "[" + msg.count + "]";
+  msg.uid = undefined;
+  msg.count = undefined;
+  return this.m("output", msg);
+})
+
+app.get('/:id', function(req, res) {
+  var uid = req.params.id;
+  var cid = req.client._idleStart;
+
+  flx.start(flx.m("output", {cid: cid, res: res}));
+  flx.start(flx.m("input", {uid: uid, cid: cid}));
+})
+
+app.listen(8080);
+\end{code}
 
 

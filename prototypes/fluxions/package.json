@@ -11,6 +11,6 @@
   },
   "engine": "node >= 0.10.0",
   "scripts": {
-  	"test": "mocha test/test.js"
+  	"test": "mocha test/test.js REPORTER=nyan"
   }
 }
