@@ -1,0 +1,16 @@
+{
+  "name": "flx",
+  "description": "A simple library to quicly start experimenting with the concept of fluxion",
+  "version": "0.0.1",
+  "author": "Etienne Brodu <etn@etnbrd.com>",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "mocha": ">=1.18.x",
+    "assert": ">=1.1.x"
+  },
+  "engine": "node >= 0.10.0",
+  "scripts": {
+  	"test": "mocha test/test.js"
+  }
+}

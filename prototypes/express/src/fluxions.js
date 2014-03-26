@@ -18,10 +18,11 @@ var flx_scps = {};
 function post(msg) {
 
   function postMsg(msg) {
-      setTimeout(post, 0, msg);
+    hooks.post(msg, flx_inst[msg.dest].scps, res.dest);
+    setTimeout(post, 0, msg);
   }
 
-  if(msg) {
+  function recvMsg(msg) {
     if (!flx_inst[msg.dest]) {
       link(msg.dest);
     }
@@ -30,11 +31,17 @@ function post(msg) {
 
     var res = flx_inst[msg.dest].run.call(flx_inst[msg.dest].scps, msg.body);
 
-    if (res && res.dest) {
-      hooks.post(msg, flx_inst[msg.dest].scps, res.dest);
+    if (res) {
       postMsg(res);
     }
   }
+
+  if (msg)
+    if (Array.isArray(msg)) for (var i = 0; i < msg.length; i++) {
+      recvMsg(msg[i]);
+    } else {
+      recvMsg(msg);
+    }
 };
 
 function message(dest, body) {
