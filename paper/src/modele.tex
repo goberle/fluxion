@@ -15,9 +15,10 @@ Après avoir traité un message, la fonction de traitement modifie son contexte 
 % La fonction de traitement sait à quelles fluxions les messages de sortie doivent être délivré.
 % Toute la logique d'une application fluxionnel se trouve dans les fluxions, il n'est pas masqué par une interface de messagerie et un système de routage.
 
-Les fluxions forment des chaînes de traitement lié par les flux, trapsnorté par un système de messagerie d'écrit plus bas.
+Les fluxions forment des chaînes de traitement lié par les flux, transporté par un système de messagerie d'écrit plus bas.
 % À la réception d'un message de démarrage, la fluxion destinataire va envoyer un second message à une autre fluxion, qui elle même va renvoyer un troisième message à une fluxion différente, et ainsi de suite.
 Les fluxions sont organisés dans un graph dirigé. (note: le graphe n'est pas acyclique)
+Chaque fluxion renvoie un message unique à destination d'une ou plusieurs fluxions.
 
 Le contexte d'exécution de la fonction de traitement est l'ensemble des variables de mémoire dont dépend la fluxion pour poursuivre un traitement entre deux exécutions.
 % En dehors du contexte d'exécution, la fonction de traitement ne peut pas persister de mémoire d'une exécution à l'autre.
@@ -221,8 +222,9 @@ Le service à été ségmenté comme suit :
   \item La fluxion \texttt{view} récupère le message, et met en forme la réponse que recevra l'utilisateur, et l'envoie à la fluxion de sortie.
 \end{itemize}
 
-Les messages échangés contiennent principalement deux informations importantes : les identifiant d'utilisateurs, permettant d'incrémenter un compteur pour chaque utilisateur, et les identifiants de connexion, permettant de lier une suite de messages avec la structure contenant la connexion HTTP.
+Les messages échangés contiennent principalement deux informations importantes : les identifiants d'utilisateurs, permettant d'incrémenter un compteur pour chaque utilisateur, et les identifiants de connexion, permettant de lier une suite de messages avec la structure contenant la connexion HTTP.
 Le point d'entrée, et le point de sortie du système doivent rester sur la machine où la connexion a eu lieu pour avoir accès à l'interface réseau, tandis que les autre fluxions n'ont pas cette obligation, et peuvent être migré.
+
 
 Cet identifiant de connexion est nécessaire au point de sortie pour associer le résultat reçu avec la connexion vers laquelle le renvoyer à l'utilisateur.
 Nous passons cet identifiant pour ne pas alourdir les échanges de messages avec la structure contenant la connexion HTTP.
