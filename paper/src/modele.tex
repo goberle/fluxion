@@ -89,10 +89,16 @@ Il se construit sous la forme suivante :
 }
 \end{code}
 
-Pour exécuter un programme exprimé sous la forme de fluxions, le modèle d'exécution fluxionnel propose deux fonctions d'interface : l'enregistrement et le démarrage.
+\begin{figure}[h!]
+  \includegraphics[width=0.5\textwidth]{schema-message.pdf}
+  \caption{Schema du système de messagerie}
+  \label{fig:messagerie}
+\end{figure}
 
-Lors de l'initialisation du programme, il est nécessaire d'enregistrer les fluxions pour qu'elles puissent ensuite recevoir des messages.
-L'enregistrement se fait à l'aide de la fonction \texttt{register(<nom>, <fn>, <contexte>)}.
+Pour exécuter un programme exprimé sous la forme de fluxions, le modèle d'exécution fluxionnel propose deux fonctions d'interface : l'enregistrement et le démarrage.
+Le schema \ref{fig:messagerie} présente les différente étape dans l'acheminement d'un message.
+
+Lors de l'initialisation du programme, il est nécessaire d'enregistrer les fluxions pour qu'elles puissent ensuite recevoir des messages.L'enregistrement se fait à l'aide de la fonction \texttt{register(<nom>, <fn>, <contexte>)}.
 Le nom de la fluxion lui permet d'être identifié de manière unique dans le modèle d'exécution, et ainsi de recevoir des messages.
 Il ne peut donc pas exister plusieurs fluxions ayant le même nom.
 Une fluxion peut elle-même enregistrer d'autres fluxions dynamiquement.
@@ -100,7 +106,13 @@ Une fluxion peut elle-même enregistrer d'autres fluxions dynamiquement.
 % L'exécution d'une fluxion n'est déclenchée que par la réception d'un message.
 L'exécution des fluxions enregistré dans le modèle d'exécution se fait en envoyant un message à une première fluxion, qui va elle même envoyer un message à une seconde et ainsi de suite.
 % L'exécution d'une fluxion est déclenchée par le système de messagerie qui traite tous les messages en attente.
-Pour déclencher cette chaîne un premier message est envoyé au système de messagerie en utilisant la fonction \texttt{start(<nom>,<msg>)}.
+Pour déclencher cette chaîne un premier message est envoyé au système de messagerie en utilisant la fonction \texttt{start(<nom>,<msg>)}, étape \circled{2} sur le schema \ref{fig:messagerie}.
+Cette fonction va placer un premier message dans la file du système de messagerie.
+Le système exécute la fonction de traitement destinataire de ce premier message, étape \circled{3} sur le schema \ref{fig:messagerie}.
+Le message résultat de cette exécution est alors empilé dans la file de message, étape \circled{4} sur le schema \ref{fig:messagerie}.
+
+L'empilement des messages dans une file permet d'exécuter en parallèle plusieurs chaîne de traitement indépendantes de manière équitable.
+Pour des raisons de performance, il pourrait être intéressant de lier les fluxions présentes sur le même nœud les unes derrières les autres, cependant, cela empêcherais les messages provenant du réseau d'être traité de manière équitable.
 
 \subsection{Interface}
 
@@ -124,7 +136,7 @@ Dans notre approche, il existe deux types de fluxion de bordures web :
 \end{itemize}
 
 
-Le schéma~\ref{fig:schemaweb} présente les éléments d'un système Web fluxionnel.
+Le schéma \ref{fig:schemaweb} présente les éléments d'un système Web fluxionnel et détaille les étapes d'acheminement d'un message par le système de messagerie.
 
 \begin{figure}[h!]
 	\includegraphics[width=0.5\textwidth]{schema-web.pdf}

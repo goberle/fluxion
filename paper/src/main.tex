@@ -1,11 +1,15 @@
 \documentclass{acm_proc_article-sp}
 
-\usepackage[utf8]{inputenc}
+\usepackage[utf8x]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[english, french]{babel}
 \usepackage[babel=true]{csquotes}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+
+\usepackage{tikz}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+            \node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
 
 % \usepackage[citestyle=authoryear]{biblatex}
 % \addbibresource{OS.bib}
@@ -18,6 +22,7 @@
 \input{_todos}
 % \input{alias}
 \input{code}
+
 
 % Document starts
 \begin{document}
