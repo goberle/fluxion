@@ -217,7 +217,7 @@ Le service à été ségmenté comme suit :
 \begin{itemize}
   \item Le point d'entrée \texttt{app.get} réagit à la connection d'un client et démarre la chaîne de traitement.
   Ce n'est pas une fluxion et il n'est pas enregistré dans le système de messagerie.
-  \item Le point de sortie \texttt{output} est une fluxion mais elle est liée à la machine sur laquelle arrive la connexion afin de pouvoir y répondre.
+  \item Le point de sortie \texttt{output} est une fluxion mais elle est liée à la machine sur laquelle arrive la connexion afin de pouvoir y répondre.
   \item La fluxion \texttt{input} est la première à recevoir le message indiquant une connexion cliente. Son traitement consiste à incrémenter le compteur de l'utilisateur présent dans son scope, et à renseigner ce compteur dans le message, avant de le renvoyer à la fluxion suivante.
   \item La fluxion \texttt{view} récupère le message, et met en forme la réponse que recevra l'utilisateur, et l'envoie à la fluxion de sortie.
 \end{itemize}
