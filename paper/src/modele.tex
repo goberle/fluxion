@@ -138,63 +138,97 @@ Elle prend les paramètres de la requête Web, place l'identifiant de la connexi
 
 \subsection{Exemple de fluxion}
 
-Afin d'illustrer le modèle d'exécution fluxionnel, nous présentons ici un exemple de son utilisation à travers une application de comptage de visite.
+Afin d'illustrer le modèle d'exécution fluxionnel, nous présentons ici un exemple de son utilisation à travers un simple service de comptage de visite.
 
-\begin{code}
-var app = require('express')();
+Ce service permet de compter le nombre de connexions HTTP de chaque utilisateur sur ce service et renvoie le résultat sous forme d'une réponse HTTP.
 
-var count = {};
+Le code \ref{lst:classique} représente le code de ce service de comptage dans un modèle classique.
 
-app.get('/:id', function(req, res){
-  res.send(req.params.id + '[' + (count[req.params.id] = (count[req.params.id] + 1) || 1 ) + ']');
-});
+\begin{figure}
+  \begin{code}
+  var app = require('express')();
 
-port = 8080;
-app.listen(port);
-console.log("Listening port: "+port);
-\end{code}
+  var count = {};
+
+  app.get('/:id', function(req, res){
+    res.send(req.params.id + '[' + (count[req.params.id] = (count[req.params.id] + 1) || 1 ) + ']');
+  });
+
+  port = 8080;
+  app.listen(port);
+  console.log("Listening port: "+port);
+  \end{code}
+  \caption{Code classique}
+  \label{lst:classique}
+\end{figure}
+
+Le code \ref{lst:fluxionnel} représente le code de ce même service de comptage dans le modèle fluxionnel.
+
+\begin{figure}
+  \begin{code}
+  var flx = require('./lib/flx')
+    , express = require('express')
+    , app = express();
+
+  flx.register("output", function(msg){
+    if (msg.res) {
+      this.cid[msg.cid] = msg.res;
+    } else {
+      this.cid[msg.cid].send(msg.view.toString());
+    }
+    return undefined;
+  }, {
+    cid: {}
+  })
+
+  flx.register("input", function(msg){
+    this.uid[msg.uid] = this.uid[msg.uid] + 1 || 1;
+    msg.count = this.uid[msg.uid];
+    return this.m("view", msg);
+  },{
+    uid: {}
+  });
+
+  flx.register("view", function(msg) {
+    msg.view = msg.uid + "[" + msg.count + "]";
+    msg.uid = undefined;
+    msg.count = undefined;
+    return this.m("output", msg);
+  })
+
+  app.get('/:id', function(req, res) {
+    var uid = req.params.id;
+    var cid = req.client._idleStart;
+
+    flx.start(flx.m("output", {cid: cid, res: res}));
+    flx.start(flx.m("input", {uid: uid, cid: cid}));
+  })
+
+  app.listen(8080);
+  \end{code}
+  \caption{Code fluxionnel}
+  \label{lst:fluxionnel}
+\end{figure}
+
+La code classique est bien plus concis que le code fluxionnel du fait de la segmentation et de l'encapsulation  par le modèle fluxionnel.
+
+Le service à été ségmenté comme suit :
+\begin{itemize}
+  \item Le point d'entrée \texttt{app.get} réagit à la connection d'un client et démarre la chaîne de traitement.
+  Ce n'est pas une fluxion et il n'est pas enregistré dans le système de messagerie.
+  \item Le point de sortie \texttt{output} est une fluxion mais elle est liée à la machine sur laquelle arrive la connexion afin de pouvoir y répondre.
+  \item La fluxion \texttt{input} est la première à recevoir le message indiquant une connexion cliente. Son traitement consiste à incrémenter le compteur de l'utilisateur présent dans son scope, et à renseigner ce compteur dans le message, avant de le renvoyer à la fluxion suivante.
+  \item La fluxion \texttt{view} récupère le message, et met en forme la réponse que recevra l'utilisateur, et l'envoie à la fluxion de sortie.
+\end{itemize}
+
+Les messages échangés contiennent principalement deux informations importantes : les identifiant d'utilisateurs, permettant d'incrémenter un compteur pour chaque utilisateur, et les identifiants de connexion, permettant de lier une suite de messages avec la structure contenant la connexion HTTP.
+Le point d'entrée, et le point de sortie du système doivent rester sur la machine où la connexion a eu lieu pour avoir accès à l'interface réseau, tandis que les autre fluxions n'ont pas cette obligation, et peuvent être migré.
+
+Cet identifiant de connexion est nécessaire au point de sortie pour associer le résultat reçu avec la connexion vers laquelle le renvoyer à l'utilisateur.
+Nous passons cet identifiant pour ne pas alourdir les échanges de messages avec la structure contenant la connexion HTTP.
+
+Ainsi, la fluxion de sortie reçois des messages provenant de deux fluxions : le point d'entrée
 
 
-\begin{code}
-var flx = require('./lib/flx')
-  , express = require('express')
-  , app = express();
-
-flx.register("output", function(msg){
-  if (msg.res) {
-    this.cid[msg.cid] = msg.res;
-  } else {
-    this.cid[msg.cid].send(msg.view.toString());
-  }
-  return undefined;
-}, {
-  cid: {}
-})
-
-flx.register("input", function(msg){
-  this.uid[msg.uid] = this.uid[msg.uid] + 1 || 1;
-  msg.count = this.uid[msg.uid];
-  return this.m("view", msg);
-},{
-  uid: {}
-});
-
-flx.register("view", function(msg) {
-  msg.view = msg.uid + "[" + msg.count + "]";
-  msg.uid = undefined;
-  msg.count = undefined;
-  return this.m("output", msg);
-})
-
-app.get('/:id', function(req, res) {
-  var uid = req.params.id;
-  var cid = req.client._idleStart;
-
-  flx.start(flx.m("output", {cid: cid, res: res}));
-  flx.start(flx.m("input", {uid: uid, cid: cid}));
-})
-
-app.listen(8080);
-\end{code}
 
 
