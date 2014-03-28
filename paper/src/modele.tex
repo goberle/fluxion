@@ -2,8 +2,8 @@
 
 \subsection{Fluxions}
 
-Le principe du modèle d'exécution fluxionnel est d'identifier des unités d'exécution autonomes n'ayant pour paramètre d'entrée et de sortie que des flux, c'est à dire des séquences continues et infinies de données agrégés par messages.
-Nous avons appelé cette unité d'exécution autonome une fluxion.
+Le modèle d'exécution fluxionnel à pour fonction de manipuler et d'invoquer des unités d'exécution autonomes n'ayant pour paramètre d'entrée et de sortie que des flux, c'est à dire des séquences continues et infinies de données agrégés par messages.
+Nous avons appelé ce type d'unité d'exécution autonome une fluxion.
 C'est à dire une fonction, au sens de la programmation fonctionnelle, dépendant exclusivement de flux de données.
 Elle est composée d'un nom unique, d'une fonction de traitement, et d'un contexte mémoire au moment de son exécution.
 
@@ -11,52 +11,54 @@ Les entrées et sorties d'une fluxion sont des flux.
 Un flux est un ensemble de messages à destination d'une fluxion.
 Les messages sont composés du nom de la fluxion destinataire et d'un corps.
 Ils représentent à la fois le signal d'invocation, et les données nécessaires à cette invocation.
-Après avoir traité un message, la fonction de traitement modifie son contexte local, puis se termine en renvoyant un message sur son flux de sortie.
-% La fonction de traitement sait à quelles fluxions les messages de sortie doivent être délivré.
-% Toute la logique d'une application fluxionnel se trouve dans les fluxions, il n'est pas masqué par une interface de messagerie et un système de routage.
+Après avoir traité un message, la fonction de traitement modifie son contexte local, puis termine son exécution en renvoyant un message sur son flux de sortie.
 
-Les fluxions forment des chaînes de traitement lié par les flux, transporté par un système de messagerie d'écrit plus bas.
-% À la réception d'un message de démarrage, la fluxion destinataire va envoyer un second message à une autre fluxion, qui elle même va renvoyer un troisième message à une fluxion différente, et ainsi de suite.
-Les fluxions sont organisés dans un graph dirigé. (note: le graphe n'est pas acyclique)
+Les fluxions forment des chaînes de traitement liés par les flux, eux-même acheminés par un système de messagerie d'écrit plus bas.
+Les fluxions sont organisés en un graphe dirigé.
 Chaque fluxion renvoie un message unique à destination d'une ou plusieurs fluxions.
 
 Le contexte d'exécution de la fonction de traitement est l'ensemble des variables de mémoire dont dépend la fluxion pour poursuivre un traitement entre deux exécutions.
-% En dehors du contexte d'exécution, la fonction de traitement ne peut pas persister de mémoire d'une exécution à l'autre.
-
-% \TODO{	
-% Les données et la logique d'une application étant cloisonné de manière distincte pendant l'exécution, il est possible de mettre à jour une fluxion en la remplaçant dans le système, sans impacter l'exécution de l'application.
-% }
-
-% Une fluxion peut être déplacée dynamiquement d'environnement d'exécution au cours de son activité.
-% Déplacer une fluxion nécessite de déplacer sa fonction de traitement ainsi que son contexte d'exécution.
-% Dans notre approche, nous avons distingué et cloisonné le contexte d'exécution, les paramètres d'appel et les paramètres de retour dans des flux.
-% Mesurer le débit de ces flux permet d'estimer le coup de leurs déplacements.
-% Ainsi, déplacer une fluxion consiste à déplacer le code fonctionnel vers une nouvelle destination, puis à rediriger ses flux d'entrées, de sorties et son contexte d'exécution en conséquence.
-
-
 
 \subsection{Système de messagerie}
 
-Le système de messagerie permet d'acheminer les flux entre les fluxions selon leurs noms.
-% Toute l'exécution est orchestré par ce système de messagerie.
+Le système de messagerie est le cœur du modèle d'exécution fluxionnel.
+Il a pour fonction, à la fois d'acheminer les flux de messages entres les fluxions, et d'invoquer les fluxions.
 
-% Lorsqu'un message ou un groupe de message est soumis à l'envoie, soit par l'appel à \texttt{start}, soit au retour d'une fluxion, le système de messagerie le prend en charge.
+Il est construit autour d'une file de message traité les uns après les autres.
+L'utilisation d'une file de messages en attentes permet d'exécuter plusieurs chaîne de traitement en parallèle de manière équitable.
+Le cycle de vie du système de messagerie est illustré dans la figure \ref{fig:messagerie}.
 
-% TODO à reformuler
-% Pour chaque message, le système vérifie que la fluxion destinataire existe.
-% Il appel la fonction de traitement de la fluxion destinataire, en utilisant son contexte d'exécution, et avec pour paramètre le corps du message.
-% La fonction de traitement retourne un message, à son tour soumis à l'envoie.
+\begin{figure}[h!]
+  \includegraphics[width=0.5\textwidth]{schema-message.pdf}
+  \caption{Schema du système de messagerie}
+  \label{fig:messagerie}
+\end{figure}
 
-Les messages soumis à l'envoi sont poussés dans une file, en attendant d'être traité par le système de messagerie.
+Chaque fluxion dois être enregistré dans le système de messagerie.
+Cet enregistrement associe une fonction de traitement à un nom, et un contexte d'exécution propre.
+Le système de messagerie achemine les flux de messages en se basant sur les noms des fluxions.
+C'est pourquoi il ne peut pas exister plusieurs fluxions ayant le même nom.
+Lors de cet enregistrement, il est possible d'initialiser le contexte d'exécution.
+L'enregistrement se fait à l'aide de la fonction \texttt{register(<nom>, <fn>, <contexte>)}.
+Une fluxion peut elle-même enregistrer d'autres fluxions dynamiquement.
+
+Pour déclencher une chaîne de fluxions un premier message est envoyé à destination d'une fluxion par l'intermédiaire du système de messagerie, en utilisant la fonction \texttt{start(<msg>)}, étape \circled{2} sur le schema \ref{fig:messagerie}.
+Cette fonction va placer un premier message dans la file.
+Le système exécute la fonction de traitement destinataire de ce premier message, étape \circled{3} sur le schema \ref{fig:messagerie}.
+Le message résultat de cette exécution est alors empilé dans la file de message, étape \circled{4} sur le schema \ref{fig:messagerie}.
+
+L'algorithme \ref{alg:traitement} explique précisément le traitement d'un message, et l'invocation de la fluxion destinataire décrit ci-dessus.
+Tandis que l'algorithme \ref{alg:parcours} explique le parcours de la file de messages.
 
 \begin{algorithm}
 \caption{Algorithme de traitement de la file de messages}
+\label{alg:traitement}
 \begin{algorithmic}
 \Function{ProcessMsg}{$msg$}
 \For{$dest$ \textbf{in} $msg.dest$}
 \State $flx \gets lookup(dest)$
-\State $res \gets$ \Call{exec}{$flx, msg.body$}
-\State \Call{enqueue}{$res$}
+\State $res \gets$ \Call{exec}{$flx, msg.body$} \Comment{étape \circled{3}}
+\State \Call{enqueue}{$res$} \Comment{étape \circled{4}}
 \EndFor
 \EndFunction
 \end{algorithmic}
@@ -64,6 +66,7 @@ Les messages soumis à l'envoi sont poussés dans une file, en attendant d'être
 
 \begin{algorithm}
 \caption{Algorithme de parcours de la file}
+\label{alg:parcours}
 \begin{algorithmic}
 \Function{ProcessMsg}{$msg$}
 \While{$msg$ \textbf{presents in} $msgQueue$}
@@ -74,49 +77,9 @@ Les messages soumis à l'envoi sont poussés dans une file, en attendant d'être
 \end{algorithmic}
 \end{algorithm}
 
-La fonction de traitement ne sera appelé qu'avec un seul paramètre : le message reçu.
-% Ce message peut être vide, auquel cas, ce paramètre sera indéfini.
-
-La fonction de traitement doit renvoyer un message, ou un tableau de plusieurs messages.
-Un message se compose du nom de la fluxion destinataire, et optionnellement d'un corps.
-Il se construit sous la forme suivante :
-
-\begin{code}
-{
-  dest: "ma_fluxion", // nom de la fluxion destinataire du message
-  body: // corps du message, optionnel
-      {}, [], "", ...
-}
-\end{code}
-
-\begin{figure}[h!]
-  \includegraphics[width=0.5\textwidth]{schema-message.pdf}
-  \caption{Schema du système de messagerie}
-  \label{fig:messagerie}
-\end{figure}
-
-Pour exécuter un programme exprimé sous la forme de fluxions, le modèle d'exécution fluxionnel propose deux fonctions d'interface : l'enregistrement et le démarrage.
-Le schema \ref{fig:messagerie} présente les différente étape dans l'acheminement d'un message.
-
-Lors de l'initialisation du programme, il est nécessaire d'enregistrer les fluxions pour qu'elles puissent ensuite recevoir des messages.L'enregistrement se fait à l'aide de la fonction \texttt{register(<nom>, <fn>, <contexte>)}.
-Le nom de la fluxion lui permet d'être identifié de manière unique dans le modèle d'exécution, et ainsi de recevoir des messages.
-Il ne peut donc pas exister plusieurs fluxions ayant le même nom.
-Une fluxion peut elle-même enregistrer d'autres fluxions dynamiquement.
-
-% L'exécution d'une fluxion n'est déclenchée que par la réception d'un message.
-L'exécution des fluxions enregistré dans le modèle d'exécution se fait en envoyant un message à une première fluxion, qui va elle même envoyer un message à une seconde et ainsi de suite.
-% L'exécution d'une fluxion est déclenchée par le système de messagerie qui traite tous les messages en attente.
-Pour déclencher cette chaîne un premier message est envoyé au système de messagerie en utilisant la fonction \texttt{start(<nom>,<msg>)}, étape \circled{2} sur le schema \ref{fig:messagerie}.
-Cette fonction va placer un premier message dans la file du système de messagerie.
-Le système exécute la fonction de traitement destinataire de ce premier message, étape \circled{3} sur le schema \ref{fig:messagerie}.
-Le message résultat de cette exécution est alors empilé dans la file de message, étape \circled{4} sur le schema \ref{fig:messagerie}.
-
-L'empilement des messages dans une file permet d'exécuter en parallèle plusieurs chaîne de traitement indépendantes de manière équitable.
-Pour des raisons de performance, il pourrait être intéressant de lier les fluxions présentes sur le même nœud les unes derrières les autres, cependant, cela empêcherais les messages provenant du réseau d'être traité de manière équitable.
-
 \subsection{Interface}
 
-Le système fluxionnel ne manipule que des fluxion par l'intermédiaire d'un système de messagerie.
+Les fluxions ne peuvent échanger qu'à l'intérieur du modèle d'exécution.
 Afin de pouvoir interagir avec le monde extérieur, il faut définir des interfaces de bordure.
 Les bordures du systèmes sont des fluxions qui font l'interface avec l'extérieur du système.
 
