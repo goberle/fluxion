@@ -4,19 +4,21 @@ La croissance des plateformes du Web est dû partiellement à la capacité d'Int
 En quelques heures, il est possible de mettre en ligne un produit fonctionnel afin de rassembler une première audience.
 \textit{``Release early, release often''} est souvent entendu pour capter rapidement une communauté d'utilisateurs autour d'un projet open source.
 
-Si le service répond correctement aux attentes de l'audience, celle-ci va probablement grossir au fur et à mesure que le service gagne en popularité.
+Si le service répond correctement aux attentes, l'audience va probablement grossir au fur et à mesure que le service gagne en popularité.
 Pour pouvoir faire face à cette croissance, la quantité de ressources utilisé par le service augmente en conséquence, et il arrive un moment dans le développement du produit où la taille des données à traiter et la quantité de ressources nécessaires, imposent l'utilisation d'un modèle de traitement plus efficace.
 La plupart des modèles plus efficaces passent par une segmentation des échanges entre fonctions, en utilisant différents paradigmes de communication comme les approches \textit{three-tiers}, les événements, les messages ou les flux, afin de réduire le couplage entre les parties et pouvoir les migrer vers des environnement de plus en plus puissants. [bilbio]
 Une fois segmenté, les différentes parties communiquent entre elles par un principe de messagerie le plus souvent asynchrone.
 De nombreux outils ont été définis qui permettent d'exprimer ces différentes parties, leurs interactions, et de prendre en charge l'acheminement des messages [Storm, MillWheel, Spark, TimeStream ...].
-Cependant, ces outils utilisent des interfaces et des langages particuliers. Il est nécessaire de former les équipes de développement à l'utilisation de ces nouveaux outils, d'engager des experts et de réécrire le service initial en utilisant ces nouveaux outils.
-Cette nouvelle architecture est globalement moins souple et moins propice aux changements rapides. // TODO à vérifier et documenter [biblio]
-Ce changement d'architecture présente une prise de risque dans la poursuite du projet de par les modifications qu'ils impliquent sur le developpement.
+Cependant, ces outils utilisent des interfaces et des langages particuliers.
+Il est nécessaire de former les équipes de développement à leur utilisation, d'engager des experts et de réécrire le code initial.
+Cette nouvelle architecture est globalement moins souple et souvent moins propice aux changements rapides.
+% // TODO à vérifier et documenter [biblio]
+Ce changement d'architecture présente une prise de risque dans la poursuite du projet de par les modifications qu'ils impliquent sur le developpement, sans impact direct sur la nature du service rendu.
 
 Nous proposons un outil visant à automatiser ce changement d'architecture, en apportant une vision segmentée du programme sans modifier le code initalement développé.
 Un tel outil permettrait de lever les risques décrit ci-dessus.
-Nous visons des applications Web dont les sollicitations proviennent des flux de requêtes utilisateurs et dont le développement initial est réalisé selon une approche web 'classique' (serveur web / traitement applicatif / data).
-Nous pensons qu'il est possible d'analyser cette classe d'applications dès les premières étapes d'exploitations afin de les re-exprimer sous la forme de flux échangés entre fonctions autonomes relocalisables.
+Nous visons des applications Web dont les sollicitations proviennent des flux de requêtes utilisateurs et dont le développement initial est réalisé selon une approche web 'basique' (serveur web / traitement applicatif / data).
+Nous pensons qu'il est possible d'analyser cette classe d'applications dès les premières étapes d'exploitation afin de les exprimer sous la forme de flux échangés entre fonctions autonomes, relocalisables.
 
 Nous supposons que les applications sont développées dans un langage dynamique comme Javascript, et nous proposons un outil capable d'identifier les flux internes d'échanges, de définir des unités de traitement de ces flux, et de pouvoir gérer de manière dynamique ces unités.
 L'outil identifie ces unités sans être intrusif dans le code existant mais en proposant une sur-expression du programme initial reposant sur le paradigme de fluxion que nous allons définir et qui servira de cœur à notre proposition.
