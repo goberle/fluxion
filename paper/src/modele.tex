@@ -2,7 +2,7 @@
 
 \subsection{Fluxions}
 
-Le modèle d'exécution fluxionnelle à pour fonction de manipuler et d'invoquer des unités d'exécutions autonomes n'ayant pour paramètre d'entrée et de sortie que des flux, c'est à dire des séquences continues et infinies de données agrégées par messages.
+Le modèle d'exécution fluxionnel a pour fonction de manipuler et d'invoquer des unités d'exécutions autonomes n'ayant pour paramètre d'entrée et de sortie que des flux, c'est à dire des séquences continues et infinies de données agrégées par messages.
 Nous avons appelé ce type d'unité d'exécution autonome une fluxion.
 C'est à dire une fonction, au sens de la programmation fonctionnelle, dépendant exclusivement de flux de données.
 Elle est composée d'un nom unique, d'une fonction de traitement, et d'un contexte mémoire au moment de son exécution.
@@ -11,7 +11,7 @@ Les messages sont composés du nom de la fluxion destinataire et d'un corps, et 
 % Ils représentent à la fois le signal d'invocation, et les données nécessaires à cette invocation.
 Après avoir traité un message, la fluxion de traitement modifie son contexte local, puis termine son exécution en renvoyant un message sur son flux de sortie.
 Chaque fluxion renvoie un message unique à destination d'une ou plusieurs fluxions.
-Le contexte d'exécution de la fluxion de traitement est composé de l'ensemble des variables de mémoire dont dépend la fluxion pour reprendre un traitement entre deux exécutions.
+Le contexte d'exécution de la fluxion de traitement est composé de l'ensemble des variables de mémoire dont dépend la fluxion pour pouvoir reprendre son traitement entre deux messages.
 
 Les fluxions forment des chaînes de traitement liés par les flux.
 L'ensemble de ces chaînes forme un graphe direct orienté.
@@ -19,11 +19,11 @@ L'ensemble de ces chaînes forme un graphe direct orienté.
 \subsection{Système de messagerie}
 
 Le système de messagerie est le cœur du modèle d'exécution fluxionnel.
-Il a pour fonction, à la fois d'acheminer les flux de messages entres les fluxions, et de les invoquer.
+Il a pour fonction, à la fois d'acheminer les flux de messages, et d'invoquer les fluxions.
 
-Il est construit autour d'une file de messages, traités les uns après les autres par l'invocation de la fluxion destinataire.
-L'utilisation d'une file de messages permet d'exécuter plusieurs chaîne de traitement parallèlement et équitablement, sans faire de différence dans l'ordonnancement entre messages locaux et messages provenant du réseau.
-Le cycle de vie d'une application fluxionnelle est illustré sur la figure \ref{fig:messagerie}.
+Il est construit autour d'une file de messages, traités les uns après les autres par invocation de la fluxion destinataire.
+L'utilisation d'une file de messages permet d'exécuter plusieurs chaînes de traitement parallèlement et équitablement, sans faire de différence dans l'ordonnancement entre messages locaux et messages provenant du réseau.
+Le cycle de vie d'une application fluxionnelle est illustré figure \ref{fig:messagerie}.
 
 \begin{figure}[h!]
   \includegraphics[width=0.5\textwidth]{schema-message.pdf}
@@ -45,8 +45,7 @@ Le système dépile ce message, et exécute la fonction de traitement destinatai
 Le message résultat de cette exécution est alors empilé dans la file de message, étape \circled{5} et \circled{6} sur le figure \ref{fig:messagerie}.
 Le système boucle alors sur les étapes \circled{3} à \circled{6} jusqu'à ce qu'il n'y plus de messages dans la file.
 
-Les algorithmes \ref{alg:traitement} et \ref{alg:parcours} formalise précisément le comportement du système de messagerie lors de l'appel de la fonction \texttt{start}.
-Tandis que l'algorithme explique le parcours de la file de messages.
+Les algorithmes \ref{alg:traitement} et \ref{alg:parcours} formalisent précisément le comportement du système de messagerie lors de l'appel de la fonction \texttt{start}.
 
 \begin{algorithm}
 \caption{Algorithme de la file de messages}
@@ -55,8 +54,8 @@ Tandis que l'algorithme explique le parcours de la file de messages.
 \Function{processMsg}{$msg$}
 \For{$dest$ \textbf{in} $msg.dest$}
 \State $fluxion \gets lookup(dest)$
-\State $message \gets$ \Call{exec}{$fluxion, msg.body$} \Comment{étape \circled{4} \& \circled{5}}
-\State \Call{enqueue}{$message$} \Comment{étape \circled{6}}
+\State $message \gets$ \Call{exec}{$fluxion, msg.body$} \Comment{\circled{4} \& \circled{5}}
+\State \Call{enqueue}{$message$} \Comment{\circled{6}}
 \EndFor
 \EndFunction
 \end{algorithmic}
@@ -68,7 +67,7 @@ Tandis que l'algorithme explique le parcours de la file de messages.
 \begin{algorithmic}
 \Function{loopMessage}{\null}
 \While{$msg$ \textbf{presents in} $msgQueue$}
-\State $msg \gets$ \Call{dequeue}{\null} \Comment{étape \circled{3}}
+\State $msg \gets$ \Call{dequeue}{\null} \Comment{\circled{3}}
 \State \Call{ProcessMsg}{$msg$}
 \EndWhile
 \EndFunction
@@ -78,21 +77,23 @@ Tandis que l'algorithme explique le parcours de la file de messages.
 \subsection{Interfaces externes}
 
 % Les fluxions ne peuvent échanger de messages qu'avec les autres fluxions à l'intérieur du modèle d'exécution.
-Afin de pouvoir interagir avec le monde extérieur, il faut définir des interfaces de bordure avec l'extérieur du système.
+Afin de pouvoir interagir avec le monde extérieur, il faut définir des interfaces de bordures avec l'extérieur du système.
 % Ces bordures sont capable à la fois d'interagir avec le système et avec l'extérieur.
 % Ce lien d'interaction avec l'extérieur empêche les bordures d'être autonomes comme les fluxions.
-Notre approche reposant principalement sur les architectures Web, l'interface d'entré visée est l'intégration des interfaces REST, qui engendre deux interfaces de bordures.
+Notre approche reposant principalement sur les architectures Web, l'interface visée est l'intégration des interfaces REST, qui engendre deux composants de bordures.
 
 % Dans notre approche, il existe deux types d'interface de bordures pour le Web :
 
 \begin{itemize}
 	\item[\textbf{In}]
     permet de recevoir des connections clientes entrantes suivant le protocole REST.
-    C'est donc le premier maillon de la chaîne de traitement.
-    Pour chaque connexion entrante, l'entrée va générer une fluxion de sortie permettant de répondre au client.
+    % C'est donc le premier maillon de la chaîne de traitement.
+    Pour chaque connexion entrante, le composant \textbf{In} va transmettre au composant \textbf{Out} la connexion lui permettant de répondre au client Web, et un identifiant permettant d'associer messages et connexions.
+    Il transmet ensuite l'identifiant à la première fluxion de la chaîne de traitement en appelant la fonction \texttt{start}.
 	\item[\textbf{Out}]
-    permet d'envoyer le résultat de la chaîne de traitement au client.
-    C'est donc le dernier maillon de la chaîne de traitement.
+    permet d'envoyer le résultat de la chaîne de traitement au client Web.
+    Afin de recevoir les messages de la chaîne de traitement, le composant \textbf{Out} est enregistrée dans le système de messagerie.
+    % C'est donc le dernier maillon de la chaîne de traitement.
 \end{itemize}
 
 
@@ -104,16 +105,13 @@ Le schéma \ref{fig:schemaweb} présente les éléments d'un système Web fluxio
 	\label{fig:schemaweb}
 \end{figure}
 
-Le système Web est donc le déclencheur d'une chaîne de traitement de requêtes.
-À chaque nouvelle requête d'un utilisateur, la fonction \texttt{start(<query>)} du système de messagerie est appelée.
-Au démarrage du système Web, deux fluxions de bordure sont lancées.
-La bordure entrante prend les paramètres de la requête Web, place l'identifiant de la connexion client dans le contexte de la demi-fluxion de sortie, puis lance le traitement de la requête en invoquant la fonction \texttt{start} du système de messagerie.
+% TODO paragraphe de transition
 
 \subsection{Exemple de fluxion}
 
-Afin d'illustrer le modèle d'exécution fluxionnel, nous présentons ici un exemple de son utilisation à travers un simple service de comptage de visite.
+Afin d'illustrer le modèle d'exécution fluxionnel, nous présentons ici un exemple de son utilisation à travers un simple compteur de visite.
 
-Ce service permet de compter le nombre de connexions HTTP de chaque utilisateur sur ce service et renvoie ce nombre dans la réponse.
+Ce service compte le nombre de connexions HTTP de chaque utilisateur et lui renvoie ce nombre dans la réponse.
 
 \begin{figure}[h!]
   \includegraphics[width=0.5\textwidth]{schema-example.pdf}
@@ -121,7 +119,7 @@ Ce service permet de compter le nombre de connexions HTTP de chaque utilisateur 
   \label{fig:example}
 \end{figure}
 
-L'extrait de code \ref{lst:classique} représente ce service de comptage exprimé dans un modèle classique.
+La version initial du service pourrait représenter à l'extrait de code \ref{lst:classique}.
 
 \begin{figure}
   \begin{code}
@@ -129,41 +127,55 @@ L'extrait de code \ref{lst:classique} représente ce service de comptage exprim�
 
   var count = {};
 
-  app.get('/:id', function(req, res){
-    res.send(req.params.id + '[' + (count[req.params.id] = (count[req.params.id] + 1) || 1 ) + ']');
+  app.get('/:id', function reply(req, res){
+    count[req.params.id] = count[req.params.id] + 1  || 1;
+    var visits = count[req.params.id];
+    var reply = req.params.id + '[' + visits + ']';
+    res.send(reply);
   });
 
   port = 8080;
   app.listen(port);
   console.log("Listening port: "+port);
   \end{code}
-  \caption{Code classique}
+  \caption{Service initial}
   \label{lst:classique}
 \end{figure}
 
-L'extrait de code \ref{lst:fluxionnel} représente ce même service de comptage dans le modèle fluxionnel.
+Dans ce code il faut distinguer 3 éléments.
+La variable \texttt{count} est une mémoire persistante permettant de compter le nombre de visite pour chaque identifiant d'utilisateur distinc.
+Elle sera donc transformée dans le notion de contexte d'exécution du système fluxionnel.
+La fonction \texttt{reply} réalise le traitement fluxionnel type que l'on souahite réaliser.
+Enfin les deux méthodes \texttt{get} et \texttt{send} permettent d'interagir avec le Web.
+
+Ce programme minimal est transformé dans notre système selon les fluxions illustrés figure \ref{fig:fluxions}.
+
+\begin{figure}[h!]
+  \includegraphics[width=0.5\textwidth]{flux.pdf}
+  \caption{Suite de fluxion du compteur}
+  \label{fig:fluxions}
+\end{figure}
+
+L'extrait de code \ref{lst:fluxionnel} décrit ce même service de comptage dans un pseudo code représentant le modèle d'exécution fluxionnel.
 
 \begin{figure}
   \begin{code}
-  var flx = require('./lib/flx')
-    , web = require('./lib/web');
+  var flx = require './lib/flx'
+    , web = require './lib/external/web';
 
-  \\ 2
-  flx.register("input", function(msg){
+  fluxion input >> view
     this.uid[msg.uid] = this.uid[msg.uid] + 1 || 1;
     msg.count = this.uid[msg.uid];
-    return this.m("view", msg);
-  },{
-    uid: {}
-  });
+    return msg;
 
-  \\ 3
-  flx.register("view", function(msg) {
+  fluxion view >> output
     msg.view = msg.uid + "[" + msg.count + "]";
     msg.uid = undefined;
     msg.count = undefined;
-    return this.m("output", msg);
-  })
+    return msg;
+
+  register input, {uid: {}}
+  register view
 
   web.listen();
   \end{code}

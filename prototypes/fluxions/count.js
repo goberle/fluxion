@@ -1,17 +1,5 @@
 var flx = require('./lib/flx')
-  , express = require('express')
-  , app = express();
-
-flx.register("output", function(msg){
-  if (msg.res) {
-    this.cid[msg.cid] = msg.res;
-  } else {
-    this.cid[msg.cid].send(msg.view.toString());
-  }
-  return undefined;
-}, {
-  cid: {}
-})
+  , web = require('./lib/web');
 
 flx.register("input", function(msg){
   this.uid[msg.uid] = this.uid[msg.uid] + 1 || 1;
@@ -28,12 +16,4 @@ flx.register("view", function(msg) {
   return this.m("output", msg);
 })
 
-app.get('/:id', function(req, res) {
-  var uid = req.params.id;
-  var cid = req.client._idleStart;
-
-  flx.start(flx.m("output", {cid: cid, res: res}));
-  flx.start(flx.m("input", {uid: uid, cid: cid}));
-})
-
-app.listen(8080);
+web.listen();
