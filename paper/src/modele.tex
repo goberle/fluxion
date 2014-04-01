@@ -7,16 +7,16 @@ Nous avons appelé ce type d'unité d'exécution autonome une fluxion.
 C'est à dire une fonction, au sens de la programmation fonctionnelle, dépendant exclusivement de flux de données.
 Elle est composée d'un nom unique, d'une fonction de traitement, et d'un contexte mémoire au moment de son exécution.
 
-Les entrées et sorties d'une fluxion sont des flux.
-Un flux est un ensemble de messages à destination d'une fluxion.
+Les entrées et sorties d'une fluxion sont des flux, c'est à dire une suite de messages.
+% Un flux est un ensemble de messages à destination d'une fluxion.
 Les messages sont composés du nom de la fluxion destinataire et d'un corps, et sont acheminés par un système de messagerie d'écrit dans la prochaine section.
 Ils représentent à la fois le signal d'invocation, et les données nécessaires à cette invocation.
 Après avoir traité un message, la fonction de traitement modifie son contexte local, puis termine son exécution en renvoyant un message sur son flux de sortie.
 Chaque fluxion renvoie un message unique à destination d'une ou plusieurs fluxions.
-Le contexte d'exécution de la fonction de traitement est l'ensemble des variables de mémoire dont dépend la fluxion pour poursuivre un traitement entre deux exécutions.
+Le contexte d'exécution de la fonction de traitement est composé de l'ensemble des variables de mémoire dont dépend la fluxion pour poursuivre un traitement entre deux exécutions.
 
 Les fluxions forment des chaînes de traitement liés par les flux.
-L'ensemble de ces chaînes de traitement forme un graphe dirigé.
+L'ensemble de ces chaînes de traitement forme un graphe direct orienté.
 
 \subsection{Système de messagerie}
 
@@ -24,7 +24,7 @@ Le système de messagerie est le cœur du modèle d'exécution fluxionnel.
 Il a pour fonction, à la fois d'acheminer les flux de messages entres les fluxions, et d'invoquer les fluxions.
 
 Il est construit autour d'une file de messages.
-C'est messages sont traités les uns après les autres.
+Ceux-ci sont traités les uns après les autres par l'invocation de la fluxion destination.
 L'utilisation d'une file de messages permet d'exécuter plusieurs chaîne de traitement en parallèle de manière équitable, et de ne pas faire de différence dans l'ordonnancement entre les messages locaux et les messages provenant du réseau.
 Le cycle de vie du système de messagerie est illustré dans la figure \ref{fig:messagerie}.
 
@@ -54,11 +54,11 @@ Tandis que l'algorithme \ref{alg:parcours} explique le parcours de la file de me
 \caption{Algorithme de traitement de la file de messages}
 \label{alg:traitement}
 \begin{algorithmic}
-\Function{ProcessMsg}{$msg$}
+\Function{processMsg}{$msg$}
 \For{$dest$ \textbf{in} $msg.dest$}
-\State $flx \gets lookup(dest)$
-\State $res \gets$ \Call{exec}{$flx, msg.body$} \Comment{étape \circled{3}}
-\State \Call{enqueue}{$res$} \Comment{étape \circled{4}}
+\State $fluxion \gets lookup(dest)$
+\State $message \gets$ \Call{exec}{$fluxion, msg.body$} \Comment{étape \circled{3}}
+\State \Call{enqueue}{$message$} \Comment{étape \circled{4}}
 \EndFor
 \EndFunction
 \end{algorithmic}
@@ -77,7 +77,7 @@ Tandis que l'algorithme \ref{alg:parcours} explique le parcours de la file de me
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Interface}
+\subsection{Interfaces externes}
 
 Les fluxions ne peuvent échanger qu'aux autres fluxions à l'intérieur du modèle d'exécution.
 Afin de pouvoir interagir avec le monde extérieur, il faut définir des interfaces de bordure entre l'intérieur et l'extérieur du système. Ces bordures sont capable à la fois d'interagir avec le système et avec l'extérieur.
@@ -87,13 +87,13 @@ Ce lien d'interaction avec l'extérieur compromet leur autonomie.
 Notre approche repose sur une espérance de gain technologique principalement sur les architectures Web.
 L'interface d'entré visé est l'intégration des interfaces REST, mais tout autre point d'entrée est valable tant qu'une interface de bordure en flux peut être défini.
 
-Dans notre approche, il existe deux types d'interface de bordures web :
+Dans notre approche, il existe deux types d'interface de bordures pour le Web :
 
 \begin{itemize}
 	\item[les \textbf{entrées}]
     permettent de recevoir des connections clientes entrantes suivant le protocole HTTP.
     C'est donc le premier maillon de la chaîne de traitement.
-    Pour chaque connexion entrante, l'entrée va générer une bordure de sortie permettant de répondre au client.
+    Pour chaque connexion entrante, l'entrée va générer une fluxion de sortie permettant de répondre au client.
 	\item[les \textbf{sorties}]
     permettent d'envoyer le résultat de la chaîne de traitement au client.
     C'est donc le dernier maillon de la chaîne de traitement.
@@ -109,7 +109,7 @@ Le schéma \ref{fig:schemaweb} présente les éléments d'un système Web fluxio
 \end{figure}
 
 Le système Web est donc le déclencheur d'une chaîne de traitement de requêtes.
-À chaque nouvelle requête d'un utilisateur, la fonction \texttt{start(<param>)} du système de messagerie est appelée.
+À chaque nouvelle requête d'un utilisateur, la fonction \texttt{start(<query>)} du système de messagerie est appelée.
 Au démarrage du système Web, deux fluxions de bordure sont lancées.
 La bordure entrante n'est pas enregistré dans le système de messagerie.
 Elle prend les paramètres de la requête Web, place l'identifiant de la connexion client dans le contexte de la demi-fluxion de sortie, puis lance le traitement de la requête en invoquant la fonction \texttt{start} du système de messagerie.

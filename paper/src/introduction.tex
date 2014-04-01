@@ -11,12 +11,12 @@ Une fois segmenté, les différentes parties communiquent entre elles par un pri
 De nombreux outils ont été définis qui permettent d'exprimer ces différentes parties, leurs interactions, et de prendre en charge l'acheminement des messages [Storm, MillWheel, Spark, TimeStream ...].
 Cependant, ces outils utilisent des interfaces et des langages particuliers.
 Il est nécessaire de former les équipes de développement à leur utilisation, d'engager des experts et de réécrire le code initial.
-Cette nouvelle architecture est globalement moins souple et souvent moins propice aux changements rapides.
+Cette nouvelle architecture est globalement moins souple et souvent moins propice aux changements rapides, de ce fait le changement d'architecture présente une prise de risque dans la poursuite du projet de par les modifications impliqués sur le developpement, sans pour autant d'impact direct sur la nature du service rendu.
 % // TODO à vérifier et documenter [biblio]
-Ce changement d'architecture présente une prise de risque dans la poursuite du projet de par les modifications qu'ils impliquent sur le developpement, sans impact direct sur la nature du service rendu.
 
 Nous proposons un outil visant à automatiser ce changement d'architecture, en apportant une vision segmentée du programme sans modifier le code initalement développé.
-Un tel outil permettrait de lever les risques décrit ci-dessus.
+Un tel outil permettrait de lever les risques décrits ci-dessus.
+% // TODO notion de lazy transformation
 Nous visons des applications Web dont les sollicitations proviennent des flux de requêtes utilisateurs et dont le développement initial est réalisé selon une approche web 'basique' (serveur web / traitement applicatif / data).
 Nous pensons qu'il est possible d'analyser cette classe d'applications dès les premières étapes d'exploitation afin de les exprimer sous la forme de flux échangés entre fonctions autonomes, relocalisables.
 
