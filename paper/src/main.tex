@@ -1,7 +1,8 @@
 \documentclass{acm_proc_article-sp}
 
-\usepackage[utf8x]{inputenc}
+\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
+\usepackage{textcomp}
 \usepackage[english, french]{babel}
 \usepackage[babel=true]{csquotes}
 \usepackage{algorithm}
@@ -11,13 +12,21 @@
 \newcommand*\circled[1]{\tikz[baseline=(char.base)]{
             \node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
 
-% \usepackage[citestyle=authoryear]{biblatex}
+\usepackage[citestyle=authoryear]{biblatex}
 % \addbibresource{OS.bib}
 % \addbibresource{Flow-Based Programming.bib}
 % \addbibresource{Functional Programming-Functional Reactive Programming.bib}
 % \addbibresource{Stream.bib}
 % \addbibresource{Dataflow.bib}
 % \addbibresource{Web & Social Networks.bib}
+
+% \bibliographystyle{abbrv}
+\bibliography{OS.bib}
+\bibliography{Flow-Based Programming.bib}
+\bibliography{Functional Programming-Functional Reactive Programming.bib}
+\bibliography{Stream.bib}
+\bibliography{Dataflow.bib}
+\bibliography{Web & Social Networks.bib}
 
 \input{_todos}
 % \input{alias}
@@ -30,7 +39,7 @@
 % Title portion
 \title{
 	% Définition d'un modèle d'execution fluxionnel
-  Defintion of a fluxionnal execution model
+  Definition of a fluxionnal execution model
 	% \titlenote{
 	% 	(Does NOT produce the permission block, copyright information nor page numbering). For use with ACM\_PROC\_ARTICLE-SP.CLS. Supported by ACM.
 	% }
@@ -50,32 +59,32 @@
 % 1st. author
 \alignauthor
 Etienne Brodu\\
-  \affaddr{\small{IXXI – ENS Lyon – Site Jacques Monod}}\\
-  \affaddr{\small{15 parvis René Descartes – BP 7000}}\\
-  \affaddr{\small{69342 Lyon Cedex 07  FRANCE}}\\
-  \email{etienne.brodu@insa-lyon.fr}
+  \email{\textsf{\normalsize{etienne.brodu@insa-lyon.fr}}}\\
+  \affaddr{\textsf{\small{IXXI – ENS Lyon}}}\\
+  \affaddr{\textsf{\small{15 parvis René Descartes – BP 7000}}}\\
+  \affaddr{\textsf{\small{69342 Lyon Cedex 07  FRANCE}}}
 % 2nd. author
 \alignauthor
 Stéphane Frénot\\
-  \affaddr{\small{IXXI – ENS Lyon – Site Jacques Monod}}\\
-  \affaddr{\small{15 parvis René Descartes – BP 7000}}\\
-  \affaddr{\small{69342 Lyon Cedex 07  FRANCE}}\\
-  \email{stephane.frenot@insa-lyon.fr}
+  \email{\textsf{\normalsize{stephane.frenot@insa-lyon.fr}}}\\
+  \affaddr{\textsf{\small{IXXI – ENS Lyon}}}\\
+  \affaddr{\textsf{\small{15 parvis René Descartes – BP 7000}}}\\
+  \affaddr{\textsf{\small{69342 Lyon Cedex 07  FRANCE}}}
 % 3rd. author
 \alignauthor
 Fabien Cellier\\
-  \affaddr{\small{Worldline}}\\
-  \affaddr{\small{107-109 boulevard Vivier Merle}}\\
-  \affaddr{\small{69438 Lyon Cedex 03}}\\
-  \email{fabien.cellier@worldline.com}
+  \email{\textsf{\normalsize{fabien.cellier@worldline.com}}}\\
+  \affaddr{\textsf{\small{Worldline}}}\\
+  \affaddr{\textsf{\small{107-109 boulevard Vivier Merle}}}\\
+  \affaddr{\textsf{\small{69438 Lyon Cedex 03}}}
 \and  % use '\and' if you need 'another row' of author names
 % 4th. author
 \alignauthor
 Frédéric Oblé\\
-  \affaddr{\small{Worldline}}\\
-  \affaddr{\small{107-109 boulevard Vivier Merle}}\\
-  \affaddr{\small{69438 Lyon Cedex 03}}\\
-  \email{frederic.oble@worldline.com}
+  \email{\textsf{\normalsize{frederic.oble@worldline.com}}}\\
+  \affaddr{\textsf{\small{Worldline}}}\\
+  \affaddr{\textsf{\small{107-109 boulevard Vivier Merle}}}\\
+  \affaddr{\textsf{\small{69438 Lyon Cedex 03}}}
 }
 
 \maketitle
@@ -92,7 +101,7 @@ Frédéric Oblé\\
 
 \terms{Compilation}
 
-\keywords{Liquid IT, Flow programming, Web} % NOT required for Proceedings
+\keywords{Flow programming, Web, Javascript} % NOT required for Proceedings
 
 \input{introduction}
 \input{modele}
@@ -103,7 +112,7 @@ Frédéric Oblé\\
 % \input{acknowledgments}
 
 % Bibliography
-\bibliographystyle{abbrv}
+% \bibliographystyle{abbrv}
 % \bibliography{OS.bib}
 % \bibliography{Flow-Based Programming.bib}
 % \bibliography{Functional Programming-Functional Reactive Programming.bib}
@@ -115,7 +124,7 @@ Frédéric Oblé\\
                              % 'legacy' bibs and bibs with 'alternate codings'.
                              % Gerry Murray - March 2012
 
-\appendix
-% \input{appendix}
+\input{appendix}
+\printbibliography[]
 
 \end{document}

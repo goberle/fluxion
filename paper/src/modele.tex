@@ -9,17 +9,17 @@ Elle est composée d'un nom unique, d'une fonction de traitement, et d'un contex
 
 Les messages sont composés du nom de la fluxion destinataire et d'un corps, et acheminés par un système de messagerie.
 % Ils représentent à la fois le signal d'invocation, et les données nécessaires à cette invocation.
-Après avoir traité un message, la fluxion de traitement modifie son contexte local, puis termine son exécution en renvoyant un message sur son flux de sortie.
+Après avoir traité un message, la fluxion modifie son contexte local, puis termine son exécution en renvoyant un message sur son flux de sortie.
 Chaque fluxion renvoie un message unique à destination d'une ou plusieurs fluxions.
-Le contexte d'exécution de la fluxion de traitement est composé de l'ensemble des variables de mémoire dont dépend la fluxion pour pouvoir reprendre son traitement entre deux messages.
+Le contexte d'exécution de la fluxion est composé de l'ensemble des variables d'état dont dépend la fluxion.
 
-Les fluxions forment des chaînes de traitement liés par les flux.
-L'ensemble de ces chaînes forme un graphe direct orienté.
+Les fluxions forment des chaînes de traitement liées par les flux.
+L'ensemble de ces chaînes forme un graphe direct orienté, géré par un système de messagerie.
 
 \subsection{Système de messagerie}
 
 Le système de messagerie est le cœur du modèle d'exécution fluxionnel.
-Il a pour fonction, à la fois d'acheminer les flux de messages, et d'invoquer les fluxions.
+Il a pour fonction, à la fois d'acheminer les messages, et d'invoquer les fluxions.
 
 Il est construit autour d'une file de messages, traités les uns après les autres par invocation de la fluxion destinataire.
 L'utilisation d'une file de messages permet d'exécuter plusieurs chaînes de traitement parallèlement et équitablement, sans faire de différence dans l'ordonnancement entre messages locaux et messages provenant du réseau.
@@ -39,13 +39,13 @@ C'est pourquoi il ne peut pas exister deux fluxions ayant le même nom.
 L'enregistrement se fait à l'aide de la fonction \texttt{register(<nom>, <fn>, <contexte>)}, étape \circled{1} sur la figure \ref{fig:messagerie}.
 % Une fluxion peut elle-même enregistrer d'autres fluxions dynamiquement.
 
-Pour déclencher une chaîne de fluxions un premier message est envoyé à destination d'une fluxion par l'intermédiaire du système de messagerie, en utilisant la fonction \texttt{start(<msg>)}, étape \circled{2} sur le figure \ref{fig:messagerie}.
+Pour déclencher une chaîne de fluxions un premier message est envoyé dans le système de messagerie, en utilisant la fonction \texttt{start(<msg>)}, étape \circled{2}.
 Cette fonction va placer un premier message dans la file.
-Le système dépile ce message, et exécute la fonction de traitement destinataire, étape \circled{3} et \circled{4} sur le figure \ref{fig:messagerie}.
-Le message résultat de cette exécution est alors empilé dans la file de message, étape \circled{5} et \circled{6} sur le figure \ref{fig:messagerie}.
-Le système boucle alors sur les étapes \circled{3} à \circled{6} jusqu'à ce qu'il n'y plus de messages dans la file.
+Le système dépile ce message, et exécute la fonction de traitement destinataire, étape \circled{3} et \circled{4}.
+Le message résultat de cette exécution est alors empilé dans la file de message, étape \circled{5} et \circled{6}.
+Le système boucle alors sur les étapes \circled{3} à \circled{6} jusqu'à ce qu'il n'y ai plus de messages dans la file.
 
-Les algorithmes \ref{alg:traitement} et \ref{alg:parcours} formalisent précisément le comportement du système de messagerie lors de l'appel de la fonction \texttt{start}.
+Les algorithmes \ref{alg:traitement} et \ref{alg:parcours} formalisent précisément le comportement du système de messagerie généré suite à l'appel de la fonction \texttt{start}.
 
 \begin{algorithm}
 \caption{Algorithme de la file de messages}
@@ -76,27 +76,20 @@ Les algorithmes \ref{alg:traitement} et \ref{alg:parcours} formalisent précisé
 
 \subsection{Interfaces externes}
 
-% Les fluxions ne peuvent échanger de messages qu'avec les autres fluxions à l'intérieur du modèle d'exécution.
-Afin de pouvoir interagir avec le monde extérieur, il faut définir des interfaces de bordures avec l'extérieur du système.
-% Ces bordures sont capable à la fois d'interagir avec le système et avec l'extérieur.
-% Ce lien d'interaction avec l'extérieur empêche les bordures d'être autonomes comme les fluxions.
-Notre approche reposant principalement sur les architectures Web,l'interface devras pouvoir communiquer avec un client selon le protocole REST.
+Afin de pouvoir interagir avec le monde extérieur, on définit des interfaces de bordures externes.
+Notre approche repose sur les architectures Web.
+L'interface externe permet de communiquer avec un client REST \footnote{REST: \textbf{Re}presentational \textbf{S}tate \textbf{T}ransfer \cite{Fielding2002}}.
 Nous définissons dans cette interface deux composants :
-
-
- l'interface visée est l'intégration des interfaces REST, qui engendre deux composants de bordures.
-
-% Dans notre approche, il existe deux types d'interface de bordures pour le Web :
 
 \begin{itemize}
 	\item[\textbf{In}]
     permet de recevoir des connections clientes.
     % C'est donc le premier maillon de la chaîne de traitement.
-    Pour chaque connexion entrante, ce composant va transmettre la connexion au composant \textbf{Out}, lui permettant de répondre, et un identifiant, lui permettant d'associer un message reçus avec la connexion cliente en attente de ce message.
-    Il transmet ensuite un message contenant l'identifiant et la requête à la première fluxion de la chaîne de traitement en appelant la fonction \texttt{start}.
+    Pour chaque connexion entrante, ce composant va transmettre l'identifiant de connexion au composant \textbf{Out}, lui permettant de répondre.
+    Il transmet ensuite un message contenant l'identifiant de connexion et la requête à la première fluxion de la chaîne de traitement en appelant la fonction \texttt{start}.
 	\item[\textbf{Out}]
     permet d'envoyer le résultat de la chaîne de traitement au client Web.
-    Afin de recevoir les messages de la chaîne de traitement, le composant \textbf{Out} est enregistrée dans le système de messagerie.
+    Afin de recevoir les messages de la chaîne, le composant \textbf{Out} est enregistrée dans le système de messagerie sous le nom réservé \texttt{out}.
     % C'est donc le dernier maillon de la chaîne de traitement.
 \end{itemize}
 
@@ -111,47 +104,37 @@ La figure \ref{fig:schemaweb} illustre les éléments spécifiques de cette inte
 
 % TODO paragraphe de transition
 
-\subsection{Exemple de fluxion}
+\subsection{Exemple de service}
 
-Afin d'illustrer le modèle d'exécution fluxionnel, nous présentons ici un exemple de son utilisation à travers un simple compteur de visite.
+Afin d'illustrer le modèle d'exécution fluxionnel, nous présentons ici un exemple de son utilisation à travers un simple compteur de visites.
+Ce service compte le nombre de connexions HTTP de chaque utilisateur et lui renvoie ce nombre dans la réponse.
 
-Ce service compte le nombre de connexions HTTP de chaque utilisateur et lui renvoie ce nombre dans la réponse, tel qu'illustré figure \ref{fig:example}.
+La version initiale du service pourrait ressembler à l'extrait de listing \ref{lst:classique}.
 
-\begin{figure}[h!]
-  \includegraphics[width=\linewidth]{count.pdf}
-  \caption{Illustration simple du comportement du compteur}
-  \label{fig:example}
-\end{figure}
+\begin{code}[Javascript, caption={Service initial},label={lst:classique}]
+var app = require('express')();
 
-La version initial du service pourrait ressembler à l'extrait de code figure \ref{lst:classique}.
+@\label{lst:classique_count}@var count = {};
 
-\begin{figure}
-  \begin{code}
-  var app = require('express')();
+@\label{lst:classique_get}\label{lst:classique_replyb}@app.get('/:id', function reply(req, res){
+  count[req.params.id] = count[req.params.id]  || 1;
+  ++count[req.params.id]
+  var visits = count[req.params.id];
+  var reply = req.params.id + '[' + visits + ']';
+@\label{lst:classique_send}@  res.send(reply);
+@\label{lst:classique_replye}@});
 
-  var count = {};
-
-  app.get('/:id', function reply(req, res){
-    count[req.params.id] = count[req.params.id] + 1  || 1;
-    var visits = count[req.params.id];
-    var reply = req.params.id + '[' + visits + ']';
-    res.send(reply);
-  });
-
-  port = 8080;
-  app.listen(port);
-  console.log("Listening port: "+port);
-  \end{code}
-  \caption{Service initial}
-  \label{lst:classique}
-\end{figure}
+port = 8080;
+app.listen(port);
+console.log("Listening port: "+port);
+\end{code}
 
 Dans ce code il est intéressant de distinguer 3 éléments.
 \begin{itemize}
-  \item La variable \texttt{count} est une mémoire persistante permettant de compter le nombre de visite pour chaque identifiant d'utilisateur distinc.
+  \item La variable \texttt{count} à la ligne \ref{lst:classique_count} est une mémoire persistante permettant de compter le nombre de visites pour chaque identifiant d'utilisateur distinct.
   Elle sera donc transformée dans le notion de contexte d'exécution du système fluxionnel.
-  \item La fonction \texttt{reply} réalise le traitement fluxionnel type que l'on souahite réaliser.
-  \item Enfin les deux méthodes \texttt{get} et \texttt{send} permettent d'interagir avec le serveur Web.
+  \item La fonction \texttt{reply}, ligne \ref{lst:classique_replyb} à \ref{lst:classique_replye} réalise le traitement fluxionnel type que l'on souahite réaliser.
+  \item Enfin les deux méthodes \texttt{get} et \texttt{send}, respectivement ligne \ref{lst:classique_get} et \ref{lst:classique_send}, permettent d'interagir avec le serveur Web.
 \end{itemize}
 
 Ce programme minimal serait transformé dans notre système en la chaîne de fluxions illustrés figure \ref{fig:fluxions}.
@@ -162,33 +145,31 @@ Ce programme minimal serait transformé dans notre système en la chaîne de flu
   \label{fig:fluxions}
 \end{figure}
 
-L'extrait de code figure \ref{lst:fluxionnel} décrit ce même service de comptage dans un pseudo code représentant le modèle d'exécution fluxionnel.
-Ce pseudo code, de par la segmentation qu'il apporte par rapport au code initial, pourrais permettre à un système annexe par exemple d'optimiser le placement des fluxions sur les machines physiques en fonction du coût des flux et de leur traitement.
+L'extrait de code figure \ref{lst:fluxionnel} décrit ce même service de comptage dans un langage fluxionnel de haut niveau.
+Ce pseudo code, de par la segmentation qu'il apporte par rapport au code initial, permet à un système annexe d'optimiser le placement des fluxions sur les machines physiques en fonction du coût des flux et de leur traitement.
 
-\begin{figure}
-  \begin{code}
-  var flx = require './lib/flx'
-    , web = require './lib/external/web';
+Ce langage fluxionnel de haut niveau est non typé
+\TODO{écrire un paragraphe sur les caractéristiques du langage, une subsection pourrait être nécessaire, mais elle serait peut être mieux placé dans la section sur la transformation}
 
-  fluxion input >> view
-    this.uid[msg.uid] = this.uid[msg.uid] + 1 || 1;
-    msg.count = this.uid[msg.uid];
-    return msg;
+\begin{code}[Javascript, caption={Code fluxionnel},label={lst:fluxionnel}]
+use fluxion, web
 
-  fluxion view >> output
-    msg.view = msg.uid + " connected " + msg.count + " times.";
-    msg.uid = undefined;
-    msg.count = undefined;
-    return msg;
+fluxion input >> view
+  this.uid[msg.uid] = this.uid[msg.uid] + 1 || 1
+  msg.count = this.uid[msg.uid]
+  return msg
 
-  register input, {uid: {}}
-  register view
+fluxion view >> output
+  msg.view = msg.uid + " connected " + msg.count + " times."
+  msg.uid = undefined
+  msg.count = undefined
+  return msg
 
-  web.listen();
-  \end{code}
-  \caption{Code fluxionnel}
-  \label{lst:fluxionnel}
-\end{figure}
+register input, {uid: {}}
+register view
+
+web.listen
+\end{code}
 
 Hormis les deux composants d'interface, le service à été segmenté comme suit :
 \begin{itemize}

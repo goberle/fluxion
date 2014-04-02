@@ -20,7 +20,7 @@
 			1. Une fonction n'utilise aucune mémoire, ou n'utilise aucune persistance entre ses invocations.
 			    -> pas de scope
 
-			\begin{code}
+			\begin{code}[Javascript, caption={Code fluxionnel},label={lst:mem1}]
 				function(mon_argument) {
 				    return mon_argument + 3; // traitements
 				}
@@ -30,7 +30,7 @@
 			2. Une fonction utilise une closure comme scope et elle est la seule à accéder à cette closure.
 			    -> scope représentant la closure
 
-			\begin{code}
+			\begin{code}[Javascript, caption={Code fluxionnel},label={lst:mem2}]
 				function(mon_scope) {
 				    // mon_scope accessible
 				    return function(mon_argument) {
@@ -43,7 +43,7 @@
 			3. Une fonction utilise une closure comme scope et elle n'est pas la seule à accéder à cette closure, cas de l'objet global.
 			    -> scope représentant la closure, partagé entre les fluxions.
 
-			\begin{code}
+			\begin{code}[Javascript, caption={Code fluxionnel},label={lst:mem3}]
 				var global ...
 
 				function fn1(mon_scope) {
@@ -66,7 +66,7 @@
 			1. Une fonction appelle une autre fonction à la fin de son exécution
 			    -> la fluxion représentant la fonction appelante envoie un message à la fluxion représentant la fonction appelée.
 
-			\begin{code}
+			\begin{code}[Javascript, caption={Code fluxionnel},label={lst:fn1}]
 				function(req) {
 				    // traitements sur req
 				    return next(req);
