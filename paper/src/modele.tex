@@ -26,7 +26,7 @@ L'utilisation d'une file de messages permet d'exécuter plusieurs chaînes de tr
 Le cycle de vie d'une application fluxionnelle est illustré figure \ref{fig:messagerie}.
 
 \begin{figure}[h!]
-  \includegraphics[width=0.5\textwidth]{schema-message.pdf}
+  \includegraphics[width=\linewidth]{schema-message.pdf}
   \caption{Schema du système de messagerie}
   \label{fig:messagerie}
 \end{figure}
@@ -80,16 +80,20 @@ Les algorithmes \ref{alg:traitement} et \ref{alg:parcours} formalisent précisé
 Afin de pouvoir interagir avec le monde extérieur, il faut définir des interfaces de bordures avec l'extérieur du système.
 % Ces bordures sont capable à la fois d'interagir avec le système et avec l'extérieur.
 % Ce lien d'interaction avec l'extérieur empêche les bordures d'être autonomes comme les fluxions.
-Notre approche reposant principalement sur les architectures Web, l'interface visée est l'intégration des interfaces REST, qui engendre deux composants de bordures.
+Notre approche reposant principalement sur les architectures Web,l'interface devras pouvoir communiquer avec un client selon le protocole REST.
+Nous définissons dans cette interface deux composants :
+
+
+ l'interface visée est l'intégration des interfaces REST, qui engendre deux composants de bordures.
 
 % Dans notre approche, il existe deux types d'interface de bordures pour le Web :
 
 \begin{itemize}
 	\item[\textbf{In}]
-    permet de recevoir des connections clientes entrantes suivant le protocole REST.
+    permet de recevoir des connections clientes.
     % C'est donc le premier maillon de la chaîne de traitement.
-    Pour chaque connexion entrante, le composant \textbf{In} va transmettre au composant \textbf{Out} la connexion lui permettant de répondre au client Web, et un identifiant permettant d'associer messages et connexions.
-    Il transmet ensuite l'identifiant à la première fluxion de la chaîne de traitement en appelant la fonction \texttt{start}.
+    Pour chaque connexion entrante, ce composant va transmettre la connexion au composant \textbf{Out}, lui permettant de répondre, et un identifiant, lui permettant d'associer un message reçus avec la connexion cliente en attente de ce message.
+    Il transmet ensuite un message contenant l'identifiant et la requête à la première fluxion de la chaîne de traitement en appelant la fonction \texttt{start}.
 	\item[\textbf{Out}]
     permet d'envoyer le résultat de la chaîne de traitement au client Web.
     Afin de recevoir les messages de la chaîne de traitement, le composant \textbf{Out} est enregistrée dans le système de messagerie.
@@ -97,10 +101,10 @@ Notre approche reposant principalement sur les architectures Web, l'interface vi
 \end{itemize}
 
 
-Le schéma \ref{fig:schemaweb} présente les éléments d'un système Web fluxionnel et détaille les étapes d'acheminement d'un message par le système de messagerie.
+La figure \ref{fig:schemaweb} illustre les éléments spécifiques de cette interface Web au sein du système fluxionnel illustré par la figure \ref{fig:messagerie}.
 
 \begin{figure}[h!]
-	\includegraphics[width=0.5\textwidth]{schema-web.pdf}
+	\includegraphics[width=\linewidth]{schema-web.pdf}
 	\caption{Schema d'un système fluxionnel avec une interface Web}
 	\label{fig:schemaweb}
 \end{figure}
@@ -111,15 +115,15 @@ Le schéma \ref{fig:schemaweb} présente les éléments d'un système Web fluxio
 
 Afin d'illustrer le modèle d'exécution fluxionnel, nous présentons ici un exemple de son utilisation à travers un simple compteur de visite.
 
-Ce service compte le nombre de connexions HTTP de chaque utilisateur et lui renvoie ce nombre dans la réponse.
+Ce service compte le nombre de connexions HTTP de chaque utilisateur et lui renvoie ce nombre dans la réponse, tel qu'illustré figure \ref{fig:example}.
 
 \begin{figure}[h!]
-  \includegraphics[width=0.5\textwidth]{schema-example.pdf}
-  \caption{Schema de l'exemple d'un système fluxionnel avec une interface Web}
+  \includegraphics[width=\linewidth]{count.pdf}
+  \caption{Illustration simple du comportement du compteur}
   \label{fig:example}
 \end{figure}
 
-La version initial du service pourrait représenter à l'extrait de code \ref{lst:classique}.
+La version initial du service pourrait ressembler à l'extrait de code figure \ref{lst:classique}.
 
 \begin{figure}
   \begin{code}
@@ -142,21 +146,24 @@ La version initial du service pourrait représenter à l'extrait de code \ref{ls
   \label{lst:classique}
 \end{figure}
 
-Dans ce code il faut distinguer 3 éléments.
-La variable \texttt{count} est une mémoire persistante permettant de compter le nombre de visite pour chaque identifiant d'utilisateur distinc.
-Elle sera donc transformée dans le notion de contexte d'exécution du système fluxionnel.
-La fonction \texttt{reply} réalise le traitement fluxionnel type que l'on souahite réaliser.
-Enfin les deux méthodes \texttt{get} et \texttt{send} permettent d'interagir avec le Web.
+Dans ce code il est intéressant de distinguer 3 éléments.
+\begin{itemize}
+  \item La variable \texttt{count} est une mémoire persistante permettant de compter le nombre de visite pour chaque identifiant d'utilisateur distinc.
+  Elle sera donc transformée dans le notion de contexte d'exécution du système fluxionnel.
+  \item La fonction \texttt{reply} réalise le traitement fluxionnel type que l'on souahite réaliser.
+  \item Enfin les deux méthodes \texttt{get} et \texttt{send} permettent d'interagir avec le serveur Web.
+\end{itemize}
 
-Ce programme minimal est transformé dans notre système selon les fluxions illustrés figure \ref{fig:fluxions}.
+Ce programme minimal serait transformé dans notre système en la chaîne de fluxions illustrés figure \ref{fig:fluxions}.
 
 \begin{figure}[h!]
-  \includegraphics[width=0.5\textwidth]{flux.pdf}
+  \includegraphics[width=\linewidth]{flux.pdf}
   \caption{Suite de fluxion du compteur}
   \label{fig:fluxions}
 \end{figure}
 
-L'extrait de code \ref{lst:fluxionnel} décrit ce même service de comptage dans un pseudo code représentant le modèle d'exécution fluxionnel.
+L'extrait de code figure \ref{lst:fluxionnel} décrit ce même service de comptage dans un pseudo code représentant le modèle d'exécution fluxionnel.
+Ce pseudo code, de par la segmentation qu'il apporte par rapport au code initial, pourrais permettre à un système annexe par exemple d'optimiser le placement des fluxions sur les machines physiques en fonction du coût des flux et de leur traitement.
 
 \begin{figure}
   \begin{code}
@@ -169,7 +176,7 @@ L'extrait de code \ref{lst:fluxionnel} décrit ce même service de comptage dans
     return msg;
 
   fluxion view >> output
-    msg.view = msg.uid + "[" + msg.count + "]";
+    msg.view = msg.uid + " connected " + msg.count + " times.";
     msg.uid = undefined;
     msg.count = undefined;
     return msg;
@@ -183,33 +190,30 @@ L'extrait de code \ref{lst:fluxionnel} décrit ce même service de comptage dans
   \label{lst:fluxionnel}
 \end{figure}
 
-La code classique est bien plus concis que le code fluxionnel du fait de la segmentation et de l'encapsulation impliqué par le modèle fluxionnel.
-
-Le service à été ségmenté comme suit :
+Hormis les deux composants d'interface, le service à été segmenté comme suit :
 \begin{itemize}
-  \item[\circled{1}] Le point d'entrée \textbf{in} réagit à la connexion d'un client et démarre la chaîne de traitement en appelant \texttt{start}.
-  Ce n'est pas une fluxion, il n'est pas enregistré dans le système de messagerie, et est lié à la machine recevant les connections entrantes.
-  \item[\circled{4}] Le point de sortie \textbf{out} est enregistré dans le système comme une fluxion mais elle est liée à la machine recevant les connexions clientes afin de pouvoir y répondre.
-  \item[\circled{2}] La fluxion \texttt{input} est la première à recevoir le message indiquant une connexion cliente. Son traitement consiste à incrémenter le compteur de l'utilisateur présent dans son scope, et à renseigner ce compteur dans le message, avant de le renvoyer à la fluxion suivante.
-  Elle contient l'ensemble de la logique de ce simple service. Pour des services réels, on trouverais à sa place l'ensemble des fluxions contenant la logique du service organisé en une ou plusieurs chaîne de traitement.
-  \item[\circled{3}] La fluxion \texttt{view} récupère le message, et met en forme la réponse que recevra l'utilisateur, et l'envoie à la fluxion de sortie.
+  \item La fluxion \texttt{input} est la première à recevoir le message du client.
+  Elle contient l'ensemble de la logique de ce simple service.
+  Pour des services réels, on trouverais à sa place l'ensemble des fluxions contenant la logique du service organisé en une ou plusieurs chaîne de traitement.
+  Elle incrémente le compteur de l'utilisateur l'agrège au message, et renvoie ce dernier à la fluxion suivante.
+  \item La fluxion \texttt{view} récupère le message, et met en forme la réponse que recevra l'utilisateur, et l'envoie à la fluxion de sortie.
 \end{itemize}
 
-Ce service manipule principalement deux informations sur lesquelles qu'il est important de détailler.
-D'une part, les connections clientes sont partagé entre l'entrée et la sortie.
-Pour chaque connexion, l'entrée passe directement à la sortie un couple <id, res>.
-id représente simplement un identifiant permettant de retrouver res, il est envoyé à la fluxion input.
-res est la structure permettant de répondre au client.
-Ce mécanisme provoque un échange important de donnée entre le point d'entrée et le point de sortie, et implique de passer l'identifiant sur toute la chaîne de traitement, jusqu'à sa réception au point de sortie.
+% Ce service manipule principalement deux informations sur lesquelles qu'il est important de détailler.
+% D'une part, les connections clientes sont partagé entre l'entrée et la sortie.
+% Pour chaque connexion, l'entrée passe directement à la sortie un couple <id, res>.
+% id représente simplement un identifiant permettant de retrouver res, il est envoyé à la fluxion input.
+% res est la structure permettant de répondre au client.
+% Ce mécanisme provoque un échange important de donnée entre le point d'entrée et le point de sortie, et implique de passer l'identifiant sur toute la chaîne de traitement, jusqu'à sa réception au point de sortie.
 
-Les messages échangés contiennent principalement deux informations importantes : les identifiants d'utilisateurs, permettant d'incrémenter un compteur pour chaque utilisateur, et les identifiants de connexion, permettant de lier une suite de messages avec la structure contenant la connexion HTTP.
-Le point d'entrée, et le point de sortie du système doivent rester sur la machine où la connexion a eu lieu pour avoir accès à l'interface réseau, tandis que les autre fluxions n'ont pas cette obligation, et peuvent être migré.
+% Les messages échangés contiennent principalement deux informations importantes : les identifiants d'utilisateurs, permettant d'incrémenter un compteur pour chaque utilisateur, et les identifiants de connexion, permettant de lier une suite de messages avec la structure contenant la connexion HTTP.
+% Le point d'entrée, et le point de sortie du système doivent rester sur la machine où la connexion a eu lieu pour avoir accès à l'interface réseau, tandis que les autre fluxions n'ont pas cette obligation, et peuvent être migré.
 
 
-Cet identifiant de connexion est nécessaire au point de sortie pour associer le résultat reçu avec la connexion vers laquelle le renvoyer à l'utilisateur.
-Nous passons cet identifiant pour ne pas alourdir les échanges de messages avec la structure contenant la connexion HTTP.
+% Cet identifiant de connexion est nécessaire au point de sortie pour associer le résultat reçu avec la connexion vers laquelle le renvoyer à l'utilisateur.
+% Nous passons cet identifiant pour ne pas alourdir les échanges de messages avec la structure contenant la connexion HTTP.
 
-Ainsi, la fluxion de sortie reçois des messages provenant de deux fluxions : le point d'entrée
+% Ainsi, la fluxion de sortie reçois des messages provenant de deux fluxions : le point d'entrée
 
 
 
