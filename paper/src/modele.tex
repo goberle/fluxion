@@ -1,20 +1,35 @@
-\section{Modèle d'exécution fluxionnel}
+\section{Fluxionnel execution model}
 
 \subsection{Fluxions}
 
-Le modèle d'exécution fluxionnel a pour fonction de manipuler et d'invoquer des unités d'exécutions autonomes n'ayant pour paramètre d'entrée et de sortie que des flux, c'est à dire des séquences continues et infinies de données agrégées par messages.
-Nous avons appelé ce type d'unité d'exécution autonome une fluxion.
-C'est à dire une fonction, au sens de la programmation fonctionnelle, dépendant exclusivement de flux de données.
-Elle est composée d'un nom unique, d'une fonction de traitement, et d'un contexte mémoire au moment de son exécution.
+The fluxionnel execution model role is to manage and invoke autonomous execution units.
+An execution units as we define it, accept only streams as input and output, that is a continuous and infinite sequence of data contained in messages.
+We named this execution unit a fluxion.
+That is a function, as in functional programming, only dependent from data streams.
+It's composed of a unique name, a processing function, and a memory context during its execution.
 
-Les messages sont composés du nom de la fluxion destinataire et d'un corps, et acheminés par un système de messagerie.
-% Ils représentent à la fois le signal d'invocation, et les données nécessaires à cette invocation.
-Après avoir traité un message, la fluxion modifie son contexte local, puis termine son exécution en renvoyant un message sur son flux de sortie.
-Chaque fluxion renvoie un message unique à destination d'une ou plusieurs fluxions.
-Le contexte d'exécution de la fluxion est composé de l'ensemble des variables d'état dont dépend la fluxion.
+Messages are composed of the name of the recipient fluxion, a body, and are carried by a messaging system.
+After processing a message, the fluxion modify its context, and then terminate its execution by sending a message on its output stream.
+Each fluxion send back a unique message to one or many recipient.
+The fluxion's execution context is the set of state variables whose the fluxion depends on.
 
-Les fluxions forment des chaînes de traitement liées par les flux.
-L'ensemble de ces chaînes forme un graphe direct orienté, géré par un système de messagerie.
+The fluxions make up a chain of processing binded by data streams.
+All these chains make up a directed graph, managed by the messaging system.
+
+
+% Le modèle d'exécution fluxionnel a pour fonction de manipuler et d'invoquer des unités d'exécutions autonomes n'ayant pour paramètre d'entrée et de sortie que des flux, c'est à dire des séquences continues et infinies de données agrégées par messages.
+% Nous avons appelé ce type d'unité d'exécution autonome une fluxion.
+% C'est à dire une fonction, au sens de la programmation fonctionnelle, dépendant exclusivement de flux de données.
+% Elle est composée d'un nom unique, d'une fonction de traitement, et d'un contexte mémoire au moment de son exécution.
+
+% Les messages sont composés du nom de la fluxion destinataire et d'un corps, et acheminés par un système de messagerie.
+% % Ils représentent à la fois le signal d'invocation, et les données nécessaires à cette invocation.
+% Après avoir traité un message, la fluxion modifie son contexte local, puis termine son exécution en renvoyant un message sur son flux de sortie.
+% Chaque fluxion renvoie un message unique à destination d'une ou plusieurs fluxions.
+% Le contexte d'exécution de la fluxion est composé de l'ensemble des variables d'état dont dépend la fluxion.
+
+% Les fluxions forment des chaînes de traitement liées par les flux.
+% L'ensemble de ces chaînes forme un graphe direct orienté, géré par un système de messagerie.
 
 \subsection{Système de messagerie}
 
