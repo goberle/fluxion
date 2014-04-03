@@ -1,30 +1,33 @@
 \section{Introduction}
 
 
-The growth of web platforms is caused partially by the capacity of Internet to favor services development with the quick release of a minimal product.
-In a matter of hours, it's possible to put online a working product to gather a first community around.
-\textit{``Release early, release often''} is often heard to quickly gather a user community around an open source project, as a community is a factor of success.
+The growth of web platforms is caused partially by Internet's capacity to stimulate services development and allow very quick release of minimal viable products.
+In a matter of hours, it's possible to upload a first product and start gathering a community around.
+\textit{``Release early, release often''} is commonly heard as an advice to quickly gather a user community, as the size of the community is a factor of success.
 
-If the service complies with requirements, the community will probably grow gradually as the service gain popularity.
-To absorb this growth, the resources quantity used by the service will grow accordingly.
-Until the size of data to process, and available resources require to use a more efficient processing model.
-To reduce coupling between service's parts, and migrate them to more resourceful environment, most of the most efficient models split the exchanges between functions, using different communication paradigms like three-tiers architecture, events, messages, or stream. [biblio]
-Once split, the different service's parts are connected by a messaging system, often asynchronous.
-Lots of tools have been defined to express and manage these different service's parts and their communications [Storm, MillWheel, Spark, TimeStream ...]
+If the service complies successfully with users requirements, the community will grow gradually as the service gain popularity.
+To cope with this growth, the resources quantity taken up by the service shall grow exponentially.
+Until the amount of data to process requires the development team to use a more efficient processing model to make better use of the resources.
+Many of the most efficient models split the system into parts to reduce coupling and migrate them to more resourceful environment. [biblio]
+Once split, the different service's parts are connected by a messaging system, often asynchronous, using communication paradigms like \textit{three-tiers} architecture, events, messages or stream.
+Many tools have been developed to express and manage these different service's parts and their communications [Storm, MillWheel, Spark, TimeStream ...]
 However these tools use specific interfaces and languages.
-It requires to train the development teams, hire experts and write again the initial code base.
-This new architecture is mainly less flexible and less adaptable to quick modification.
-Thus, this modifications implies to take risk to continue developing the project because of the implications, without releasing a concrete impact on the service's features.
+Thus, it requires the development team to be trained, to hire experts and to start over the initial code base, while this new architecture is not flexible and adaptable enough for quick modifications, as the initial code base was.
+Thus, this modifications implies the development team to take risks without adding concrete value to the service.
 
-We propose a tool to automate this architecture shift, by using a split architecture to the program, without having to modify the initial code base.
-Such a tool could lift the risks described above.
-We aim at providing this tool to Web applications of which load come from users requests streams, and initial development use a simple web paradigm.
-% TODO explain a simple web paradigm
-We think it's possible to analyze this type of applications to express it using autonomous, movable functions communicating by data streams, as soon as the first public release.
+We propose a tool able to automate this architecture shift.
+Such a tool might lift the risks described above.
+We aim at providing this tool to Web applications for which load come from users requests streams.
+And application for which initial development use a simple web paradigm consisting of a web server, data processing logic, and a database.
+We think it's possible to analyze this type of applications to express it using autonomous, movable functions communicating by data streams.
+And to shift architecture as soon as the first public release without wiping off the initial code base.
 
-We assume this applications are developed in a dynamic language like Javascript, and we propose a tool able to identify internal streams, to define stream processing units, and to dynamically manage these units.
-The tool aim to not modify the existing code, but propose a layer of meta information over the initial code.
-This layer uses the paradigm of fluxion which we are going to define, and will be at the core of our proposition.
+We assume these applications are developed in a dynamic language like Javascript, and we propose a tool able to identify internal streams and stream processing units, and to dynamically manage these units.
+The tool aims not to modify the existing code, but propose a layer of meta information over the initial code.
+This layer uses the paradigm of fluxion which we are going to define in section 2, and will be at the core of our proposition of automation, described section 3.
+In Section 4, we evaluate our tool, and compare it to other solutions in term of performance, and development impact.
+
+
 
 % La croissance des plateformes du Web est dû partiellement à la capacité d'Internet à favoriser le développement de services avec une mise en production minimale très rapide.
 % En quelques heures, il est possible de mettre en ligne un produit fonctionnel afin de rassembler une première audience.
@@ -48,6 +51,3 @@ This layer uses the paradigm of fluxion which we are going to define, and will b
 
 % Nous supposons que les applications sont développées dans un langage dynamique comme Javascript, et nous proposons un outil capable d'identifier les flux internes d'échanges, de définir des unités de traitement de ces flux, et de pouvoir gérer de manière dynamique ces unités.
 % L'outil identifie ces unités sans être intrusif dans le code existant mais en proposant une sur-expression du programme initial reposant sur le paradigme de fluxion que nous allons définir et qui servira de cœur à notre proposition.
-
-\TODO{La section 2 présente le principe de fluxion en le positionnant par rapport à l'existant.
-La section 3 ...}
