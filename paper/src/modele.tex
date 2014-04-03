@@ -9,6 +9,7 @@ That is a function, as in functional programming, only dependent from data strea
 It's composed of a unique name, a processing function, and a memory context during its execution.
 
 Messages are composed of the name of the recipient fluxion, a body, and are carried by a messaging system.
+% They represent both the invocation signal, and the data needed for this invocation
 After processing a message, the fluxion modify its context, and then terminate its execution by sending a message on its output stream.
 Each fluxion send back a unique message to one or many recipient.
 The fluxion's execution context is the set of state variables whose the fluxion depends on.
@@ -16,54 +17,38 @@ The fluxion's execution context is the set of state variables whose the fluxion 
 The fluxions make up a chain of processing binded by data streams.
 All these chains make up a directed graph, managed by the messaging system.
 
+\subsection{Messaging system}
 
-% Le modèle d'exécution fluxionnel a pour fonction de manipuler et d'invoquer des unités d'exécutions autonomes n'ayant pour paramètre d'entrée et de sortie que des flux, c'est à dire des séquences continues et infinies de données agrégées par messages.
-% Nous avons appelé ce type d'unité d'exécution autonome une fluxion.
-% C'est à dire une fonction, au sens de la programmation fonctionnelle, dépendant exclusivement de flux de données.
-% Elle est composée d'un nom unique, d'une fonction de traitement, et d'un contexte mémoire au moment de son exécution.
+The messaging system is the core of our fluxionnel execution model.
+Its task is both to carry messages along stream, and to invoke fluxions at a message reception.
 
-% Les messages sont composés du nom de la fluxion destinataire et d'un corps, et acheminés par un système de messagerie.
-% % Ils représentent à la fois le signal d'invocation, et les données nécessaires à cette invocation.
-% Après avoir traité un message, la fluxion modifie son contexte local, puis termine son exécution en renvoyant un message sur son flux de sortie.
-% Chaque fluxion renvoie un message unique à destination d'une ou plusieurs fluxions.
-% Le contexte d'exécution de la fluxion est composé de l'ensemble des variables d'état dont dépend la fluxion.
-
-% Les fluxions forment des chaînes de traitement liées par les flux.
-% L'ensemble de ces chaînes forme un graphe direct orienté, géré par un système de messagerie.
-
-\subsection{Système de messagerie}
-
-Le système de messagerie est le cœur du modèle d'exécution fluxionnel.
-Il a pour fonction, à la fois d'acheminer les messages, et d'invoquer les fluxions.
-
-Il est construit autour d'une file de messages, traités les uns après les autres par invocation de la fluxion destinataire.
-L'utilisation d'une file de messages permet d'exécuter plusieurs chaînes de traitement parallèlement et équitablement, sans faire de différence dans l'ordonnancement entre messages locaux et messages provenant du réseau.
-Le cycle de vie d'une application fluxionnelle est illustré figure \ref{fig:messagerie}.
+It's build around a message queue, processed one after another by invocation of the recipient fluxion.
+Using a message queue allow to execute multiple processing chain fairly and concurrently, without difference in scheduling local messages, or network messages.
+The life cycle of a fluxionnel application is pictured on figure \ref{fig:MesSys}.
 
 \begin{figure}[h!]
   \includegraphics[width=\linewidth]{schema-message.pdf}
-  \caption{Schema du système de messagerie}
-  \label{fig:messagerie}
+  \caption{Messaging system details}
+  \label{fig:MesSys}
 \end{figure}
 
-Chaque fluxion dois être enregistrée dans le système de messagerie.
-Cet enregistrement associe une fonction de traitement à un nom, et un contexte d'exécution initial.
-Le système de messagerie achemine les flux de messages en se basant sur les noms des fluxions.
-C'est pourquoi il ne peut pas exister deux fluxions ayant le même nom.
-% Lors de cet enregistrement, il est possible d'initialiser le contexte d'exécution.
-L'enregistrement se fait à l'aide de la fonction \texttt{register(<nom>, <fn>, <contexte>)}, étape \circled{1} sur la figure \ref{fig:messagerie}.
-% Une fluxion peut elle-même enregistrer d'autres fluxions dynamiquement.
+The messaging system needs every fluxion to be registered.
+This registration match a processing function with a unique name and an initial execution context.
+The messaging system carries messages streams based on these fluxions' names.
+That's why two fluxions with the same name would lead the system in a conflicting situation.
+The registration is done using the function \texttt{register(<nom>, <fn>, <contexte>)}, step \circled{1} on figure \ref{fig:MesSys}.
+% A fluxion can dynamically register other fluxions
 
-Pour déclencher une chaîne de fluxions un premier message est envoyé dans le système de messagerie, en utilisant la fonction \texttt{start(<msg>)}, étape \circled{2}.
-Cette fonction va placer un premier message dans la file.
-Le système dépile ce message, et exécute la fonction de traitement destinataire, étape \circled{3} et \circled{4}.
-Le message résultat de cette exécution est alors empilé dans la file de message, étape \circled{5} et \circled{6}.
-Le système boucle alors sur les étapes \circled{3} à \circled{6} jusqu'à ce qu'il n'y ai plus de messages dans la file.
+To trigger a fluxions chain, a first message is sent in the messaging system, using the function \texttt{start(<msg>)}, step \circled{2}.
+This function push a first message in the queue.
+Immediately, the system dequeue this message to invoke the recipient processing function, step \circled{3} and \circled{4}.
+The message resulting of this invocation is then enqueue on the message queue, step \circled{5} and \circled{6}.
+The system loop through step \circled{3} to \circled{4} until the queue is empty.
 
-Les algorithmes \ref{alg:traitement} et \ref{alg:parcours} formalisent précisément le comportement du système de messagerie généré suite à l'appel de la fonction \texttt{start}.
+The algorithm \ref{alg:traitement} and \ref{alg:parcours} describe precisely the behavior of the messaging system after the function \texttt{start} invocation.
 
 \begin{algorithm}
-\caption{Algorithme de la file de messages}
+\caption{Message queue processing algorithm}
 \label{alg:traitement}
 \begin{algorithmic}
 \Function{processMsg}{$msg$}
@@ -77,7 +62,7 @@ Les algorithmes \ref{alg:traitement} et \ref{alg:parcours} formalisent précisé
 \end{algorithm}
 
 \begin{algorithm}
-\caption{Algorithme de parcours de la file}
+\caption{Message queue walking algorithm}
 \label{alg:parcours}
 \begin{algorithmic}
 \Function{loopMessage}{\null}
@@ -89,42 +74,42 @@ Les algorithmes \ref{alg:traitement} et \ref{alg:parcours} formalisent précisé
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Interfaces externes}
+\subsection{External interfaces}
 
-Afin de pouvoir interagir avec le monde extérieur, on définit des interfaces de bordures externes.
-Notre approche repose sur les architectures Web.
-L'interface externe permet de communiquer avec un client REST \footnote{REST: \textbf{Re}presentational \textbf{S}tate \textbf{T}ransfer \cite{Fielding2002}}.
-Nous définissons dans cette interface deux composants :
+In order to interact with outside of the system, we define external border interfaces.
+Our approach is based on Web architecture.
+The external interface enable to communicate with a REST\footnote{REST: \textbf{Re}presentational \textbf{S}tate \textbf{T}ransfer \cite{Fielding2002}} client.
+We define two components in this interface :
 
 \begin{itemize}
 	\item[\textbf{In}]
-    permet de recevoir des connections clientes.
-    % C'est donc le premier maillon de la chaîne de traitement.
-    Pour chaque connexion entrante, ce composant va transmettre l'identifiant de connexion au composant \textbf{Out}, lui permettant de répondre.
-    Il transmet ensuite un message contenant l'identifiant de connexion et la requête à la première fluxion de la chaîne de traitement en appelant la fonction \texttt{start}.
+    receives client connections.
+    % This is so the first link in the chain.
+    For every incoming connection, this component relay a connection identifier needed by the \textbf{Out} component for the reply.
+    It then relay a message the connection identifier and the request to the first fluxion in the processing chain by calling the function \texttt{start}.
 	\item[\textbf{Out}]
-    permet d'envoyer le résultat de la chaîne de traitement au client Web.
-    Afin de recevoir les messages de la chaîne, le composant \textbf{Out} est enregistrée dans le système de messagerie sous le nom réservé \texttt{out}.
-    % C'est donc le dernier maillon de la chaîne de traitement.
+    reply the result of the processing chain to the client.
+    To receive messages from the processing chain, the component \textbf{Out} is registered in the messaging system under the name \texttt{out}.
+    % This is so the last link in the chain.
 \end{itemize}
 
-
-La figure \ref{fig:schemaweb} illustre les éléments spécifiques de cette interface Web au sein du système fluxionnel illustré par la figure \ref{fig:messagerie}.
+The figure \ref{fig:schemaweb} pictures the specifics elements of the web interface inside the fluxionnel system.
+% La figure \ref{fig:schemaweb} illustre les éléments spécifiques de cette interface Web au sein du système fluxionnel illustré par la figure \ref{fig:MesSys}.
 
 \begin{figure}[h!]
 	\includegraphics[width=\linewidth]{schema-web.pdf}
-	\caption{Schema d'un système fluxionnel avec une interface Web}
+	\caption{Fluxionnal application with web interface}
 	\label{fig:schemaweb}
 \end{figure}
 
 % TODO paragraphe de transition
 
-\subsection{Exemple de service}
+\subsection{Service example}
 
-Afin d'illustrer le modèle d'exécution fluxionnel, nous présentons ici un exemple de son utilisation à travers un simple compteur de visites.
-Ce service compte le nombre de connexions HTTP de chaque utilisateur et lui renvoie ce nombre dans la réponse.
+In order to picture the fluxionnel execution model, we present in this section an example of its use with a simple visit counting service.
+This service count the number of HTTP connection of each user, and send him back this number in the HTTP reply.
 
-La version initiale du service pourrait ressembler à l'extrait de listing \ref{lst:classique}.
+The inital version of this service could look like the listing extract \ref{lst:classique}.
 
 \begin{code}[Javascript, caption={Service initial},label={lst:classique}]
 var app = require('express')();
@@ -135,7 +120,7 @@ var app = require('express')();
   count[req.params.id] = count[req.params.id]  || 1;
   ++count[req.params.id]
   var visits = count[req.params.id];
-  var reply = req.params.id + '[' + visits + ']';
+  var reply = req.params.id + ' connected ' + visits + ' times.';
 @\label{lst:classique_send}@  res.send(reply);
 @\label{lst:classique_replye}@});
 
@@ -144,29 +129,31 @@ app.listen(port);
 console.log("Listening port: "+port);
 \end{code}
 
-Dans ce code il est intéressant de distinguer 3 éléments.
+In the listing extract \ref{lst:classique}, three elements are interesting to notice.
+
 \begin{itemize}
-  \item La variable \texttt{count} à la ligne \ref{lst:classique_count} est une mémoire persistante permettant de compter le nombre de visites pour chaque identifiant d'utilisateur distinct.
-  Elle sera donc transformée dans le notion de contexte d'exécution du système fluxionnel.
-  \item La fonction \texttt{reply}, ligne \ref{lst:classique_replyb} à \ref{lst:classique_replye} réalise le traitement fluxionnel type que l'on souahite réaliser.
-  \item Enfin les deux méthodes \texttt{get} et \texttt{send}, respectivement ligne \ref{lst:classique_get} et \ref{lst:classique_send}, permettent d'interagir avec le serveur Web.
+  \item The \texttt{count} array at line \ref{lst:classique_count} is a persistent memory to store each users visits counts under a specific user identifier.
+  This array transform into a fluxion execution context in the fluxionnel system.
+  \item The \texttt{reply} function, line \ref{lst:classique_replyb} to \ref{lst:classique_replye}, contains the logic we want to replace by fluxionnel processing chain.
+  \item The two methods \texttt{get} and \texttt{send}, respectively line \ref{lst:classique_get} and \ref{lst:classique_send}, interface the logic and the web server.
 \end{itemize}
 
-Ce programme minimal serait transformé dans notre système en la chaîne de fluxions illustrés figure \ref{fig:fluxions}.
+This minimal service would be transformed with our automatic tool into the fluxions chain pictured figure \ref{fig:fluxions}.
 
 \begin{figure}[h!]
   \includegraphics[width=\linewidth]{flux.pdf}
-  \caption{Suite de fluxion du compteur}
+  \caption{Count service fluxions chain}
   \label{fig:fluxions}
 \end{figure}
 
-L'extrait de code figure \ref{lst:fluxionnel} décrit ce même service de comptage dans un langage fluxionnel de haut niveau.
-Ce pseudo code, de par la segmentation qu'il apporte par rapport au code initial, permet à un système annexe d'optimiser le placement des fluxions sur les machines physiques en fonction du coût des flux et de leur traitement.
+The listing extract \ref{lst:fluxionnel} describe this same counting service in a high level fluxionnel langage.
+This new language bring a stricter segmentation than the initial code.
+And so allow an additional system to optimize how fluxions are organized on different physical machines according to the cost of the streams and their processing. 
 
-Ce langage fluxionnel de haut niveau est non typé
-\TODO{écrire un paragraphe sur les caractéristiques du langage, une subsection pourrait être nécessaire, mais elle serait peut être mieux placé dans la section sur la transformation}
+This high level language is not typed.
+\TODO{write a paragraph about the languages caracteristics, a reserved subsection might be necessary, but maybe better placed in the next section, about transformation}
 
-\begin{code}[Javascript, caption={Code fluxionnel},label={lst:fluxionnel}]
+\begin{code}[Javascript, caption={Fluxionnal high level language},label={lst:fluxionnel}]
 use fluxion, web
 
 fluxion input >> view
@@ -186,31 +173,11 @@ register view
 web.listen
 \end{code}
 
-Hormis les deux composants d'interface, le service à été segmenté comme suit :
+Except from the two interface components, the service is split as follow :
 \begin{itemize}
-  \item La fluxion \texttt{input} est la première à recevoir le message du client.
-  Elle contient l'ensemble de la logique de ce simple service.
-  Pour des services réels, on trouverais à sa place l'ensemble des fluxions contenant la logique du service organisé en une ou plusieurs chaîne de traitement.
-  Elle incrémente le compteur de l'utilisateur l'agrège au message, et renvoie ce dernier à la fluxion suivante.
-  \item La fluxion \texttt{view} récupère le message, et met en forme la réponse que recevra l'utilisateur, et l'envoie à la fluxion de sortie.
+  \item The \texttt{input} fluxion is the first to receive the client message.
+  It contains the whole logic of this simple service.
+  A real services would need a more complex chain with logic distributed across multiples fluxions, instead of a single fluxion.
+  It increment the count for the received user identifier, push this count inside the message, and relay it the next fluxion.
+  \item The \texttt{view} fluxion receive this message, and format as the user will view it, and relay it the output fluxion.
 \end{itemize}
-
-% Ce service manipule principalement deux informations sur lesquelles qu'il est important de détailler.
-% D'une part, les connections clientes sont partagé entre l'entrée et la sortie.
-% Pour chaque connexion, l'entrée passe directement à la sortie un couple <id, res>.
-% id représente simplement un identifiant permettant de retrouver res, il est envoyé à la fluxion input.
-% res est la structure permettant de répondre au client.
-% Ce mécanisme provoque un échange important de donnée entre le point d'entrée et le point de sortie, et implique de passer l'identifiant sur toute la chaîne de traitement, jusqu'à sa réception au point de sortie.
-
-% Les messages échangés contiennent principalement deux informations importantes : les identifiants d'utilisateurs, permettant d'incrémenter un compteur pour chaque utilisateur, et les identifiants de connexion, permettant de lier une suite de messages avec la structure contenant la connexion HTTP.
-% Le point d'entrée, et le point de sortie du système doivent rester sur la machine où la connexion a eu lieu pour avoir accès à l'interface réseau, tandis que les autre fluxions n'ont pas cette obligation, et peuvent être migré.
-
-
-% Cet identifiant de connexion est nécessaire au point de sortie pour associer le résultat reçu avec la connexion vers laquelle le renvoyer à l'utilisateur.
-% Nous passons cet identifiant pour ne pas alourdir les échanges de messages avec la structure contenant la connexion HTTP.
-
-% Ainsi, la fluxion de sortie reçois des messages provenant de deux fluxions : le point d'entrée
-
-
-
-
