@@ -6,7 +6,7 @@ The fluxionnal execution model role is to manage and invoke autonomous execution
 An execution unit accepts only streams as input and output, that is a continuous and infinite sequence of data contained in messages.
 We named this execution unit a fluxion.
 That is a function, as in functional programming, only dependent from data streams.
-It's composed of a unique name, a processing function, and a memory context during its execution.
+It is composed of a unique name, a processing function, and a memory context during its execution.
 
 Messages are composed of the name of the recipient fluxion, a body, and are carried by a messaging system.
 % They represent both the invocation signal, and the data needed for this invocation
@@ -20,7 +20,7 @@ All these chains make up a directed graph, managed by the messaging system.
 \subsection{Messaging system}
 
 The messaging system is the core of our fluxionnal execution model.
-It carries messages along stream, and invokes fluxions at a message reception.
+It carries messages along stream, and invokes fluxion at a message reception.
 
 It is build around a message queue.
 Each message is processed one after another by invocation of the recipient fluxion.
@@ -78,7 +78,7 @@ The algorithm \ref{alg:traitement} and \ref{alg:parcours} precisely describe the
 \subsection{External interfaces}
 
 In order to interact with other systems, we define external border interfaces.
-As a first approach, we aimed at Web architectures, and we need to communicate with a REST\footnote{REST: \textbf{Re}presentational \textbf{S}tate \textbf{T}ransfer \cite{Fielding2002}} client.
+As a first approach, our goal is to interface Web architectures, so we need to communicate with a REST\footnote{REST: \textbf{Re}presentational \textbf{S}tate \textbf{T}ransfer \cite{Fielding2002}} client.
 We define two components in this interface :
 
 \begin{itemize}
@@ -107,9 +107,9 @@ Figure \ref{fig:schemaweb} pictures the specifics elements of the web interface 
 \subsection{Service example}
 
 In order to picture the fluxionnal execution model, we present an example of a simple visit counting service.
-This service counts the number of HTTP connection of each user, and sends him back this number in the HTTP reply.
+This service counts the number of HTTP connection for each user, and sends him back this number in the HTTP reply.
 
-The inital version of this service could look like the listing extract \ref{lst:classique}.
+The inital version of this service could look like listing \ref{lst:classique}.
 
 \begin{code}[Javascript, caption={Initial service},label={lst:classique}]
 var app = require('express')();
@@ -136,6 +136,7 @@ In listing \ref{lst:classique}, three elements are worth noticing.
   This array corresponds to a fluxion execution context in the fluxionnal system.
   \item The \texttt{reply} function, line \ref{lst:classique_replyb} to \ref{lst:classique_replye}, contains the logic we want to express in the fluxionnal processing chain.
   \item The two methods \texttt{get} and \texttt{send}, respectively line \ref{lst:classique_get} and \ref{lst:classique_send}, interface the logic with the external interface.
+  The processing chains clearly appears here : $\texttt{get} \to \texttt{reply} \to \texttt{send}$
 \end{itemize}
 
 This minimal service would be transformed with our automatic tool into the fluxions chain pictured figure \ref{fig:fluxions}.
