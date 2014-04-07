@@ -2,7 +2,7 @@ FILE = main
 NAME = Fluxions
 PDFLATEX = mkdir -p .tmp && cd src && pdflatex --output-directory ../.tmp ../src/${FILE}.tex && mv ../.tmp/${FILE}.pdf ../${NAME}.pdf && cd ..
 BIBER = mkdir -p .tmp && cd .tmp && biber ${FILE} && cd ..
-.PHONY: all, biblio, _main, _bib
+.PHONY: all, bib, _main, _bib
 
 all: pdf bib open
 
