@@ -107,9 +107,9 @@ Figure \ref{fig:schemaweb} pictures the specifics elements of the web interface 
 \subsection{Service example}
 
 In order to picture the fluxionnal execution model, we present an example of a simple visit counting service.
-This service counts the number of HTTP connection for each user, and sends him back this number in the HTTP reply.
+This service counts the number of HTTP connections for each user, and sends him back this number in the HTTP reply.
 
-The inital version of this service could look like listing \ref{lst:classique}.
+The initial version of this service could look like listing \ref{lst:classique}.
 
 \begin{code}[Javascript, caption={Initial service},label={lst:classique}]
 var app = require('express')();
@@ -132,14 +132,14 @@ console.log("Listening port: "+port);
 In listing \ref{lst:classique}, three elements are worth noticing.
 
 \begin{itemize}
-  \item The \texttt{count} array at line \ref{lst:classique_count} is a persistent memory that stores each user visit count.
-  This array corresponds to a fluxion execution context in the fluxionnal system.
+  \item The \texttt{count} object at line \ref{lst:classique_count} is a persistent memory that stores each user visit count.
+  This object is mapped to a fluxion \textit{execution context} in the fluxionnal system.
   \item The \texttt{reply} function, line \ref{lst:classique_replyb} to \ref{lst:classique_replye}, contains the logic we want to express in the fluxionnal processing chain.
   \item The two methods \texttt{get} and \texttt{send}, respectively line \ref{lst:classique_get} and \ref{lst:classique_send}, interface the logic with the external interface.
-  The processing chains clearly appears here : $\texttt{get} \to \texttt{reply} \to \texttt{send}$
+  The hidden processing chain is : $\texttt{get} \to \texttt{reply} \to \texttt{send}$
 \end{itemize}
 
-This minimal service would be transformed with our automatic tool into the fluxions chain pictured figure \ref{fig:fluxions}.
+This minimal service is transformed with our automatic tool into the Figure \ref{fig:fluxions} fluxions chain .
 
 \begin{figure}[h!]
   \includegraphics[width=\linewidth]{flux.pdf}
@@ -147,16 +147,25 @@ This minimal service would be transformed with our automatic tool into the fluxi
   \label{fig:fluxions}
 \end{figure}
 
-Listing \ref{lst:fluxionnal} describes this counting service in our fluxionnal langage.
-This new language brings a stricter segmentation than the initial code, and so allows an additional system to optimize how fluxions are organized on different physical machines according to the cost of the streams and their processing. 
+Figure \ref{fig:fluxions}, circles shows registered fluxions.
+We show exchanged messages between fluxions and data transmitted from one fluxion to the other. Finally squares stored in the messaging system hold the \textit{execution context} for the logic and \textbf{Out} fluxionx.
+When a new \texttt{get} REST message is received at the \textbf{In} end point, a start message triggers the flow.
+Concurrently the \textbf{In} fluxion set a \texttt{cid} parameter to the \textbf{Out} fluxion execution context.
+This \texttt{cid} is associated to the client connexion the last fluxion may redirect the answer to.
+The \texttt{cid} tags the request and is transmitted all the way long through the flow.
+Each fluxion propagates the necessary values from one fluxion to the other exclusively within messages.
+Horizontal dashed lines shows message virtual transmission between fluxion although they all go through the messaging system.
+
+Listing \ref{lst:fluxionnal} describes this counting service in our fluxionnal language.
+Conclusion, this new language brings a stricter segmentation than the initial code, and so allows an additional system to optimize how fluxions are organized on different physical machines according to the cost of the streams and their processing. 
 
 This high level language is not typed.
-\TODO{write a paragraph about the languages caracteristics, a reserved subsection might be necessary, but maybe better placed in the next section, about transformation}
+\TODO{write a paragraph about the languages characteristics, a reserved subsection might be necessary, but maybe better placed in the next section, about transformation}
 
 \begin{code}[Javascript, caption={Fluxionnal sample},label={lst:fluxionnal}]
 use fluxion, web
 
-fluxion input >> view
+fluxion logic >> view
   this.uid[msg.uid] = this.uid[msg.uid] + 1 || 1
   msg.count = this.uid[msg.uid]
   return msg
@@ -167,7 +176,7 @@ fluxion view >> output
   msg.count = undefined
   return msg
 
-register input, {uid: {}}
+register logic, {uid: {}}
 register view
 
 web.listen
@@ -175,9 +184,12 @@ web.listen
 
 Except from the two interface components, the service is split as follow :
 \begin{itemize}
-  \item The \texttt{input} fluxion is the first to receive the client message.
+  \item The \texttt{logic} fluxion is the first to receive the client message.
   It contains the whole logic of this simple service.
   A real services would need a more complex chain with logic distributed across multiples fluxions, instead of a single fluxion.
-  It increment the count for the received user identifier, push this count inside the message, and relay it the next fluxion.
+  It increments the count for the received user identifier, push this count inside the message, and relay it the next fluxion.
   \item The \texttt{view} fluxion receive this message, and format as the user will view it, and relay it the output fluxion.
 \end{itemize}
+
+Although, using a fluxionnal approach is a way to build an efficient distributed system we consider that the most important part of our work is to enable code transformation from a standard basic web approach to a flow of fluxions.
+We show now the main code transformation we propose.
