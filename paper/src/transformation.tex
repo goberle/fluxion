@@ -1,11 +1,14 @@
-\section{Transformation d'un modèle à l'autre}
+\section{Transformation}
 
-	Nous développons ici les étapes de compilation necessaire pour passer d'un modèle de programmation classique utilisant Javascript, vers le modèle d'execution fluxionnel décrit dans la précédente section.
+	We are detailling here, the necessary compilations steps to transform a program expressed with a classical approach, using Javascript, to the fluxionnal execution model described in the previous section.
 
-	Nous listons ici l'ensemble des points de différence entre les deux modèles nécessitant une transformation lors de la compilation.
+	As the fluxionnal execution model is written in Javascript, most of the initial code can be preserved.
+	However, here is the list of the differences between the two models.
+	These differences need a transformation from one model to another.
 
-	Nous considérons qu'un service web se situe dans un sous-ensemble des programmes classiques écrit dans un langage dynamique.
-	Ce sous-ensemble implique que le programme soit structuré de manière à enchaîner des traitements séquentiellement les uns après les autres.
+	We consider a web service is in a subset of the classical programs, written in dynamic language.
+	This subset implies the program to be structured in a fashion sucha as to chain processing sequentially, one after the other.
+	\TODO{The subset is badly described}
 
 	\subsection{Différences entre les deux modèles}
 
