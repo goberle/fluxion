@@ -24,13 +24,13 @@ function post(msg) {
     if (!msg)
       return false;
 
-    setTimeout(post, 0, msg);
+    // setTimeout(post, 0, msg);
+    post(msg);
   }
 
   function recvMsg(msg) {
     if (!flx_repo[msg.dest]) {
       console.log(msg.dest + ' not defined');
-      // link(msg.dest);
     }
 
     hooks.post(msg, msg.dest);

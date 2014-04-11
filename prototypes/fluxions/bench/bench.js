@@ -2,7 +2,7 @@ var http = require('http');
 var time = require('microtime');
 
 const parallel = 1;
-const connection = 1000;
+const connection = 10000;
 var clients = {};
 var results = {
   clients: 0
