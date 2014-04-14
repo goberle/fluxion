@@ -1,12 +1,14 @@
 var http = require('http');
 var time = require('microtime');
 
-const parallel = 1;
-const connection = 10000;
+const parallel = 100;
+const connection = 100;
 var clients = {};
 var results = {
   clients: 0
 };
+
+console.log(">> Bench with " + parallel + " concurrent client" + ((parallel > 1)?'s':'') + ", connecting sequentially " + connection + " time" + ((connection > 1)?'s':''));
 
 function send(id, before, after) {
 
@@ -49,7 +51,7 @@ function gather(id) {
     };
     var time = sums / parallel;
 
-    console.log("With " + parallel + " concurrent client" + ((parallel > 1)?'s':'') + ", connecting sequentially " + connection + " time" + ((connection > 1)?'s':'') + ", measured average response time : " + time + "ms");
+    console.log("  - Measured average response time : " + time + "ms");
   }
 }
 

@@ -2,6 +2,8 @@ var flx = require('./flx_nosto')
   , express = require('express')
   , app = express();
 
+var _cid = 0;
+
 flx.register("output", function(msg){
   if (msg.res) {
     this.cid[msg.cid] = msg.res;
@@ -15,7 +17,7 @@ flx.register("output", function(msg){
 
 app.get('/:id', function(req, res) {
   var uid = req.params.id;
-  var cid = req.client._idleStart;
+  var cid = _cid++;
 
   flx.start(flx.m("output", {cid: cid, res: res}));
   flx.start(flx.m("input", {uid: uid, cid: cid}));
