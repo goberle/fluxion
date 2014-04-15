@@ -1,5 +1,5 @@
-var flx = require('./lib/flx_nosto')
-  , web = require('./lib/web_nosto');
+var flx = require('./lib/flx_chain')
+  , web = require('./lib/web_chain');
 
 flx.register("input", function(msg){
   this.uid[msg.uid] = this.uid[msg.uid] + 1 || 1;

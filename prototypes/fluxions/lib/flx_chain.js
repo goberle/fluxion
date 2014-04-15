@@ -24,7 +24,6 @@ function post(msg) {
     if (!msg)
       return false;
 
-    // setTimeout(post, 0, msg);
     post(msg);
   }
 

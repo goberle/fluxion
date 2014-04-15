@@ -1,16 +1,27 @@
 var http = require('http');
 var time = require('microtime');
 
-const parallel = 100;
-const connection = 100;
+const parallel = 1;
+const connection = 1;
+const servers = [
+  'count_basic',
+  'count_chain',
+  'count_basic'
+  // 'count_basic',
+  // 'count_nextTick',
+  // 'count_setTimeout',
+  ]
+
+
+
 var clients = {};
 var results = {
   clients: 0
 };
 
-console.log(">> Bench with " + parallel + " concurrent client" + ((parallel > 1)?'s':'') + ", connecting sequentially " + connection + " time" + ((connection > 1)?'s':''));
-
 function send(id, before, after) {
+
+  console.log(" -- >> http://localhost:8080" + id);
 
   var options = {
     hostname: 'localhost',
@@ -27,7 +38,7 @@ function send(id, before, after) {
   });
 
   req.on('error', function(e) {
-    console.log('problem with request: ' + e.message);
+    console.error('problem with request: ' + e.message);
   });
 
   before(time.now());
@@ -35,7 +46,7 @@ function send(id, before, after) {
   req.end();
 }
 
-function gather(id) {
+function gather(name, cb) {
   results.clients++;
 
   if (results.clients === parallel) {
@@ -51,34 +62,101 @@ function gather(id) {
     };
     var time = sums / parallel;
 
-    console.log("  - Measured average response time : " + time + "ms");
+    cb(name, time, results);
   }
 }
 
-// write data to request body
-for (var i = 0; i < parallel; i++) {
+function bench(name, cb) {
+  // write data to request body
 
-  (function(i) {
-    var before = function(time) {
-      clients[i].time = time;
-    }
+  // console.log(clients, results);
 
-    var after = function(time) {
-      var d = time - clients[i].time;
-      clients[i].times.push(d);
-
-      if (++clients[i].count <= connection) {
-        send('/client' + i, before, after);
-      } else {
-        gather(i);
+  for (var i = 0; i < parallel; i++) {
+    (function(i) {
+      var before = function(time) {
+        clients[i].time = time;
       }
-    }
 
-    clients[i] = {
-      count: 1,
-      time: 0,
-      times: []
-    };
-    send('/client' + i, before, after);
-  })(i);
-};
+      var after = function(time) {
+        var d = time - clients[i].time;
+        clients[i].times.push(d);
+
+        if (++clients[i].count < connection) {
+          send('/client' + i, before, after);
+        } else {
+          gather(name, cb);
+        }
+      }
+
+      clients[i] = {
+        count: 0,
+        time: 0,
+        times: []
+      };
+      send('/client' + i, before, after);
+    })(i);
+  };
+}
+
+
+
+function launch(name, _cb) {
+  var spawn = require('child_process').spawn,
+      server = spawn('node', [name]);
+
+  server.stdout.on('data', function (data) {
+    console.log('stdout: ' + data);
+    if (data == ">> listening 8080\n") {
+      _cb();
+    }
+  });
+
+  server.stderr.on('data', function (data) {
+    console.error('stderr: ' + data);
+  });
+
+  server.on('close', function (code) {
+    console.log('child process exited with code ' + code);
+  });
+
+  return function() {
+    server.stdin.pause();
+    server.kill();
+  }
+}
+
+
+console.log(">> " + parallel + " concurrent client" + ((parallel > 1)?'s':'') + ", " + connection + " sequential connection" + ((connection > 1)?'s':''));
+
+var it = 0;
+function iteration(it) {
+  console.log("iteration " + it);
+
+  clients = {};
+  results = {
+    clients: 0
+  };
+
+  if (it >= servers.length) {
+    return;
+  }
+
+  var name = servers[it];
+  var kill = launch(name, function() {
+    console.log("launched");
+    bench(name, function(name, average, results) {
+      console.log("  >> " + name + " : " + average + "μs");
+      kill();
+      console.log(clients, results);
+      setTimeout(iteration, 1000, ++it);
+    })
+  });
+}
+
+iteration(it);
+
+
+
+
+
+

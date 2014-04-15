@@ -1,4 +1,4 @@
-var flx = require('./flx_nosto')
+var flx = require('./flx_chain')
   , express = require('express')
   , app = express();
 

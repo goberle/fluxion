@@ -1,5 +1,5 @@
-var flx = require('./lib/flx')
-  , web = require('./lib/web');
+var flx = require('./lib/flx_setTimeout')
+  , web = require('./lib/web_setTimeout');
 
 flx.register("input", function(msg){
   this.uid[msg.uid] = this.uid[msg.uid] + 1 || 1;
