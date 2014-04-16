@@ -20,24 +20,40 @@ For this evaluation against the basic implementation, we developed different ver
 With these differents implementations, we want to highlight the advantages and drawbacks of the fluxionnal execution model.
 
 \begin{figure}
-\begin{tikzpicture}
-	\begin{axis} [
- 		ybar,
- 		enlargelimits=0.15, 
- 		legend style={at={(0.5,-0.15)},anchor=north,legend columns=-1},
- 		ylabel={Average response time},
- 		symbolic x coords={Basic,Fluxionnal-NoSetTimeout,Fluxionnal},
- 		xtick=data,
- 		nodes near coords,
- 		nodes near coords align={vertical}
-	]
-		\addplot coordinates {(Basic,20104) (Fluxionnal-NoSetTimeout,29546) (Fluxionnal,72891)};
-	\end{axis}
-\end{tikzpicture}
+\input{../../prototypes/fluxions/bench/charts/average}
 \caption{Average response time for each implementation}
 \label{fig:reponsetime}
 \end{figure}
 
+\begin{figure}
+\input{../../prototypes/fluxions/bench/charts/distribution}
+\caption{Distribution of response time for each implementation}
+\label{fig:distribution}
+\end{figure}
+
+\begin{figure}
+\input{../../prototypes/fluxions/bench/charts/count_basic}
+\caption{Response time for count\_basic}
+\label{fig:timecountbasic}
+\end{figure}
+
+\begin{figure}
+\input{../../prototypes/fluxions/bench/charts/count_chain}
+\caption{Response time for count\_chain}
+\label{fig:timecountchain}
+\end{figure}
+
+\begin{figure}
+\input{../../prototypes/fluxions/bench/charts/count_nextTick}
+\caption{Response time for count\_nextTick}
+\label{fig:timecountnextTick}
+\end{figure}
+
+\begin{figure}
+\input{../../prototypes/fluxions/bench/charts/count_setTimeout}
+\caption{Response time for count\_setTimeout}
+\label{fig:timecountsetTimeout}
+\end{figure}
 
 
 We can see that the use of fluxions, from our implementation of the fluxionnal execution model increases the average response time of about 50\%, as the \textbf{Fluxionnal-NoSetTimeout} implementation aberage response time show from the \textbf{Basic} implementation.

@@ -1,14 +1,22 @@
 var http = require('http');
 var time = require('microtime');
+var fs = require('fs');
 
 const parallel = 100;
-const connection = 1000;
+const connection = 100;
 const servers = [
   'count_chain',
   'count_basic',
   'count_nextTick',
   'count_setTimeout'
   ]
+
+const colors = [
+  'blue',
+  'red',
+  'green',
+  'yellow'
+]
 
 var results = {};
 var ctl_clients = 0;
@@ -116,6 +124,83 @@ function launch(name, _cb) {
 
 function output() {
 
+  console.log(" == OUTPUT ============================= ");
+
+  function writeFile(name, data) {
+    var path = "bench/charts/" + name + ".tex"
+
+    process.stdout.write('\x1B[1m\x1B[36m>\x1B[35m>\x1B[39m\x1B[22m ' + path);
+    fs.writeFileSync(path, data);
+    console.log('  \x1B[1m\x1B[32m✓\x1B[39m\x1B[22m');
+  }
+
+  function toXLabel(name) {
+    return name.replace(/count_/g, '');
+  }
+
+  templates = {
+    distribution: {
+      pre: "\\begin{tikzpicture}\n" +
+      "\\begin{semilogxaxis}[xmin=0,xmax=1000000, ylabel=Number of client, xlabel=Response time (ms)]\n",
+      post: "\\end{semilogxaxis}\n" +
+      "\\end{tikzpicture}\n"
+    },
+    average: {
+      pre: "\\begin{tikzpicture}\n" +
+      "\\begin{axis}[ybar, ylabel={Average response time}, nodes near coords, nodes near coords align={vertical}, xtick=data, x tick label style={rotate=45,anchor=east}, symbolic x coords={" + toXLabel(servers.join(', ')) + "}]\n" +
+      "\\addplot[color=black]\n" +
+      "coordinates ",
+      post: "\\end{axis}\n" +
+      "\\end{tikzpicture}\n"
+    }
+  }
+
+    // ybar,
+    // enlargelimits=0.15, 
+    // legend style={at={(0.5,-0.15)},anchor=north,legend columns=-1},
+    // symbolic x coords={Basic,Fluxionnal-NoSetTimeout,Fluxionnal},
+
+  var chart = {};
+  var mean = {};
+  var res = 100;
+  var sum = 0;
+
+  for (var s in results) { var server = results[s];
+    chart[s] = {}
+    for (var c in server) { var client = server[c];
+      for (var i = 0; i < client.times.length; i++) {
+        var index = Math.floor(client.times[i] / res) * res;
+        chart[s][index] = chart[s][index] + 1 || 1;
+        sum += client.times[i];
+      };
+      mean[s] = sum / (parallel * connection);
+    };
+  };
+
+  // console.log(chart);
+
+  var average = templates.average.pre + '{';
+  var distribution = templates.distribution.pre;
+  var col = 0;
+  for (var s in chart) { var server = chart[s];
+    var output = templates.distribution.pre + "\n\\addplot[color=black, mark=x] coordinates {";
+    distribution += "\\addplot[color=" + colors[col++] + ", mark=x] coordinates {"
+    for (var c in server) { var time = server[c]
+      output += '(' + c + ',' + time + ')';
+      distribution += '(' + c + ',' + time + ')';
+    }
+    average += '(' + toXLabel(s) + ',' + mean[s] + ')';
+    distribution += "};\n",
+
+    output += "};\n" + templates.distribution.post;
+    writeFile(s, output);
+  }
+  average += "};\n" + templates.average.post;
+  writeFile('average', average);
+
+  distribution += "\\legend{" + toXLabel(servers.join(', ')) + "}\n" + templates.distribution.post;
+  writeFile('distribution', distribution);
+
 }
 
 
@@ -146,6 +231,7 @@ function iteration(it) {
       console.log(" : " + time + "μs");
     };
 
+    output();
 
     return;
   }
