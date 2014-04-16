@@ -1,27 +1,26 @@
 var http = require('http');
 var time = require('microtime');
 
-const parallel = 1;
-const connection = 1;
+const parallel = 100;
+const connection = 1000;
 const servers = [
-  'count_basic',
   'count_chain',
-  'count_basic'
-  // 'count_basic',
-  // 'count_nextTick',
-  // 'count_setTimeout',
+  'count_basic',
+  'count_nextTick',
+  'count_setTimeout'
   ]
 
+var results = {};
+var ctl_clients = 0;
 
-
-var clients = {};
-var results = {
-  clients: 0
+for (var i = 0; i < servers.length; i++) {
+  results[servers[i]] = {}
 };
+
 
 function send(id, before, after) {
 
-  console.log(" -- >> http://localhost:8080" + id);
+  // console.log(" -- >> http://localhost:8080" + id);
 
   var options = {
     hostname: 'localhost',
@@ -30,7 +29,7 @@ function send(id, before, after) {
     method: 'GET'
   };
 
-  var req = http.request(options, function(res) {
+  var req = new http.request(options, function(res) {
     res.setEncoding('utf8');
     res.on('data', function(buf) {
       after(time.now(), buf);
@@ -47,52 +46,42 @@ function send(id, before, after) {
 }
 
 function gather(name, cb) {
-  results.clients++;
+  ctl_clients++;
 
-  if (results.clients === parallel) {
+  if (ctl_clients === parallel) {
     // console.log(clients);
-
-    var sums = 0;
-    for (var c in clients) { var client = clients[c];
-      client.sum = 0;
-      for (var i = 0; i < client.times.length; i++) {
-        client.sum += client.times[i];
-      };
-      sums += client.sum / connection;
-    };
-    var time = sums / parallel;
-
-    cb(name, time, results);
+    cb(name, results);
   }
 }
 
 function bench(name, cb) {
   // write data to request body
 
-  // console.log(clients, results);
-
   for (var i = 0; i < parallel; i++) {
     (function(i) {
-      var before = function(time) {
-        clients[i].time = time;
-      }
-
-      var after = function(time) {
-        var d = time - clients[i].time;
-        clients[i].times.push(d);
-
-        if (++clients[i].count < connection) {
-          send('/client' + i, before, after);
-        } else {
-          gather(name, cb);
-        }
-      }
-
-      clients[i] = {
+      
+      var client = {
         count: 0,
         time: 0,
         times: []
       };
+
+      var before = function(time) {
+        client.time = time;
+      }
+
+      var after = function(time) {
+        var d = time - client.time;
+        client.times.push(d);
+
+        if (++client.count < connection) {
+          send('/client' + i, before, after);
+        } else {
+          results[name][i] = client;
+          gather(name, cb);
+        }
+      }
+
       send('/client' + i, before, after);
     })(i);
   };
@@ -105,7 +94,7 @@ function launch(name, _cb) {
       server = spawn('node', [name]);
 
   server.stdout.on('data', function (data) {
-    console.log('stdout: ' + data);
+    // console.log('stdout: ' + data);
     if (data == ">> listening 8080\n") {
       _cb();
     }
@@ -116,7 +105,7 @@ function launch(name, _cb) {
   });
 
   server.on('close', function (code) {
-    console.log('child process exited with code ' + code);
+    // console.log('child process exited with code ' + code);
   });
 
   return function() {
@@ -125,30 +114,52 @@ function launch(name, _cb) {
   }
 }
 
+function output() {
 
-console.log(">> " + parallel + " concurrent client" + ((parallel > 1)?'s':'') + ", " + connection + " sequential connection" + ((connection > 1)?'s':''));
+}
+
+
+
+console.log('\x1B[1m\x1B[36m>\x1B[35m>\x1B[39m\x1B[22m ' + parallel + " concurrent client" + ((parallel > 1)?'s':'') + ", " + connection + " sequential connection" + ((connection > 1)?'s':''));
 
 var it = 0;
 function iteration(it) {
-  console.log("iteration " + it);
-
-  clients = {};
-  results = {
-    clients: 0
-  };
 
   if (it >= servers.length) {
+
+    console.log(" == RESULTS ============================= ");
+
+    for (var s in results) { var server = results[s];
+      
+      process.stdout.write('\x1B[1m\x1B[36m>\x1B[35m>\x1B[39m\x1B[22m ' + s);
+
+      var sums = 0;
+      for (var c in server) { var client = server[c];
+        client.sum = 0;
+        for (var i = 0; i < client.times.length; i++) {
+          client.sum += client.times[i];
+        };
+        sums += client.sum / connection;
+      };
+      var time = sums / parallel;
+
+      console.log(" : " + time + "μs");
+    };
+
+
     return;
   }
 
   var name = servers[it];
+  ctl_clients = 0;
+  process.stdout.write("  " + it + " - " + name);
+  
   var kill = launch(name, function() {
-    console.log("launched");
-    bench(name, function(name, average, results) {
-      console.log("  >> " + name + " : " + average + "μs");
+    // console.log("launched");
+    bench(name, function(name, results) {
       kill();
-      console.log(clients, results);
-      setTimeout(iteration, 1000, ++it);
+      console.log('  \x1B[1m\x1B[32m✓\x1B[39m\x1B[22m');
+      setTimeout(iteration, 0, ++it);
     })
   });
 }

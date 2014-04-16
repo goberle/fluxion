@@ -3,7 +3,7 @@
   var count = {};
 
   app.get("/:id", function reply(req, res){
-    console.log("      >> recv " + req.params.id);
+    // console.log("      >> recv " + req.params.id);
   	count[req.params.id] = count[req.params.id] + 1  || 1;
   	var visits = count[req.params.id];
   	var reply = req.params.id + '[' + visits + ']';

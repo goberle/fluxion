@@ -24,8 +24,8 @@ app.get('/:id', function(req, res) {
 })
 
 function listen() {
+  app.listen(8080);
 	console.log(">> listening 8080");
-	app.listen(8080);
 }
 
 module.exports = {
