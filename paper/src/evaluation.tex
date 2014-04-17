@@ -1,6 +1,6 @@
 \section{Performance evaluation}
 
-We use the web service example described in the previous section, figure \ref{fig:fluxions}, to compare the fluxionnal execution model and the basic Javascript implementation, listing \ref{lst:classique}.
+We use the web service example described in the previous section, Figure \ref{fig:fluxions}, to compare the fluxionnal execution model and the basic Javascript implementation, listing \ref{lst:classique}.
 For this evaluation we developed several fluxionnal execution models using different instructions for chaining fluxions.
 Thus, through multiple implementation, we can compare the efficiency of the model itself, not of one implementation.
 
@@ -9,7 +9,7 @@ Thus, through multiple implementation, we can compare the efficiency of the mode
 To implement the message queue in Javascript, we used already existing mechanisms as Javascript interpreters are oftnely packaged with an event loop.
 We distinguishe three different ways to queue and dequeue messages. These three implementations come the nature of the \texttt{node.js} event loop, and how Javascripts event are processed.
 
-As shown in figure \ref{fig:eventloop} detailing the different layers of the event loop, the \texttt{node.js} event loop queues messages.
+As shown in Figure \ref{fig:eventloop} detailing the different layers of the event loop, the \texttt{node.js} event loop queues messages.
 These messages queues stacks of function, which queues functions.
 One can queue a message using \texttt{setTimeout}.
 Inside a message, one can queue a stack using the \texttt{node.js} instruction \texttt{process.nextTick}.
@@ -32,7 +32,7 @@ We tested our model with three different implementations.
 \begin{itemize}
 	\item[\textbf{Chain}]
 		This implementation chains fluxions one after another by a direct function call.
-		The whole fluxion chain is contain inside a same stack on figure \ref{fig:eventloop}.
+		The whole fluxion chain is contain inside a same stack on Figure \ref{fig:eventloop}.
 		It set the fluxions chain length maximum to the macimum function call stack size, and it's impossible to interleave messages from network in the middle of a fluxion chain.
 
 	\item[\textbf{NextTick}]
@@ -84,7 +84,7 @@ With these differents implementations, we want to highlight the advantages and d
 \label{fig:timecountsetTimeout}
 \end{figure}
 
-As we can see on figure \ref{fig:distribution}, the difference between the basic implementation and the chained implementation is insignificant, we can conclude that splitting a web service into fluxions doesn't induce performance loss.
+As we can see on Figure \ref{fig:distribution}, the difference between the basic implementation and the chained implementation is insignificant, we can conclude that splitting a web service into fluxions doesn't induce significative performance loss.
 And event the implementation using \texttt{nextTick} is almost as efficient as the basic implementation.
 However, the implementation using \texttt{setTimeout} is about 5 times less efficient than the basic implementation.
 
