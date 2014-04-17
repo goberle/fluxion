@@ -2,8 +2,8 @@ var http = require('http');
 var time = require('microtime');
 var fs = require('fs');
 
-const parallel = 1000;
-const connection = 100;
+const parallel = 1000; // the number of parallel clients
+const connection = 100; // the number of sequential request per client
 const servers = [
   'count_chain',
   'count_basic',
