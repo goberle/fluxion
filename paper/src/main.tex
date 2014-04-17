@@ -10,6 +10,8 @@
 
 \usepackage{tikz}
 \usepackage{pgfplots}
+\usepgfplotslibrary{external} 
+\tikzexternalize
 \newcommand*\circled[1]{\tikz[baseline=(char.base)]{
             \node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
 

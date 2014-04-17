@@ -1,16 +1,45 @@
 \section{Performance evaluation}
 
-We use the web service example described in the previous section, figure \ref{fig:fluxions}, to compare the fluxionnal execution model, to basic Javascript implementation, listing \ref{lst:classique}.
-For this evaluation against the basic implementation, we developed different version of the fluxionnal execution models using different methods for chaining fluxions.
+We use the web service example described in the previous section, figure \ref{fig:fluxions}, to compare the fluxionnal execution model and the basic Javascript implementation, listing \ref{lst:classique}.
+For this evaluation we developed several fluxionnal execution models using different instructions for chaining fluxions.
+Thus, through multiple implementation, we can compare the efficiency of the model itself, not of one implementation.
+
+\subsection{About the message queue}
+
+To implement the message queue in Javascript, we used already existing mechanisms as Javascript interpreters are oftnely packaged with an event loop.
+We distinguishe three different ways to queue and dequeue messages. These three implementations come the nature of the \texttt{node.js} event loop, and how Javascripts event are processed.
+
+As shown in figure \ref{fig:eventloop} detailing the different layers of the event loop, the \texttt{node.js} event loop queues messages.
+These messages queues stacks of function, which queues functions.
+One can queue a message using \texttt{setTimeout}.
+Inside a message, one can queue a stack using the \texttt{node.js} instruction \texttt{process.nextTick}.
+Inside a stack, one can stack a function by calling directly this function.
+
+Network messages come from I/O operations, thus, they are queued as a new message in the event loop.
+So to get network messages, the current message have to end, in order to get the next one, might it come from the network.
+However, it's well known that queueing messages in the event loop is far from efficient.
+
+\begin{figure}[h!]
+  \includegraphics[width=\linewidth]{eventloop.pdf}
+  \caption{Javascript event loop details}
+  \label{fig:eventloop}
+\end{figure}
+
+\subsection{Three different implementations}
+
+We tested our model with three different implementations.
 
 \begin{itemize}
 	\item[\textbf{Chain}]
 		This implementation chains fluxions one after another by a direct function call.
-		It set the fluxions chain length maximum to the macimum function call stack size, and it make it impossible to interleave messages from network.
+		The whole fluxion chain is contain inside a same stack on figure \ref{fig:eventloop}.
+		It set the fluxions chain length maximum to the macimum function call stack size, and it's impossible to interleave messages from network in the middle of a fluxion chain.
 
 	\item[\textbf{NextTick}]
 		This implementation uses the instruction \texttt{process.nextTick} to chain fluxions execution.
-		This instruction makes it possible to probe network messages only every \textit{n} fluxions execution. By default \textit{n} is set to 1000.
+		This instruction add a function call at the end of the current execution.
+		Two local fluxion processing chain could run concurrently, but it's only possible to probe network messages every \textit{n} fluxions execution.
+		By default \textit{n} is set to 1000.
 
 	\item[\textbf{SetTimeout}]
 		This implementation uses the instruction \texttt{setTimeout}.
@@ -20,44 +49,57 @@ For this evaluation against the basic implementation, we developed different ver
 With these differents implementations, we want to highlight the advantages and drawbacks of the fluxionnal execution model.
 
 \begin{figure}
-\input{../../prototypes/fluxions/bench/charts/average}
-\caption{Average response time for each implementation}
+\input{../../prototypes/fluxions/bench/charts/100-1000-average}
+\caption{Average response time for each implementation - 100 parallel clients, sequentillay connecting 1000 times}
 \label{fig:reponsetime}
 \end{figure}
 
 \begin{figure}
-\input{../../prototypes/fluxions/bench/charts/distribution}
-\caption{Distribution of response time for each implementation}
+\input{../../prototypes/fluxions/bench/charts/100-1000-distribution}
+\caption{Distribution of response time for each implementation - 100 parallel clients, sequentillay connecting 1000 times}
 \label{fig:distribution}
 \end{figure}
 
 \begin{figure}
-\input{../../prototypes/fluxions/bench/charts/count_basic}
-\caption{Response time for count\_basic}
+\input{../../prototypes/fluxions/bench/charts/100-1000-count_basic}
+\caption{Response time for count\_basic - 100 parallel clients, sequentillay connecting 1000 times}
 \label{fig:timecountbasic}
 \end{figure}
 
 \begin{figure}
-\input{../../prototypes/fluxions/bench/charts/count_chain}
-\caption{Response time for count\_chain}
+\input{../../prototypes/fluxions/bench/charts/100-1000-count_chain}
+\caption{Response time for count\_chain - 100 parallel clients, sequentillay connecting 1000 times}
 \label{fig:timecountchain}
 \end{figure}
 
 \begin{figure}
-\input{../../prototypes/fluxions/bench/charts/count_nextTick}
-\caption{Response time for count\_nextTick}
+\input{../../prototypes/fluxions/bench/charts/100-1000-count_nextTick}
+\caption{Response time for count\_nextTick - 100 parallel clients, sequentillay connecting 1000 times}
 \label{fig:timecountnextTick}
 \end{figure}
 
 \begin{figure}
-\input{../../prototypes/fluxions/bench/charts/count_setTimeout}
-\caption{Response time for count\_setTimeout}
+\input{../../prototypes/fluxions/bench/charts/100-1000-count_setTimeout}
+\caption{Response time for count\_setTimeout - 100 parallel clients, sequentillay connecting 1000 times}
 \label{fig:timecountsetTimeout}
 \end{figure}
 
+As we can see on figure \ref{fig:distribution}, the difference between the basic implementation and the chained implementation is insignificant, we can conclude that splitting a web service into fluxions doesn't induce performance loss.
+And event the implementation using \texttt{nextTick} is almost as efficient as the basic implementation.
+However, the implementation using \texttt{setTimeout} is about 5 times less efficient than the basic implementation.
 
-We can see that the use of fluxions, from our implementation of the fluxionnal execution model increases the average response time of about 50\%, as the \textbf{Fluxionnal-NoSetTimeout} implementation aberage response time show from the \textbf{Basic} implementation.
-However, the instruction \texttt{SetTimeout}, used in the original Fluxionnal execution model, increases the average response time of this implementation of about 360\%.
+\begin{figure}
+\input{../../prototypes/fluxions/bench/charts/1000-100-average}
+\caption{Average response time for each implementation - 1000 parallel clients, sequentillay connecting 100 times}
+\label{fig:reponsetimeparallel}
+\end{figure}
+
+\begin{figure}
+\input{../../prototypes/fluxions/bench/charts/1000-100-distribution}
+\caption{Distribution of response time for each implementation - 1000 parallel clients, sequentillay connecting 100 times}
+\label{fig:distributionparallel}
+\end{figure}
+
 
 
 

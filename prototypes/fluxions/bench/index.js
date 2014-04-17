@@ -2,7 +2,7 @@ var http = require('http');
 var time = require('microtime');
 var fs = require('fs');
 
-const parallel = 100;
+const parallel = 1000;
 const connection = 100;
 const servers = [
   'count_chain',
@@ -127,7 +127,7 @@ function output() {
   console.log(" == OUTPUT ============================= ");
 
   function writeFile(name, data) {
-    var path = "bench/charts/" + name + ".tex"
+    var path = "bench/charts/" + parallel + "-" + connection + "-" + name + ".tex"
 
     process.stdout.write('\x1B[1m\x1B[36m>\x1B[35m>\x1B[39m\x1B[22m ' + path);
     fs.writeFileSync(path, data);
@@ -141,7 +141,7 @@ function output() {
   templates = {
     distribution: {
       pre: "\\begin{tikzpicture}\n" +
-      "\\begin{semilogxaxis}[xmin=0,xmax=1000000, ylabel=Number of client, xlabel=Response time (ms)]\n",
+      "\\begin{semilogxaxis}[xmin=0,xmax=1000000, ylabel=Number of connection, xlabel=Response time (ms)]\n",
       post: "\\end{semilogxaxis}\n" +
       "\\end{tikzpicture}\n"
     },
@@ -228,7 +228,7 @@ function iteration(it) {
       };
       var time = sums / parallel;
 
-      console.log(" : " + time + "μs");
+      console.log(" : " + (time / 1000) + "ms");
     };
 
     output();
