@@ -11,7 +11,7 @@ bib: _bib _post
 pdf: _pre
 
 clean:
-	rm -rf .tmp
+	rm -rf .tmp; rm -rf src/main-figure*
 
 open:
 	open ${NAME}.pdf

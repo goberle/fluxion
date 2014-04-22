@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.7.29)  17 APR 2014 12:58
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.7.29)  21 APR 2014 16:00
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -1519,6 +1519,12 @@ LaTeX Warning: Reference `lst:classique' on page \thepage  undefined on input l
 ine 3.
 
 
+Overfull \hbox (5.43094pt too wide) in paragraph at lines 3--6
+\T1/aer/m/n/9 mo-dels using dif-ferent ins-truc-tions for chai-ning fluxions. T
+hus,
+ []
+
+
 LaTeX Warning: Reference `fig:eventloop' on page \thepage  undefined on input l
 ine 12.
 
@@ -1540,36 +1546,15 @@ Overfull \hbox (6.75943pt too wide) in paragraph at lines 45--47
 y fluxion
  []
 
-(../../prototypes/fluxions/bench/charts/100-1000-average.tex
-A tikzpicture has been optimized away. Use '/tikz/external/optimize=false' to d
-isable this.
-) (../../prototypes/fluxions/bench/charts/100-1000-distribution.tex
-A tikzpicture has been optimized away. Use '/tikz/external/optimize=false' to d
-isable this.
-) (../../prototypes/fluxions/bench/charts/100-1000-count_basic.tex
-A tikzpicture has been optimized away. Use '/tikz/external/optimize=false' to d
-isable this.
-) (../../prototypes/fluxions/bench/charts/100-1000-count_chain.tex
-A tikzpicture has been optimized away. Use '/tikz/external/optimize=false' to d
-isable this.
-) (../../prototypes/fluxions/bench/charts/100-1000-count_nextTick.tex
-A tikzpicture has been optimized away. Use '/tikz/external/optimize=false' to d
-isable this.
-) (../../prototypes/fluxions/bench/charts/100-1000-count_setTimeout.tex
+(../../prototypes/fluxions/bench/charts/distribution.tex
 A tikzpicture has been optimized away. Use '/tikz/external/optimize=false' to d
 isable this.
 )
 
 LaTeX Warning: Reference `fig:distribution' on page \thepage  undefined on inpu
-t line 87.
+t line 93.
 
-(../../prototypes/fluxions/bench/charts/1000-100-average.tex
-A tikzpicture has been optimized away. Use '/tikz/external/optimize=false' to d
-isable this.
-) (../../prototypes/fluxions/bench/charts/1000-100-distribution.tex
-A tikzpicture has been optimized away. Use '/tikz/external/optimize=false' to d
-isable this.
-)) (./transformation.tex) (./appendix.tex)
+) (./transformation.tex) (./appendix.tex)
 
 LaTeX Warning: Empty bibliography on input line 131.
 
@@ -1586,13 +1571,13 @@ Package logreq Info: Writing requests to 'main.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 28145 strings out of 493315
- 595173 string characters out of 6137904
- 1208574 words of memory out of 5000000
- 30987 multiletter control sequences out of 15000+600000
+ 28117 strings out of 493315
+ 594030 string characters out of 6137904
+ 1072547 words of memory out of 5000000
+ 30980 multiletter control sequences out of 15000+600000
  53646 words of font info for 65 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
- 57i,12n,74p,32407b,1213s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 57i,12n,74p,16945b,1213s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb>
 Output written on main-figure7.pdf (1 page, 8419 bytes).
 PDF statistics:

@@ -4,9 +4,9 @@ var util = require('util');
 
 var id = {};
 var fn = {}; 
-var tree = esprima.parse(fs.readFileSync('../fluxions/count-simple.js'));
+var tree = esprima.parse(fs.readFileSync('../fluxions/count_basic.js'));
 
-// console.log(util.inspect(tree, {depth: 1000}));
+console.log(util.inspect(tree, {depth: 1000}));
 
 function walk(o, cb) {
 
@@ -45,16 +45,16 @@ function walk(o, cb) {
 	return _walk(o);
 }
 
-walk(tree, function(o) {
-	if (o.type === "Identifier")
-		id[o.name] = {};
+// walk(tree, function(o) {
+// 	if (o.type === "Identifier")
+// 		id[o.name] = {};
 
-	if (o.type === "FunctionExpression")
-		fn[o.id.name] = {}; // TODO composition pattern
-});
+// 	if (o.type === "FunctionExpression")
+// 		fn[o.id.name] = {}; // TODO composition pattern
+// });
 
-console.log("Identifiers : ", id);
-console.log("Functions : ", fn);
+// console.log("Identifiers : ", id);
+// console.log("Functions : ", fn);
 
 
 

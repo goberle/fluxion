@@ -1,0 +1,6 @@
+\begin{tikzpicture}
+\begin{axis}[ybar, ylabel={Average response time}, nodes near coords, nodes near coords align={vertical}, xtick=data, x tick label style={rotate=45,anchor=east}, symbolic x coords={chain, basic, nextTick, setTimeout}]
+\addplot[color=black]
+coordinates {(chain,2801.26375)(basic,5227.7875)(nextTick,7874.92125)(setTimeout,16177.05625)};
+\end{axis}
+\end{tikzpicture}

@@ -48,39 +48,45 @@ We tested our model with three different implementations.
 
 With these differents implementations, we want to highlight the advantages and drawbacks of the fluxionnal execution model.
 
-\begin{figure}
-\input{../../prototypes/fluxions/bench/charts/100-1000-average}
-\caption{Average response time for each implementation - 100 parallel clients, sequentillay connecting 1000 times}
-\label{fig:reponsetime}
-\end{figure}
+% \begin{figure}
+% \input{../../prototypes/fluxions/bench/charts/100-1000-average}
+% \caption{Average response time for each implementation - 100 parallel clients, sequentillay connecting 1000 times}
+% \label{fig:reponsetime}
+% \end{figure}
+
+% \begin{figure}
+% \input{../../prototypes/fluxions/bench/charts/100-1000-distribution}
+% \caption{Distribution of response time for each implementation - 100 parallel clients, sequentillay connecting 1000 times}
+% \label{fig:distribution}
+% \end{figure}
+
+% \begin{figure}
+% \input{../../prototypes/fluxions/bench/charts/100-1000-count_basic}
+% \caption{Response time for count\_basic - 100 parallel clients, sequentillay connecting 1000 times}
+% \label{fig:timecountbasic}
+% \end{figure}
+
+% \begin{figure}
+% \input{../../prototypes/fluxions/bench/charts/100-1000-count_chain}
+% \caption{Response time for count\_chain - 100 parallel clients, sequentillay connecting 1000 times}
+% \label{fig:timecountchain}
+% \end{figure}
+
+% \begin{figure}
+% \input{../../prototypes/fluxions/bench/charts/100-1000-count_nextTick}
+% \caption{Response time for count\_nextTick - 100 parallel clients, sequentillay connecting 1000 times}
+% \label{fig:timecountnextTick}
+% \end{figure}
+
+% \begin{figure}
+% \input{../../prototypes/fluxions/bench/charts/100-1000-count_setTimeout}
+% \caption{Response time for count\_setTimeout - 100 parallel clients, sequentillay connecting 1000 times}
+% \label{fig:timecountsetTimeout}
+% \end{figure}
 
 \begin{figure}
-\input{../../prototypes/fluxions/bench/charts/100-1000-distribution}
-\caption{Distribution of response time for each implementation - 100 parallel clients, sequentillay connecting 1000 times}
-\label{fig:distribution}
-\end{figure}
-
-\begin{figure}
-\input{../../prototypes/fluxions/bench/charts/100-1000-count_basic}
-\caption{Response time for count\_basic - 100 parallel clients, sequentillay connecting 1000 times}
-\label{fig:timecountbasic}
-\end{figure}
-
-\begin{figure}
-\input{../../prototypes/fluxions/bench/charts/100-1000-count_chain}
-\caption{Response time for count\_chain - 100 parallel clients, sequentillay connecting 1000 times}
-\label{fig:timecountchain}
-\end{figure}
-
-\begin{figure}
-\input{../../prototypes/fluxions/bench/charts/100-1000-count_nextTick}
-\caption{Response time for count\_nextTick - 100 parallel clients, sequentillay connecting 1000 times}
-\label{fig:timecountnextTick}
-\end{figure}
-
-\begin{figure}
-\input{../../prototypes/fluxions/bench/charts/100-1000-count_setTimeout}
-\caption{Response time for count\_setTimeout - 100 parallel clients, sequentillay connecting 1000 times}
+\input{../../prototypes/fluxions/bench/charts/distribution}
+\caption{Response time for each implemetation in function of the number of simultaneous clients}
 \label{fig:timecountsetTimeout}
 \end{figure}
 
@@ -88,17 +94,17 @@ As we can see on Figure \ref{fig:distribution}, the difference between the basic
 And event the implementation using \texttt{nextTick} is almost as efficient as the basic implementation.
 However, the implementation using \texttt{setTimeout} is about 5 times less efficient than the basic implementation.
 
-\begin{figure}
-\input{../../prototypes/fluxions/bench/charts/1000-100-average}
-\caption{Average response time for each implementation - 1000 parallel clients, sequentillay connecting 100 times}
-\label{fig:reponsetimeparallel}
-\end{figure}
+% \begin{figure}
+% \input{../../prototypes/fluxions/bench/charts/1000-100-average}
+% \caption{Average response time for each implementation - 1000 parallel clients, sequentillay connecting 100 times}
+% \label{fig:reponsetimeparallel}
+% \end{figure}
 
-\begin{figure}
-\input{../../prototypes/fluxions/bench/charts/1000-100-distribution}
-\caption{Distribution of response time for each implementation - 1000 parallel clients, sequentillay connecting 100 times}
-\label{fig:distributionparallel}
-\end{figure}
+% \begin{figure}
+% \input{../../prototypes/fluxions/bench/charts/1000-100-distribution}
+% \caption{Distribution of response time for each implementation - 1000 parallel clients, sequentillay connecting 100 times}
+% \label{fig:distributionparallel}
+% \end{figure}
 
 
 
