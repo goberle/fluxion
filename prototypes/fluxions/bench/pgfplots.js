@@ -2,7 +2,8 @@ const colors = [
   'blue',
   'red',
   'green',
-  'yellow'
+  'yellow',
+  'pink'
 ]
 
 const _bgraph = "\\begin{tikzpicture}\n";
@@ -25,7 +26,9 @@ function graph(type, options) {
   this._legend = [];
 
   this.addplot = function(plot) {
-    this._legend.push(plot._label);
+    if (plot._label) {
+      this._legend.push(plot._label);
+    }
     this._plots.push(plot);
   }
 
@@ -52,8 +55,10 @@ function graph(type, options) {
 
 
 function plot(options) {
-  this._label = options.label;
-  options.label = undefined;
+  if (options && options.label) {  
+    this._label = options.label;
+    options.label = undefined;
+  }
   this._options = options;
   this._output_pre = "\\addplot"
   this._output_mid = " coordinates "

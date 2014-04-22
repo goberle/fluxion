@@ -135,7 +135,7 @@ function benchMultiMultiServer(names, connection, cb) {
   // var steps = [];
   var concurrents = [];
   var connections = [];
-  for (var j = 1; j < 20; j++) {
+  for (var j = 1; j < 13; j++) {
     // steps.push(j * 50);
     concurrents.push(j * 50);
     connections.push(500) //(30 - j) * 10);

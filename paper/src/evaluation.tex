@@ -1,23 +1,25 @@
 \section{Performance evaluation}
 
-We use the web service example described in the previous section, Figure \ref{fig:fluxions}, to compare the fluxionnal execution model and the basic Javascript implementation, listing \ref{lst:classique}.
-For this evaluation we developed several fluxionnal execution models using different instructions for chaining fluxions.
-Thus, through multiple implementation, we can compare the efficiency of the model itself, not of one implementation.
+In this section, we want to evaluate our fluxionnal execution model to highlight its avantages and drawbacks.
+We compare it based on the example described in the previous secion, Figure \ref{fig:fluxions}.
+This example is implemented in basic Javascript, listing \ref{lst:classique}, and in different fluxionnal execution models.
 
-\subsection{About the message queue}
+\subsection{Evaluation conditions}
 
-To implement the message queue in Javascript, we used already existing mechanisms as Javascript interpreters are oftnely packaged with an event loop.
-We distinguishe three different ways to queue and dequeue messages. These three implementations come the nature of the \texttt{node.js} event loop, and how Javascripts event are processed.
+We developed different fluxionnal execution models to test different instructions to chain fluxions implying different compromises.
+Thus, through multiple implementations, we hope to compare the efficiency of the model itself, and erase the peculiarities brought by a single implementation.
 
-As shown in Figure \ref{fig:eventloop} detailing the different layers of the event loop, the \texttt{node.js} event loop queues messages.
-These messages queues stacks of function, which queues functions.
-One can queue a message using \texttt{setTimeout}.
-Inside a message, one can queue a stack using the \texttt{node.js} instruction \texttt{process.nextTick}.
-Inside a stack, one can stack a function by calling directly this function.
+Javascript itself doesn't feature an event loop, or a message queue.
+However, as Javascript was historically used with DOM which makes use of an event loop, most of the Javascript interpreters - like \texttt{node.js} - now also feature an event loop.
+The fluxionnal execution model is based around a message queue, so we used the event loop built inside \texttt{node.js} to act as the main message queue needed by the execution model.
 
-Network messages come from I/O operations, thus, they are queued as a new message in the event loop.
-So to get network messages, the current message have to end, in order to get the next one, might it come from the network.
-However, it's well known that queueing messages in the event loop is far from efficient.
+There is different ways to queue messages in this event loop, they are depictured in firgure \ref{fig:eventloop}.
+\begin{itemize}
+	\item[\textit{function call}] doesn't use the event loop. It's the fastest way to continue execution, and it bypass every IO.
+	\item[\textit{process.nextTick}] queue a function just after the current execution. It bypasses IO.
+	\item[\textit{setImmediate}] queue a function, doesn't bypasses IO, but bypasses \textit{setTimeout}.
+	\item[\textit{setTimeout}] queue a function, doesn't bypasses IO is called with a certain latency.
+\end{itemize}
 
 \begin{figure}[h!]
   \includegraphics[width=\linewidth]{eventloop.pdf}
@@ -25,15 +27,13 @@ However, it's well known that queueing messages in the event loop is far from ef
   \label{fig:eventloop}
 \end{figure}
 
-\subsection{Three different implementations}
-
 We tested our model with three different implementations.
 
 \begin{itemize}
 	\item[\textbf{Chain}]
 		This implementation chains fluxions one after another by a direct function call.
 		The whole fluxion chain is contain inside a same stack on Figure \ref{fig:eventloop}.
-		It set the fluxions chain length maximum to the macimum function call stack size, and it's impossible to interleave messages from network in the middle of a fluxion chain.
+		It set the fluxions chain length maximum to the maximum function call stack size, and it's impossible to interleave messages from network in the middle of a fluxion chain.
 
 	\item[\textbf{NextTick}]
 		This implementation uses the instruction \texttt{process.nextTick} to chain fluxions execution.
@@ -48,41 +48,19 @@ We tested our model with three different implementations.
 
 With these differents implementations, we want to highlight the advantages and drawbacks of the fluxionnal execution model.
 
-% \begin{figure}
-% \input{../../prototypes/fluxions/bench/charts/100-1000-average}
-% \caption{Average response time for each implementation - 100 parallel clients, sequentillay connecting 1000 times}
-% \label{fig:reponsetime}
-% \end{figure}
+\subsection{Evaluation results}
 
-% \begin{figure}
-% \input{../../prototypes/fluxions/bench/charts/100-1000-distribution}
-% \caption{Distribution of response time for each implementation - 100 parallel clients, sequentillay connecting 1000 times}
-% \label{fig:distribution}
-% \end{figure}
+\begin{figure}
+\input{../../prototypes/fluxions/bench/charts/diffInstructions}
+\caption{Response time for each implemetation in function of the number of simultaneous clients}
+\label{fig:diffinstructions}
+\end{figure}
 
-% \begin{figure}
-% \input{../../prototypes/fluxions/bench/charts/100-1000-count_basic}
-% \caption{Response time for count\_basic - 100 parallel clients, sequentillay connecting 1000 times}
-% \label{fig:timecountbasic}
-% \end{figure}
-
-% \begin{figure}
-% \input{../../prototypes/fluxions/bench/charts/100-1000-count_chain}
-% \caption{Response time for count\_chain - 100 parallel clients, sequentillay connecting 1000 times}
-% \label{fig:timecountchain}
-% \end{figure}
-
-% \begin{figure}
-% \input{../../prototypes/fluxions/bench/charts/100-1000-count_nextTick}
-% \caption{Response time for count\_nextTick - 100 parallel clients, sequentillay connecting 1000 times}
-% \label{fig:timecountnextTick}
-% \end{figure}
-
-% \begin{figure}
-% \input{../../prototypes/fluxions/bench/charts/100-1000-count_setTimeout}
-% \caption{Response time for count\_setTimeout - 100 parallel clients, sequentillay connecting 1000 times}
-% \label{fig:timecountsetTimeout}
-% \end{figure}
+\begin{figure}
+\input{../../prototypes/fluxions/bench/charts/setTimeout}
+\caption{Response time for each implemetation in function of the number of simultaneous clients}
+\label{fig:setTimeout}
+\end{figure}
 
 \begin{figure}
 \input{../../prototypes/fluxions/bench/charts/distribution}
@@ -93,21 +71,6 @@ With these differents implementations, we want to highlight the advantages and d
 As we can see on Figure \ref{fig:distribution}, the difference between the basic implementation and the chained implementation is insignificant, we can conclude that splitting a web service into fluxions doesn't induce significative performance loss.
 And event the implementation using \texttt{nextTick} is almost as efficient as the basic implementation.
 However, the implementation using \texttt{setTimeout} is about 5 times less efficient than the basic implementation.
-
-% \begin{figure}
-% \input{../../prototypes/fluxions/bench/charts/1000-100-average}
-% \caption{Average response time for each implementation - 1000 parallel clients, sequentillay connecting 100 times}
-% \label{fig:reponsetimeparallel}
-% \end{figure}
-
-% \begin{figure}
-% \input{../../prototypes/fluxions/bench/charts/1000-100-distribution}
-% \caption{Distribution of response time for each implementation - 1000 parallel clients, sequentillay connecting 100 times}
-% \label{fig:distributionparallel}
-% \end{figure}
-
-
-
 
 \TODO{}
 Although, using a fluxionnal approach is a way to build an efficient distributed system we consider that the most important part of our work is to enable code transformation from a standard basic web approach to a flow of fluxions.

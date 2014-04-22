@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.7.29)  22 APR 2014 16:43
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.7.29)  22 APR 2014 16:07
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -1535,7 +1535,13 @@ y fluxion
  []
 
 (../../prototypes/fluxions/bench/charts/diffInstructions.tex
-\openout4 = `main-figure12.dpth'.
+A tikzpicture has been optimized away. Use '/tikz/external/optimize=false' to d
+isable this.
+) (../../prototypes/fluxions/bench/charts/setTimeout.tex
+A tikzpicture has been optimized away. Use '/tikz/external/optimize=false' to d
+isable this.
+) (../../prototypes/fluxions/bench/charts/distribution.tex
+\openout4 = `main-figure14.dpth'.
 
 Missing character: There is no ; in font nullfont!
 [4
@@ -1543,14 +1549,7 @@ Missing character: There is no ; in font nullfont!
 
 
 
-{/usr/local/texlive/2013/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]) (../..
-/prototypes/fluxions/bench/charts/setTimeout.tex
-A tikzpicture has been optimized away. Use '/tikz/external/optimize=false' to d
-isable this.
-) (../../prototypes/fluxions/bench/charts/distribution.tex
-A tikzpicture has been optimized away. Use '/tikz/external/optimize=false' to d
-isable this.
-)
+{/usr/local/texlive/2013/texmf-var/fonts/map/pdftex/updmap/pdftex.map}])
 
 LaTeX Warning: Reference `fig:distribution' on page \thepage  undefined on inpu
 t line 76.
@@ -1572,18 +1571,21 @@ Package logreq Info: Writing requests to 'main.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 28599 strings out of 493315
- 608358 string characters out of 6137904
+ 28585 strings out of 493315
+ 608024 string characters out of 6137904
  919615 words of memory out of 5000000
- 31456 multiletter control sequences out of 15000+600000
+ 31442 multiletter control sequences out of 15000+600000
  53646 words of font info for 65 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
  57i,21n,74p,849b,2050s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb>
-Output written on main-figure12.pdf (1 page, 16426 bytes).
+</usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb>
+</usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></u
+sr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/
+local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb>
+Output written on main-figure14.pdf (1 page, 37352 bytes).
 PDF statistics:
- 15 PDF objects out of 1000 (max. 8388607)
- 10 compressed objects within 1 object stream
+ 27 PDF objects out of 1000 (max. 8388607)
+ 19 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  13 words of extra memory for PDF output out of 10000 (max. 10000000)
 
