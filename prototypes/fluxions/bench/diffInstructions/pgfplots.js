@@ -6,27 +6,12 @@ const colors = [
   'pink'
 ]
 
-
-const includes = "" + 
-  "\\documentclass{article}\n" +
-  "\\usepackage[utf8]{inputenc}\n" +
-  "\\usepackage[T1]{fontenc}\n" +
-  "\\usepackage{textcomp}\n" +
-  "\\usepackage[english, french]{babel}\n" +
-  "\\usepackage[babel=true]{csquotes}\n" +
-  "\\usepackage{tikz}\n" +
-  "\\usepackage{pgfplots}\n" +
-  "\\usepgfplotslibrary{external} \n" +
-  "\\tikzexternalize\n";
-
-const _bgraph = includes + 
-  "\\begin{document}\n" +
+const _bgraph = "" +
   "\\begin{figure}\n" +
   "\\begin{tikzpicture}\n";
 const _egraph = "" + 
   "\\end{tikzpicture}\n" +
-  "\\end{figure}\n" +
-  "\\end{document}\n";
+  "\\end{figure}\n";
 
 const graphTypes = [
   "axis",
@@ -69,9 +54,37 @@ function graph(type, options) {
       this._output_post;
   }
 
+  this.array = (function(parent) {
+    this.toString = this.inspect = function() {
+      this._output_pre = "\\[\\begin{array}{";
+      this._output_post = "\\end{array}\\]";
+      this._matrix = []
+
+
+      for (var i = 0; i < parent._plots.length; i++) { var _points = parent._plots[i]._points;
+        this._output_pre += "c"
+
+        for(var j = 0; j < _points.length; j++) {
+          var _point = _points[j].substr(1, _points[j].length - 2).split(', ');
+          _matrix[_point[0]] = _matrix[_point[0]] || [];
+          _matrix[_point[0]][i] = _point[1];
+        }
+      };
+
+      if (parent._legend){
+        _matrix.unshift("\\hline")
+        _matrix.unshift(parent._legend)
+      }
+
+      return this._output_pre + "}\n" +
+      _matrix.join(' \\\\\n').replace(/,/g, ' \& ') + "\\\\\n" +
+      this._output_post;
+    }
+    return this;
+  })(this)
+
   return this;
 }
-
 
 function plot(options) {
   if (options && options.label) {  
