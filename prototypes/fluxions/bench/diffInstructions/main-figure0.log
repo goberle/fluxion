@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.7.29)  23 APR 2014 22:32
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.7.29)  24 APR 2014 00:46
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -1032,19 +1032,22 @@ LaTeX Warning: Reference `lst:order' on page 1 undefined on input line 39.
 LaTeX Warning: Reference `fig:eventloop' on page 1 undefined on input line 71.
 
 
-LaTeX Warning: Reference `lst:wait' on page 1 undefined on input line 73.
+LaTeX Warning: Reference `lst:wait' on page 2 undefined on input line 73.
 
 
-LaTeX Warning: Reference `lst:direct' on page 1 undefined on input line 73.
+LaTeX Warning: Reference `lst:direct' on page 2 undefined on input line 74.
 
 
-LaTeX Warning: Reference `lst:next' on page 1 undefined on input line 73.
+LaTeX Warning: Reference `lst:next' on page 2 undefined on input line 74.
 
 
-LaTeX Warning: Reference `lst:timeout' on page 1 undefined on input line 73.
+LaTeX Warning: Reference `lst:timeout' on page 2 undefined on input line 74.
 
 
-LaTeX Warning: Reference `lst:immediate' on page 1 undefined on input line 73.
+LaTeX Warning: Reference `lst:immediate' on page 2 undefined on input line 74.
+
+
+LaTeX Warning: Reference `fig:plot' on page 2 undefined on input line 124.
 
 (./plot.tex
 \openout4 = `main-figure0.dpth'.
@@ -1052,9 +1055,12 @@ LaTeX Warning: Reference `lst:immediate' on page 1 undefined on input line 73.
 Missing character: There is no ; in font nullfont!
 [2
 
-{/usr/local/texlive/2013/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]) (./dat
-a.tex
-Overfull \hbox (71.11226pt too wide) detected at line 15
+{/usr/local/texlive/2013/texmf-var/fonts/map/pdftex/updmap/pdftex.map}])
+
+LaTeX Warning: Reference `fig:data' on page 2 undefined on input line 131.
+
+(./data.tex
+Overfull \hbox (76.11227pt too wide) detected at line 15
 []
  []
 
@@ -1064,21 +1070,22 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 22131 strings out of 493315
- 500340 string characters out of 6137904
- 688469 words of memory out of 5000000
- 25156 multiletter control sequences out of 15000+600000
+ 22123 strings out of 493315
+ 500048 string characters out of 6137904
+ 692961 words of memory out of 5000000
+ 25148 multiletter control sequences out of 15000+600000
  9462 words of font info for 23 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
- 57i,21n,74p,844b,2107s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 57i,21n,74p,844b,2115s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2013/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}
-</usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></
-usr/local/texlive/2013/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></us
-r/local/texlive/2013/texmf-dist/fonts/type1/public/cm-super/sftt1000.pfb>
-Output written on main-figure0.pdf (1 page, 41456 bytes).
+</usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><
+/usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></u
+sr/local/texlive/2013/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></usr
+/local/texlive/2013/texmf-dist/fonts/type1/public/cm-super/sftt1000.pfb>
+Output written on main-figure0.pdf (1 page, 48736 bytes).
 PDF statistics:
- 24 PDF objects out of 1000 (max. 8388607)
- 17 compressed objects within 1 object stream
+ 28 PDF objects out of 1000 (max. 8388607)
+ 20 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  13 words of extra memory for PDF output out of 10000 (max. 10000000)
 

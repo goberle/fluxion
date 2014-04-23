@@ -67,10 +67,12 @@ test("directCall");
 \end{code}
 
 
+We tested the difference of run time between these different methods.
+On Figure \ref{fig:eventloop} we can see the difference between the time spent inside a function, and the time spent between the call and the end of this function.
 
-On Figure \ref{fig:eventloop} we can see the difference between the time spent inside a function, and the time spent between the call and the end of a function.
-
-We executed the \texttt{wait} function in listing \ref{lst:wait}, called by different calling function in listings \ref{lst:direct}, \ref{lst:next}, \ref{lst:timeout} and \ref{lst:immediate}.
+We base our test on the \texttt{wait} function in listing \ref{lst:wait}.
+This function was called by different calling function in listings \ref{lst:direct}, \ref{lst:next}, \ref{lst:timeout} and \ref{lst:immediate}.
+We probed the time just before the callings functions, and just after exiting the \texttt{wait} function.
 
 \begin{code}[Javascript, caption={wait function},label={lst:wait}]
 function wait(duration, start, _cb) {
@@ -119,6 +121,18 @@ function(fn, args) {
 },
 \end{code}
 
-\input{plot.tex}
+On the figure \ref{fig:plot}, we can see that while \textit{nextTick} and \textit{setImmediate} are one order of magnitude slower than a direct call, \textit{setTimeout} is about 3 order of magnitude slower than a direct call.  
+
+\begin{figure}
+  \input{plot.tex}
+\label{fig:plot}
+\end{figure}
+
+On the \ref{fig:data}, we can see the resulting data of this experiment
+
+\begin{figure}
 \input{data.tex}
+\label{fig:data}
+\caption{Raw data of the experiment}
+\end{figure}
 \end{document}

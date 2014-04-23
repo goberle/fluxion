@@ -7,11 +7,11 @@ const colors = [
 ]
 
 const _bgraph = "" +
-  "\\begin{figure}\n" +
+  // "\\begin{figure}\n" +
   "\\begin{tikzpicture}\n";
 const _egraph = "" + 
-  "\\end{tikzpicture}\n" +
-  "\\end{figure}\n";
+  "\\end{tikzpicture}\n";
+  // "\\end{figure}\n";
 
 const graphTypes = [
   "axis",
