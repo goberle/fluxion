@@ -1,9 +1,14 @@
 console.log(__dirname);
 
 var index = 0;
+var str = "";
 
 function test(name) {
-	console.log((index++) + " " + name);
+	str += name + " + ";
+	if (++index === 4) {
+		console.log(str);
+	}
+	// console.log((index++) + " " + name);
 }
 
 setImmediate(function() {

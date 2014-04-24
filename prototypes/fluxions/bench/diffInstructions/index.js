@@ -138,7 +138,9 @@ function mean(array) {
 }
 
 function median(array) {
-  var a = array.sort();
+  ar a = array.sort(function(a, b) {
+      return a - b;
+  });
   var l = a.length;
   return (l % 2 === 0) ? mean(a.slice(l/2 - 1, l/2 + 1)) : (a[(l-1)/2]);
 }
