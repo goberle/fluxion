@@ -5,7 +5,7 @@ var utils = require('./utils');
 const connection = 2;
 const concurrent = {
   min: 1,
-  max: 2,
+  max: 5,
   step: 1
 };
 const servers = [
@@ -37,7 +37,7 @@ function benchOneServer(name, connection, parallel, cb) {
     };
 
     function _start(i) {
-      console.log("send request");
+      // process.stdout.write('+')
       utils.req({path:'/client' + i}, _before, _after);
     }
 
@@ -48,6 +48,8 @@ function benchOneServer(name, connection, parallel, cb) {
     function _after(time) {
       var d = time - _client.time;
       _client.times.push(d);
+
+      // process.stdout.write('-')
 
       if (++_client.count < connection) {
         _start(i);
@@ -72,18 +74,15 @@ function benchMultiServer(names, connection, parallel, cb) {
     if (++i >= names.length) {
       cb(_results);
     } else {
-      setTimeout(function() {
-        _launch(names[i])
-      }, 1000);
+      _launch(names[i])
     }
   }
 
   function _launch(name) {
     var kill = utils.srv(name, function() {
-      process.stdout.write("+" + name);
+      process.stdout.write('/')
       benchOneServer(name, connection, parallel, function(name, results) {
         kill();
-        process.stdout.write("- ");
         _end(name, results)
       });
     });
@@ -111,7 +110,7 @@ function benchMultiMultiServer(names, connection, concurrent, cb) {
 
   function _launch(parallelism) {
 
-    process.stdout.write('\x1B[1m\x1B[36m>\x1B[35m>\x1B[39m\x1B[22m ' + parallelism + " / " + connection);
+    process.stdout.write('\x1B[1m\x1B[36m>\x1B[35m>\x1B[39m\x1B[22m ' + parallelism + " / " + connection + " ");
     benchMultiServer(names, parallelism, connection, function(results) {
       process.stdout.write(' \x1B[32m✓\x1B[39m\n')
       _end(parallelism, results)
@@ -155,14 +154,14 @@ function ASCIIgraph(name, mean, median, min, max, length) {
     var str = " ";
     if (i < max && i > min)
       str = "█";
-    if (i === mean)
-      str = "\x1B[1m\x1B[31m█\x1B[39m\x1B[22m";
-    if (i === median)
-      str = "\x1B[1m\x1B[32m█\x1B[39m\x1B[22m";
     if (i === min)
       str = "▒";
     if (i === max)
       str = "▒";
+    if (i === mean)
+      str = "\x1B[1m\x1B[31m█\x1B[39m\x1B[22m"; // RED
+    if (i === median)
+      str = "\x1B[1m\x1B[32m█\x1B[39m\x1B[22m"; // GREEN
 
     process.stdout.write(str);
   };
@@ -178,7 +177,9 @@ function mean(array) {
 }
 
 function median(array) {
-  var a = array.sort();
+  var a = array.sort(function(a, b) {
+      return a - b;
+  });
   var l = a.length;
   return (l % 2 === 0) ? mean(a.slice(l/2 - 1, l/2 + 1)) : (a[(l-1)/2]);
 }
@@ -213,7 +214,7 @@ benchMultiMultiServer(servers, connection, concurrent, function(results){
         };
       }
 
-      ASCIIgraph(i + " concurrent", mean(values) / 500, median(values) / 500, min / 500, max / 500, 200);
+      ASCIIgraph(i + " / " + connection + " - " + toXLabel(j), mean(values) / 500, median(values) / 500, min / 500, max / 500, 200);
       plots[j].addpoint(i, mean(values));
     }
   }
