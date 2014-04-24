@@ -2,11 +2,11 @@ var fs = require('fs');
 var pgfplots = require('./pgfplots');
 var utils = require('./utils');
 
-const connection = 2;
+const connection = 1000;
 const concurrent = {
-  min: 1,
-  max: 5,
-  step: 1
+  min: 1000,
+  max: 100000,
+  step: 1000
 };
 const servers = [
   'count_chain',
