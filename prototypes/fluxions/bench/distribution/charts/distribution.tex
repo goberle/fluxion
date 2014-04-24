@@ -1,0 +1,9 @@
+\begin{tikzpicture}
+\begin{axis}[xlabel = Number of simultaneous connections, ylabel = Response time]
+\addplot[color = blue] coordinates {(1, 65021.5)};
+\addplot[color = red] coordinates {(1, 55130)};
+\addplot[color = green] coordinates {(1, 51160.5)};
+\addplot[color = yellow] coordinates {(1, 60245)};
+\legend{chain, basic, nextTick, setTimeout};
+\end{axis}
+\end{tikzpicture}

@@ -2,11 +2,11 @@ var fs = require('fs');
 var pgfplots = require('./pgfplots');
 var utils = require('./utils');
 
-const connection = 1000;
+const connection = 2;
 const concurrent = {
-  min: 1000,
-  max: 100000,
-  step: 1000
+  min: 1,
+  max: 2,
+  step: 1
 };
 const servers = [
   'count_chain',
@@ -37,6 +37,7 @@ function benchOneServer(name, connection, parallel, cb) {
     };
 
     function _start(i) {
+      console.log("send request");
       utils.req({path:'/client' + i}, _before, _after);
     }
 
@@ -125,7 +126,7 @@ function toXLabel(name) {
 }
 
 function writeFile(name, data) {
-  var path = "bench/charts/" +  name + ".tex"
+  var path = "charts/" +  name + ".tex"
 
   process.stdout.write('\x1B[1m\x1B[36m>\x1B[35m>\x1B[39m\x1B[22m ' + path);
   fs.writeFileSync(path, data);

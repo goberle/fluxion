@@ -1,0 +1,138 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage[english, french]{babel}
+\usepackage[babel=true]{csquotes}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{array}
+\usepgfplotslibrary{external} 
+\tikzexternalize
+
+\input{code}
+
+\begin{document}
+
+In this document, we want show the difference of response time of the different methods for calling a function using the event loop.
+
+There is 4 ways to call a function, 3 queuing this function on the event loop, and directly calling the function.
+From the documentation, here is a brief explanation of the differences, illustrated in Figure \ref{fig:eventloop}.
+
+\begin{itemize}
+  \item[direct call] straightforward.
+  \item[\textit{nextTick}] The function \texttt{process.nextTick} pushes the function passed as an argument to the very beginning of the next loop.
+    That means, the current execution will continue until it ends, then the queued function will be executed before anything else, including \textit{IO Operations}.
+  \item[\textit{setImmediate}] The function \texttt{setImmediate} pushes the function passed as an argument to the next event loop, just after \textit{IO Operations} finished.
+  \item[\textit{setTimeout}] The function \texttt{setTimeout} pushes the function passed as an argument to the next event loop to be executed after a certain delay, specified as an argument.
+    This delay can't be respected, thus even when it's zero, the queued function will be executed after averything else.
+\end{itemize}
+
+\begin{figure}[h!]
+  \includegraphics[width=\linewidth]{eventloop.pdf}
+  \caption{Javascript event loop details}
+  \label{fig:eventloop}
+\end{figure}
+
+We tested the order of execution of these different queueing method with the listing \ref{lst:order}.
+Even if it's in complete contradiction\footnote{setImmediate(callback, [arg], [...]) : To schedule the "immediate" execution of callback after I/O events callbacks and before setTimeout ... However, this difference might come from a difference in the implementation, the last documentation version is 0.11.26, while my version of node is 0.10.22} with the node manual, the order appears to be the following :
+Results from the execution of listing \ref{lst:order}.
+\texttt{
+0 directCall
+1 nextTick
+2 setTimeout
+3 setImmediate
+}
+
+\begin{code}[Javascript, caption={test order of execution},label={lst:order}]
+var index = 0;
+
+function test(name) {
+  console.log((index++) + " " + name);
+}
+
+setImmediate(function() {
+  test("setImmediate");
+})
+
+setTimeout(function() {
+  test("setTimeout");
+}, 0);
+
+process.nextTick(function() {
+  test("nextTick");
+})
+
+test("directCall");
+\end{code}
+
+
+We tested the difference of run time between these different methods.
+On Figure \ref{fig:eventloop} we can see the difference between the time spent inside a function, and the time spent between the call and the end of this function.
+
+We base our test on the \texttt{wait} function in listing \ref{lst:wait}.
+This function was called by different calling function in listings \ref{lst:direct}, \ref{lst:next}, \ref{lst:timeout} and \ref{lst:immediate}.
+We probed the time just before the callings functions, and just after exiting the \texttt{wait} function.
+
+\begin{code}[Javascript, caption={wait function},label={lst:wait}]
+function wait(duration, start, _cb) {
+  var iterations = 0;
+  var end = time.now() + duration * 1000;
+  while( time.now() < end ) {
+    iterations++;
+  }
+  return _cb(start, time.now());
+}
+\end{code}
+
+
+\begin{code}[Javascript, caption={Direct call},label={lst:direct}]
+function(fn, args) {
+  args[1] = time.now();
+  fn.apply(null, args);
+}
+\end{code}
+
+\begin{code}[Javascript, caption={\textit{nextTick}},label={lst:next}]
+function(fn, args) {
+  process.nextTick((function(fn, args) {
+    args[1] = time.now();
+    return function() {
+      fn.apply(null, args);
+    }
+  })(fn, args));
+},
+\end{code}
+
+\begin{code}[Javascript, caption={\textit{setTimeout}},label={lst:timeout}]
+function(fn, args) {
+  args.unshift(0)
+  args.unshift(fn);
+  args[3] = time.now();
+  setTimeout.apply(null, args);
+}
+\end{code}
+
+\begin{code}[Javascript, caption={\textit{setImmediate}},label={lst:immediate}]  
+function(fn, args) {
+  args.unshift(fn);
+  args[2] = time.now();
+  setImmediate.apply(null, args);
+},
+\end{code}
+
+On the figure \ref{fig:plot}, we can see that while \textit{nextTick} and \textit{setImmediate} are one order of magnitude slower than a direct call, \textit{setTimeout} is about 3 order of magnitude slower than a direct call.  
+
+\begin{figure}
+  \input{plot.tex}
+\label{fig:plot}
+\end{figure}
+
+On the \ref{fig:data}, we can see the resulting data of this experiment
+
+\begin{figure}
+\input{data.tex}
+\label{fig:data}
+\caption{Raw data of the experiment}
+\end{figure}
+\end{document}
