@@ -2,7 +2,12 @@ var fs = require('fs');
 var pgfplots = require('./pgfplots');
 var utils = require('./utils');
 
-const connection = 500;
+const connection = 1000;
+const concurrent = {
+  min: 1000,
+  max: 100000,
+  step: 1000
+};
 const servers = [
   'count_chain',
   'count_basic',
@@ -86,68 +91,32 @@ function benchMultiServer(names, connection, parallel, cb) {
 }
 
 
-function benchMultiMultiServer(names, connection, cb) {
-  function _end(concurrent, results) {
-    _results[concurrent] = results;
+function benchMultiMultiServer(names, connection, concurrent, cb) {
+  function _end(parallel, results) {
+    _results[parallel] = results;
 
-    i++
+    parallelism += concurrent.step;
 
-    if ( i === concurrents.length) {
+    if ( parallelism >= concurrent.max) {
       cb(_results);
     } else {
-      _launch(i);
+      _launch(parallelism);
     }
   }
 
-  function _launch(i) {
+  function _launch(parallelism) {
 
-    // var concurrent = steps[i];
-    // var connections = steps[steps.length - 1 - i];
-
-    var concurrent = concurrents[i];
-    var connection = connections[i];
-
-    process.stdout.write('\x1B[1m\x1B[36m>\x1B[35m>\x1B[39m\x1B[22m ' + concurrent + " / " + connection);
-    benchMultiServer(names, concurrent, connection, function(results) {
+    process.stdout.write('\x1B[1m\x1B[36m>\x1B[35m>\x1B[39m\x1B[22m ' + parallelism + " / " + connection);
+    benchMultiServer(names, parallelism, connection, function(results) {
       process.stdout.write(' \x1B[32m✓\x1B[39m\n')
-      _end(concurrent, results)
+      _end(parallelism, results)
     })
   }
 
-  function _divis(n) {
-    var k = 1, d = [];
-
-    if (n < 4)
-      return [n];
-
-    while (++k <= n/2)
-      if (n % k === 0)
-        d.push(k);
-
-    if (d.length === 0)
-      return _divis(n+1);
-
-    return d;
-  }
-
-  var i = 0;
-  // var steps = _divis(connection);
-  // var steps = [];
-  var concurrents = [];
-  var connections = [];
-  for (var j = 1; j < 13; j++) {
-    // steps.push(j * 50);
-    concurrents.push(j * 50);
-    connections.push(500) //(30 - j) * 10);
-  };
-
-  // console.log(concurrents, connections);
-
+  var parallelism = concurrent.min;
   var _results = {};
 
-  // console.log(steps);
-
-  _launch(i);
+  _launch(parallelism);
 }
 
 
@@ -163,7 +132,53 @@ function writeFile(name, data) {
   console.log('  \x1B[1m\x1B[32m✓\x1B[39m\x1B[22m');
 }
 
-benchMultiMultiServer(servers, connection, function(results){
+function ASCIIgraph(name, mean, median, min, max, length) {
+
+  mean = Math.floor(mean);
+  median = Math.floor(median);
+  min = Math.floor(min);
+  max = Math.floor(max);
+
+  for (var i = 0; i < 20; i++) {
+    process.stdout.write(name[i] || " ");
+  };
+  process.stdout.write("|");
+
+  for (var i = 0; i < length; i++) {
+    var str = " ";
+    if (i < max && i > min)
+      str = "█";
+    if (i === mean)
+      str = "\x1B[1m\x1B[31m█\x1B[39m\x1B[22m";
+    if (i === median)
+      str = "\x1B[1m\x1B[32m█\x1B[39m\x1B[22m";
+    if (i === min)
+      str = "<";
+    if (i === max)
+      str = ">";
+
+    process.stdout.write(str);
+  };
+  console.log("|");
+}
+
+function mean(array) {
+  var _sum = 0;
+  for (var i = 0; i < array.length; i++) {
+    _sum += array[i];
+  };
+  return _sum / array.length;
+}
+
+function median(array) {
+  var a = array.sort();
+  var l = a.length;
+  return (l % 2 === 0) ? mean(a.slice(l/2 - 1, l/2 + 1)) : (a[(l-1)/2]);
+}
+
+// END -- RESULTS
+
+benchMultiMultiServer(servers, connection, concurrent, function(results){
 
   var graph = new pgfplots.graph("axis", {
     xlabel: 'Number of simultaneous connections',
@@ -177,26 +192,24 @@ benchMultiMultiServer(servers, connection, function(results){
   }
 
   for (var i in results) { var concurrent = results[i];
-
     for (var j in concurrent) { var server = concurrent[j];
 
-      var serverSum = 0;
-      for (var k in server) { var client = server[k];
+      var max = 0;
+      var min = Infinity;
+      var values = [];
 
-        var clientSum = 0;
+      for (var k in server) { var client = server[k];
         for (var l = 0; l < client.times.length; l++) {
-          clientSum += client.times[l];
+          values.push(client.times[l]);
+          max = Math.max(max, client.times[l]);
+          min = Math.min(min, client.times[l]);
         };
-        var clientAvg = clientSum / client.times.length;
-        serverSum += clientAvg;
       }
-      var serverAvg = serverSum / Object.keys(server).length;
-      plots[j].addpoint(i, serverAvg);
+
+      ASCIIgraph(i + " concurrent", mean(values) / 500, median(values) / 500, min / 500, max / 500, 200);
+      plots[j].addpoint(i, mean(values));
     }
   }
 
-  // console.log(graph);
-
   writeFile('distribution', graph)
-
 })

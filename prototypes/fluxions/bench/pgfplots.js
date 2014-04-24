@@ -7,26 +7,25 @@ const colors = [
 ]
 
 
-const includes = "" + 
-  "\\documentclass{article}\n" +
-  "\\usepackage[utf8]{inputenc}\n" +
-  "\\usepackage[T1]{fontenc}\n" +
-  "\\usepackage{textcomp}\n" +
-  "\\usepackage[english, french]{babel}\n" +
-  "\\usepackage[babel=true]{csquotes}\n" +
-  "\\usepackage{tikz}\n" +
-  "\\usepackage{pgfplots}\n" +
-  "\\usepgfplotslibrary{external} \n" +
-  "\\tikzexternalize\n";
+// const includes = "" + 
+//   "\\documentclass{article}\n" +
+//   "\\usepackage[utf8]{inputenc}\n" +
+//   "\\usepackage[T1]{fontenc}\n" +
+//   "\\usepackage{textcomp}\n" +
+//   "\\usepackage[english, french]{babel}\n" +
+//   "\\usepackage[babel=true]{csquotes}\n" +
+//   "\\usepackage{tikz}\n" +
+//   "\\usepackage{pgfplots}\n" +
+//   "\\usepgfplotslibrary{external} \n" +
+//   "\\tikzexternalize\n";
 
-const _bgraph = includes + 
-  "\\begin{document}\n" +
-  "\\begin{figure}\n" +
+const _bgraph = "" + 
+  // "\\begin{figure}\n" +
   "\\begin{tikzpicture}\n";
+
 const _egraph = "" + 
-  "\\end{tikzpicture}\n" +
-  "\\end{figure}\n" +
-  "\\end{document}\n";
+  "\\end{tikzpicture}\n";
+  // "\\end{figure}\n";
 
 const graphTypes = [
   "axis",

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.7.29)  22 APR 2014 16:07
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.7.29)  24 APR 2014 00:49
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -1514,82 +1514,46 @@ ine 5.
 
 
 LaTeX Warning: Reference `fig:eventloop' on page \thepage  undefined on input l
-ine 17.
+ine 16.
 
 The command '\includegraphics [width=\linewidth ]{eventloop.pdf}' has been opti
 mized away. Use '/tikz/external/optimize=false' to disable this.
 
 LaTeX Warning: Reference `fig:eventloop' on page \thepage  undefined on input l
-ine 39.
+ine 35.
 
 
-Overfull \hbox (7.09497pt too wide) in paragraph at lines 49--51
+Overfull \hbox (7.09497pt too wide) in paragraph at lines 45--47
 []\T1/aer/m/n/9 This im-ple-men-ta-tion uses the ins-truc-tion \T1/aett/m/n/9 s
 et-
  []
 
 
-Overfull \hbox (6.75943pt too wide) in paragraph at lines 49--51
+Overfull \hbox (6.75943pt too wide) in paragraph at lines 45--47
 \T1/aett/m/n/9 Ti-meout\T1/aer/m/n/9 . It probes net-work mes-sages af-ter ever
 y fluxion
  []
 
-(../../prototypes/fluxions/bench/charts/diffInstructions.tex
-A tikzpicture has been optimized away. Use '/tikz/external/optimize=false' to d
-isable this.
-) (../../prototypes/fluxions/bench/charts/setTimeout.tex
-\openout4 = `main-figure13.dpth'.
 
+! LaTeX Error: File `../../prototypes/fluxions/bench/charts/diffInstructions.te
+x' not found.
 
-Package pgfplots Warning: the current plot has no coordinates (or all have been
- filtered away) on input line 4.
+Type X to quit or <RETURN> to proceed,
+or enter new name. (Default extension: tex)
 
- [warning /pgfplots/warning/plot without coordinates]
-Missing character: There is no ; in font nullfont!
-[4
-
-
-
-
-{/usr/local/texlive/2013/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]) (../..
-/prototypes/fluxions/bench/charts/distribution.tex
-A tikzpicture has been optimized away. Use '/tikz/external/optimize=false' to d
-isable this.
-)
-
-LaTeX Warning: Reference `fig:distribution' on page \thepage  undefined on inpu
-t line 76.
-
-) (./transformation.tex) (./appendix.tex)
-
-LaTeX Warning: Empty bibliography on input line 131.
-
-
-LaTeX Warning: There were undefined references.
-
-
-Package biblatex Warning: Please (re)run Biber on the file:
-(biblatex)                main
-(biblatex)                and rerun LaTeX afterwards.
-
-Package logreq Info: Writing requests to 'main.run.xml'.
-\openout1 = `main.run.xml'.
-
- ) 
+Enter file name: 
+! Emergency stop.
+<read *> 
+         
+l.54 ...es/fluxions/bench/charts/diffInstructions}
+                                                  ^^M 
 Here is how much of TeX's memory you used:
- 28617 strings out of 493315
- 608002 string characters out of 6137904
- 919615 words of memory out of 5000000
- 31474 multiletter control sequences out of 15000+600000
- 53646 words of font info for 65 fonts, out of 8000000 for 9000
+ 28065 strings out of 493315
+ 592988 string characters out of 6137904
+ 919613 words of memory out of 5000000
+ 30942 multiletter control sequences out of 15000+600000
+ 52993 words of font info for 63 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
- 57i,13n,74p,849b,1851s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb>
-</usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb>
-Output written on main-figure13.pdf (1 page, 22904 bytes).
-PDF statistics:
- 19 PDF objects out of 1000 (max. 8388607)
- 13 compressed objects within 1 object stream
- 0 named destinations out of 1000 (max. 500000)
- 13 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 57i,12n,74p,849b,1213s stack positions out of 5000i,500n,10000p,200000b,80000s
 
+!  ==> Fatal error occurred, no output PDF file produced!
