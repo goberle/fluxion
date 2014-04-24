@@ -7,13 +7,7 @@
     "express": "*"
   },
   "devDependencies": {
-    "mocha": ">=1.18.x",
-    "assert": ">=1.1.x",
     "microtime": ">=0.5.x"
   },
-  "engine": "node >= 0.10.0",
-  "scripts": {
-  	"test": "mocha test/test.js",
-    "bench": "node bench/bench.js"
-  }
+  "engine": "node >= 0.10.0"
 }

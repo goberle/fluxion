@@ -39,7 +39,7 @@ function timedHTTPReq(options, before, after) {
 
 function server(name, onconnect) {
   var spawn = require('child_process').spawn,
-      server = spawn('node', ['--max_old_space_size=8000', name]),
+      server = spawn('node', ['--max_old_space_size=16000', name]),
       connected = false;
 
   server.stdout.on('data', function (data) {
@@ -59,7 +59,7 @@ function server(name, onconnect) {
 
   return function() {
     server.stdin.pause();
-    server.kill();
+    server.kill('SIGKILL');
   }
 }
 
