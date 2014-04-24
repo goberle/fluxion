@@ -72,14 +72,18 @@ function benchMultiServer(names, connection, parallel, cb) {
     if (++i >= names.length) {
       cb(_results);
     } else {
-      _launch(names[i]);
+      setTimeout(function() {
+        _launch(names[i])
+      }, 1000);
     }
   }
 
   function _launch(name) {
     var kill = utils.srv(name, function() {
+      process.stdout.write("+" + name);
       benchOneServer(name, connection, parallel, function(name, results) {
         kill();
+        process.stdout.write("- ");
         _end(name, results)
       });
     });
@@ -120,6 +124,8 @@ function benchMultiMultiServer(names, connection, concurrent, cb) {
   _launch(parallelism);
 }
 
+// UTILS
+
 
 function toXLabel(name) {
   return name.replace(/count_/g, '');
@@ -154,9 +160,9 @@ function ASCIIgraph(name, mean, median, min, max, length) {
     if (i === median)
       str = "\x1B[1m\x1B[32m█\x1B[39m\x1B[22m";
     if (i === min)
-      str = "<";
+      str = "▒";
     if (i === max)
-      str = ">";
+      str = "▒";
 
     process.stdout.write(str);
   };
@@ -177,7 +183,7 @@ function median(array) {
   return (l % 2 === 0) ? mean(a.slice(l/2 - 1, l/2 + 1)) : (a[(l-1)/2]);
 }
 
-// END -- RESULTS
+// END -- RESULTS PROCESSING
 
 benchMultiMultiServer(servers, connection, concurrent, function(results){
 
