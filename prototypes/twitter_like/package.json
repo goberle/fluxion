@@ -9,6 +9,7 @@
   "author": "Etienne Brodu <etn@etnbrd.com>",
   "contributors": ["Guillaume Oberlé <goberle@ygg.tf>"],
   "dependencies": {
-    "express": "*"
+    "express": "*",
+    "socket.io": "*"
   }
 }

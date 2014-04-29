@@ -1,0 +1,80 @@
+<html>
+  <head>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        overflow: hidden;
+      }
+
+      #graph-container {
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        position: absolute;
+        margin-left: 400px;
+      }
+
+      #log {
+        font-family: Terminus;
+        width: 400px;
+        height: 100%;
+        overflow: auto;
+        z-index: 1;
+        position: relative;
+        color: white;
+        background: rgba(23, 23, 23, 0.8);
+      }
+
+      .logBlock {
+      }
+
+      .timestamp {
+        opacity: 0.3;
+      }
+
+      .timestamp::after {
+        content: ' :: ';
+      }
+
+      .logLine {
+        font-size: 13px;
+        margin-left: 13px;
+      }
+
+      .logMessage {
+        animation-duration: 2s;
+        animation-name: fadein;
+      }
+
+      .logData {
+        display: block;
+      }
+
+      @keyframes fadein {
+        from {
+          color: rgb(255, 0, 73);
+        }
+
+        to {
+          color: inherit;
+        }
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="graph-container"></div>
+    <div id="log"></div>
+    <script src="../socket.io/socket.io.js"></script>
+    <script src="sigma.min.js"></script>
+    <script src="one-color.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

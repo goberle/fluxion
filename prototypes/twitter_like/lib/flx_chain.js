@@ -2,10 +2,8 @@ var util = require('util');
 
 
 try {
-  var hooks = require('./hooks');
+  var hooks = require('../hooks');
 } catch(err) {
-  // For debug purpose
-  // console.log("No hooks module found, fallback to debug");
   var hooks = {
     register: function(name, fn, scps) {
       console.log("+ register " + name);
@@ -23,25 +21,22 @@ function post(msg) {
   function postMsg(msg) {
     if (!msg)
       return false;
-
     post(msg);
   }
 
   function recvMsg(msg) {
-    if (!flx_repo[msg.dest]) {
+    if (!flx_repo[msg.dest])
       console.log(msg.dest + ' not defined');
-    }
-
-    hooks.post(msg, msg.dest);
+    hooks.post(msg);
     postMsg(flx_repo[msg.dest].run.call(flx_repo[msg.dest].scp, msg.body));
   }
 
   if (msg)
-    if (Array.isArray(msg.dest)) for (var i = 0; i < msg.dest.length; i++) {
-      recvMsg(m(msg.dest[i], msg.body));
-    } else {
+    if (Array.isArray(msg.dest)) 
+      for (var i = 0; i < msg.dest.length; i++) 
+        recvMsg(message(msg.dest[i], msg.body));
+    else
       recvMsg(msg);
-    }
 }
 
 function register(name, fn, scp) {

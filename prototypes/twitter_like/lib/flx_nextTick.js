@@ -43,7 +43,7 @@ function post(msg) {
 
   if (msg)
     if (Array.isArray(msg.dest)) for (var i = 0; i < msg.dest.length; i++) {
-      recvMsg(m(msg.dest[i], msg.body));
+      recvMsg(message(msg.dest[i], msg.body));
     } else {
       recvMsg(msg);
     }
