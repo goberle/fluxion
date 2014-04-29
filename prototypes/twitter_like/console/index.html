@@ -57,6 +57,24 @@
         display: block;
       }
 
+      .link {
+        fill: none;
+        stroke: #666;
+        stroke-width: 1.5px;
+      }
+
+      circle {
+        fill: #ccc;
+        stroke: #333;
+        stroke-width: 1.5px;
+      }
+
+      text {
+        font: 10px sans-serif;
+        pointer-events: none;
+        text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+      }
+
       @keyframes fadein {
         from {
           color: rgb(255, 0, 73);
@@ -73,7 +91,7 @@
     <div id="graph-container"></div>
     <div id="log"></div>
     <script src="../socket.io/socket.io.js"></script>
-    <script src="sigma.min.js"></script>
+    <script src="d3.v3.min.js"></script>
     <script src="one-color.js"></script>
     <script src="script.js"></script>
   </body>
