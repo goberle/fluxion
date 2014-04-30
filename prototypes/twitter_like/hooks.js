@@ -35,12 +35,19 @@ var yellow        = colorFactory('\x1B[33m', '\x1B[39m');
 
 var prefix = bold(grey(">> "));
 
-function post(msg) {
+function post(msg, scp) {
+  // avoid circular stringify
+  var scpp = util._extend({}, scp);
+  scpp.m = undefined;
+  scpp.register = undefined;
+  scpp.cid = undefined;
+
   send("post", { id: msg.body.cid, 
                  s: msg.body.source, 
                  t: msg.dest, 
                  url: msg.body.url,
-                 data: msg.body.data
+                 data: msg.body.data,
+                 scp: scpp
                });
 
   console.log(prefix, yellow(msg.body.source + " >> " + msg.dest));
@@ -48,7 +55,7 @@ function post(msg) {
 
 function register(name, fn, scp) {
   nodes.push({ name: name, 
-               fn: fn, 
+               fn: fn.toString(), 
                scp: scp 
              });
 

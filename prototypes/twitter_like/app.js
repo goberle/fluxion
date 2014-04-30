@@ -53,25 +53,21 @@ flx.register('register', function (msg) {
 
 flx.register('read', function (msg) {
   msg.command = M_READ;
-  msg.source = 'read';
   return this.m(msg.data.username, msg);
 }, {});
 
 flx.register('post', function (msg) {
   msg.command = M_POST;
-  msg.source = 'post';
   return this.m(msg.data.username, msg);
 }, {});
 
 flx.register('follow', function (msg) {
   msg.command = M_ADD_FOLLOWERS;
-  msg.source = 'follow';
   return this.m(msg.data.username2, msg);
 }, {});
 
 flx.register('get_followers', function (msg) {
   msg.command = M_GET_FOLLOWERS;
-  msg.source = 'get_followers';
   return this.m(msg.data.username, msg);
 }, {});
 

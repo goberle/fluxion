@@ -27,8 +27,11 @@ function post(msg) {
   function recvMsg(msg) {
     if (!flx_repo[msg.dest])
       console.log(msg.dest + ' not defined');
-    hooks.post(msg);
-    postMsg(flx_repo[msg.dest].run.call(flx_repo[msg.dest].scp, msg.body));
+    
+    var tmp = flx_repo[msg.dest].run.call(flx_repo[msg.dest].scp, msg.body);
+    hooks.post(msg, flx_repo[msg.dest].scp);
+    msg.body.source = msg.dest;
+    postMsg(tmp);
   }
 
   if (msg)

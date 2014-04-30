@@ -5,7 +5,9 @@ var nodes = [];
 var links = [];
 var fluxions = {};
 var scps = {};
-var messages = {};
+
+var r = 10;
+var rOver = 20;
 
 function log () {
   var logBlock = document.getElementById(arguments[0]);
@@ -68,22 +70,26 @@ routerFactory('post', _post);
 routerFactory('init', _init);
 
 function _register(msg) {
-  fluxions[msg.name] = {name: msg.name};
+  // Create fluxions nodes
+  fluxions[msg.name] = {name: msg.name, type: 'fluxion', data: msg.fn};
   nodes.push(fluxions[msg.name]);
+
+  // Create scope nodes
   for (var p in msg.scp) {
-    scps[p] = {name: p};
-    nodes.push(scps[p]);
-    links.push({source: fluxions[msg.name], target: scps[p]});
+    scps[p+msg.name] = {name: p, type: 'scp', data: JSON.stringify(msg.scp[p]) };
+    nodes.push(scps[p+msg.name]);
+    links.push({source: fluxions[msg.name], target: scps[p+msg.name]});
   }
+
   update();
 }
 
 function _post(msg) {
-  if (!(messages[msg.id] instanceof Array))
-    messages[msg.id] = [];
-  messages[msg.id].push({ s: msg.s, t: msg.t });
-
   log(msg.id, msg.url, msg.data, msg.s, ' -> ', msg.t);
+
+  // Update the scope
+  for (var p in msg.scp)
+    scps[p+msg.t].data = JSON.stringify(msg.scp[p]);
 
   links.push({source: fluxions[msg.s], target: fluxions[msg.t]});
   update();
@@ -92,7 +98,7 @@ function _post(msg) {
 function _init(msg) {
   log("init", '', undefined, "initialization");
 
-  fluxions['input'] = {name: 'input'};
+  fluxions['input'] = {name: 'input', type: 'fluxion', data: ''};
   nodes.push(fluxions['input']);
   update();
 
@@ -102,20 +108,25 @@ function _init(msg) {
 }
 
 var width = 960,
-    height = 500;
+    height = 700;
 
 var force = d3.layout.force()
     .nodes(nodes)
     .links(links)
     .size([width, height])
-    .linkDistance(100)
-    .charge(-500)
+    .linkDistance(150)
+    .charge(-900)
     .on("tick", tick)
     .start();
 
 var svg = d3.select("#graph-container").append("svg")
     .attr("width", width)
     .attr("height", height);
+
+var pathG = svg.append('g');
+var circleG = svg.append('g');
+var textG = svg.append('g');
+var dataG = svg.append('g');
 
 // Per-type markers, as they don't inherit styles.
 //svg.append("defs").selectAll("marker")
@@ -131,36 +142,45 @@ var svg = d3.select("#graph-container").append("svg")
 //  .append("path")
 //    .attr("d", "M0,-5L10,0L0,5");
 
-var path = svg.selectAll("path")
-    .data(force.links())
-  .enter().append("path")
-    .attr("class", "link")
-    .attr("marker-end", "link");
+var path = pathG.selectAll("path")
+                .data(force.links())
+              .enter().append("path")
+                .attr("class", "link");
+                //.attr("marker-end", "link");
 
-var circle = svg.selectAll("circle")
-    .data(force.nodes())
-  .enter().append("circle")
-    .attr("r", 6)
-    .call(force.drag);
+var circle = circleG.selectAll("circle")
+                    .data(force.nodes())
+                  .enter().append("circle")
+                    .attr("r", r)
+                    .call(force.drag);
 
-var text = svg.selectAll("text")
-    .data(force.nodes())
-  .enter().append("text")
-    .attr("x", 8)
-    .attr("y", ".31em")
-    .text(function(d) { return d.name; });
+var text = textG.selectAll("text")
+                .data(force.nodes())
+              .enter().append("text")
+                .attr("x", 14)
+                .attr("y", 0)
+                .text(function(d) { return d.name; });
+
+var data = dataG.selectAll('data')
+                .data(force.nodes())
+              .enter().append('text')
+                .attr('x', 14)
+                .attr('y', -10)
+                .text(function(d) { return d.data; });
 
 function tick() {
   path.attr("d", linkArc);
   circle.attr("transform", transform);
+  circle.selectAll('text').attr('transform', transform);
   text.attr("transform", transform);
+  data.attr('transform', transform);
 }
 
 function linkArc(d) {
   var dx = d.target.x - d.source.x,
       dy = d.target.y - d.source.y,
       dr = Math.sqrt(dx * dx + dy * dy);
-  return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+  return "M" + d.source.x + "," + d.source.y + "A" + 0 + "," + 0 + " 0 0,1 " + d.target.x + "," + d.target.y;
 }
 
 function transform(d) {
@@ -168,17 +188,25 @@ function transform(d) {
 }
 
 function update() {
-  path = svg.selectAll('path').data(force.links());
-  path.enter().append('path').attr('class', 'link').attr("marker-end", "link");
+  path = pathG.selectAll('path').data(force.links());
+  path.enter().append('path').attr('class', 'link'); //.attr("marker-end", "link");
   path.exit().remove();
 
-  circle = svg.selectAll('circle').data(force.nodes());
-  circle.enter().append('circle').attr("r", 6).call(force.drag);
+  circle = circleG.selectAll('circle').data(force.nodes());
+  circle.enter().append('circle').attr("r", r).attr('class', function (d) { return "circle " + d.type; }).call(force.drag)
+//                .on('mouseover', function (d, i) {
+//                  d3.selectAll('text').style({opacity:'0.0'});
+//                });
+                .call(d3.helper.tooltip().attr('x', 0).attr('y', 0).text(function (d) { return d.data; }));
   circle.exit().remove();
 
-  text = svg.selectAll('text').data(force.nodes());
-  text.enter().append('text').attr("x", 8).attr("y", ".31em").text(function(d) { return d.name; });
+  text = textG.selectAll('text').data(force.nodes());
+  text.enter().append('text').attr("x", 14).attr("y", 0).text(function (d) { return d.name; });
   text.exit().remove();
+
+  data = dataG.selectAll('text').data(force.nodes());
+  data.enter().append('text').attr("x", 14).attr("y", 10).style({opacity:'0.0'}).text(function (d) { return d.data; });
+  data.exit().remove();
 
   force.start();
 }
